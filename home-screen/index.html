@@ -395,28 +395,27 @@
       <button class="settings-close" onclick="toggleSettings()">&#x2715;</button>
     </div>
 
-    <!-- Wi-Fi -->
-    <div class="settings-section">Wi-Fi</div>
+    <!-- General settings — one card -->
+    <div class="settings-section">Settings</div>
     <div class="settings-card">
       <div class="settings-row">
         <div class="settings-row-icon" style="background:linear-gradient(145deg,#a0c4ff,#88b4f8);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="white" stroke="none"/></svg></div>
         <div class="settings-row-text"><div class="settings-row-label">Wi-Fi</div><div class="settings-row-sub">Connected</div></div>
       </div>
-    </div>
-
-    <!-- Account -->
-    <div class="settings-section">Account</div>
-    <div class="settings-card">
+      <div class="settings-row">
+        <div class="settings-row-icon" style="background:linear-gradient(145deg,#ffe9a0,#ffd970);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
+        <div class="settings-row-text" style="flex:1;"><div class="settings-row-label" style="margin-bottom:4px;">Brightness</div><input type="range" min="20" max="100" value="80" class="brightness-slider" oninput="setBrightness(this.value)"></div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-icon" style="background:linear-gradient(145deg,#ffcfa0,#f5b070);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-label">Night Light</div><div class="settings-row-sub">Warm screen for late writing</div></div>
+        <label class="toggle"><input type="checkbox" id="nightToggle" onchange="toggleNight(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+      </div>
       <div class="settings-row clickable" onclick="window.open('https://accounts.google.com','_blank')">
         <div class="settings-row-icon" style="background:linear-gradient(145deg,#f5d0e5,#ebbad0);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/></svg></div>
         <div class="settings-row-text"><div class="settings-row-label">Google Account</div><div class="settings-row-sub">Sign in for Docs</div></div>
         <span class="settings-row-arrow">&#x203A;</span>
       </div>
-    </div>
-
-    <!-- Display -->
-    <div class="settings-section">Display</div>
-    <div class="settings-card">
       <div class="settings-row">
         <div class="settings-row-icon" style="background:linear-gradient(145deg,#c8bdd0,#b8adc0);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
         <div class="settings-row-text"><div class="settings-row-label">App Bar</div><div class="settings-row-sub">Where your apps live</div></div>
@@ -424,30 +423,6 @@
           <button class="mode-btn active" data-mode="dock" onclick="setMode('dock')">Dock</button>
           <button class="mode-btn" data-mode="top" onclick="setMode('top')">Top</button>
         </div>
-      </div>
-    </div>
-
-    <!-- Brightness -->
-    <div class="settings-section">Brightness</div>
-    <div class="settings-card">
-      <div class="settings-row">
-        <div class="settings-row-icon" style="background:linear-gradient(145deg,#ffe9a0,#ffd970);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
-        <div class="settings-row-text" style="flex:1;"><input type="range" min="20" max="100" value="80" class="brightness-slider" oninput="setBrightness(this.value)"></div>
-      </div>
-    </div>
-
-    <!-- Spell Check & Night Light -->
-    <div class="settings-section">Writing</div>
-    <div class="settings-card">
-      <div class="settings-row">
-        <div class="settings-row-icon" style="background:linear-gradient(145deg,#a0c4ff,#88b4f8);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-label">Spell Check</div><div class="settings-row-sub">Red underlines on typos</div></div>
-        <label class="toggle"><input type="checkbox" checked id="spellToggle"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-      </div>
-      <div class="settings-row">
-        <div class="settings-row-icon" style="background:linear-gradient(145deg,#ffcfa0,#f5b070);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-label">Night Light</div><div class="settings-row-sub">Warm screen for late writing</div></div>
-        <label class="toggle"><input type="checkbox" id="nightToggle" onchange="toggleNight(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
       </div>
     </div>
 
@@ -471,7 +446,7 @@
       </div>
     </div>
 
-    <!-- Clipboard History (bottom, scrollable) -->
+    <!-- Clipboard History -->
     <div class="settings-section">Clipboard History</div>
     <div class="settings-card">
       <div class="clipboard-scroll" id="clipboardList">
@@ -479,20 +454,7 @@
       </div>
     </div>
 
-    <!-- About -->
-    <div class="settings-section">About</div>
-    <div class="settings-card">
-      <div class="settings-row">
-        <div class="settings-row-icon" style="background:linear-gradient(145deg,#d8c8e8,#c8b8d8);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-label">Quill Haven</div><div class="settings-row-sub">Version 1.0 · Made with 🌸</div></div>
-      </div>
-      <div class="settings-row">
-        <div class="settings-row-icon" style="background:linear-gradient(145deg,#c8bdd0,#b8adc0);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-label">Device</div><div class="settings-row-sub">Acer Chromebook Spin 311</div></div>
-      </div>
-    </div>
-
-    <div class="settings-footer">v1.0 🌸</div>
+    <div class="settings-footer">Quill Haven v1.0 🌸</div>
   </div>
 </div>
 
