@@ -38,16 +38,17 @@ home-screen/
   (the skins). The old single file was 958 lines.
 - The Local Writing app lives in `apps/writing/` as three small files and links
   the same `shared/theme.css`, so it wears the exact same skin.
-- **Remaining:** each app's icon is still copy-pasted in a few places. The clean
-  fix is to make the apps data-driven (defined once) — best done together with
-  the "Add App" feature.
+- **Done:** apps are now data-driven — defined once in `js/home.js` and rendered
+  into the dock, top bar, windows, and settings. Add/remove apps supported, so
+  there's no more copy-pasted icon markup.
 
 ## Code-health follow-ups (tracked in TODO.md)
 
-- Done: theme variables moved to `shared/theme.css`; home screen split into
-  `home.css` / `home.js`; `index.html` is now just structure.
-- Remaining: make the apps data-driven so each icon is defined once (do this
-  with the "Add App" feature).
+- Done: theme variables in `shared/theme.css`; home screen split into
+  `home.css` / `home.js`; `index.html` is just structure; apps are data-driven
+  (defined once) with add/remove support.
+- Optional later: `js/home.js` could be split into `home.js` + `apps.js` if it
+  keeps growing. Not needed yet.
 
 ## How the Local Writing app fits
 

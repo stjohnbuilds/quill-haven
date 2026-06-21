@@ -267,3 +267,4 @@ The pastel themes (Blossom, Ocean, Sage) are being removed — too soft/girly fo
 | 1.0 | 2026-06-21 | Initial home screen: 2 default apps (Dabble, Docs), settings panel, clipboard history, dock/top-bar toggle, update checker |
 | 1.1 (in progress) | 2026-06-21 | Boot splash + theme picker documented; themes being reworked (pastels out, wood theme in); persistence + update-apply fixes planned; defaults changing to Google Docs + Local Writing |
 | 1.2 (in progress) | 2026-06-21 | Code split into index.html + css/home.css + shared/theme.css + js/home.js (see docs/CODE_HEALTH.md); Local Writing app built in apps/writing/ — EB Garamond editor, chapters, autosave, theme-matched — as 2nd default app |
+| 1.3 (in progress) | 2026-06-21 | Apps made data-driven (one list renders dock/top/windows/settings); Add App button + remove apps; Dabble is now a removable default add-on |

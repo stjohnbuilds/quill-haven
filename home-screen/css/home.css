@@ -356,6 +356,46 @@ body.top-mode .dock { display: none; }
 .settings-subtitle { font-size: 11px; color: var(--text-faint); font-weight: 400; margin-top: 1px; }
 .settings-footer { margin-top: 12px; text-align: center; font-size: 10px; color: var(--text-faint); }
 
+/* ── Remove-app button (on add-on rows) ── */
+.app-remove {
+  border: none; background: none; cursor: pointer; color: var(--sub); opacity: 0.55;
+  width: 22px; height: 22px; border-radius: 50%; font-size: 11px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.app-remove:hover { opacity: 1; background: var(--row-hover); color: #e06a6a; }
+
+/* ── Add app ── */
+.add-app-btn {
+  width: 100%; margin-top: 8px; padding: 9px; border: 1px dashed var(--card-border);
+  background: none; border-radius: 10px; cursor: pointer; font-family: inherit;
+  font-size: 12px; font-weight: 500; color: var(--accent-strong); transition: background 0.15s;
+}
+.add-app-btn:hover { background: var(--row-hover); }
+
+.add-app-form {
+  display: none; margin-top: 8px; padding: 12px; flex-direction: column; gap: 8px;
+  border: 1px solid var(--card-border); border-radius: 12px; background: var(--card-bg);
+}
+.add-app-form.open { display: flex; }
+.add-app-form input {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--card-border); border-radius: 8px;
+  background: var(--panel-bg); color: var(--label); font-family: inherit; font-size: 13px; outline: none;
+}
+.add-app-form input:focus { border-color: var(--accent); }
+.add-app-form input::placeholder { color: var(--text-faint); }
+.add-app-colors { display: flex; gap: 8px; justify-content: center; padding: 2px 0; }
+.color-swatch { width: 26px; height: 26px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; padding: 0; transition: transform 0.15s; }
+.color-swatch:hover { transform: scale(1.1); }
+.color-swatch.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.add-app-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 2px; }
+.add-app-cancel, .add-app-save {
+  border: none; border-radius: 8px; padding: 7px 14px; font-family: inherit;
+  font-size: 12px; font-weight: 500; cursor: pointer; transition: opacity 0.15s;
+}
+.add-app-cancel { background: var(--row-hover); color: var(--label); }
+.add-app-save { background: var(--accent); color: #fff; }
+.add-app-save:hover, .add-app-cancel:hover { opacity: 0.85; }
+
 /* ── Theme buttons ── */
 .theme-btn {
   width: 36px; height: 36px; border-radius: 10px; border: 2px solid transparent;

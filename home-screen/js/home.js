@@ -43,7 +43,51 @@ function updateClock() {
 }
 updateClock(); setInterval(updateClock, 1000);
 
-// ── App switching ──
+// ═══════════════════════════════════════════════
+//  APPS — defined once here, rendered everywhere
+//  (dock, top bar, app windows, settings list)
+// ═══════════════════════════════════════════════
+
+// Built-in apps: always present, can't be removed.
+var BUILTIN_APPS = [
+  { id:'docs', name:'Google Docs', kind:'site', url:'https://docs.google.com',
+    c1:'#f5d0e5', c2:'#ebbad0', vb:'0 0 28 28',
+    icon:'<rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.5" opacity="0.9"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="14" x2="16" y2="14" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>' },
+  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html',
+    c1:'#bfe3c4', c2:'#9ed0a8', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
+    icon:'<path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" fill="none" stroke="white" stroke-width="1.6" stroke-linejoin="round" opacity="0.92"/><path d="M14.5 6.5l3 3" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>' }
+];
+
+// Add-ons ship by default but can be removed (and the user can add their own).
+var DEFAULT_ADDONS = [
+  { id:'dabble', name:'Dabble Writer', kind:'site', url:'https://app.dabblewriter.com',
+    c1:'#ddd0f0', c2:'#ccbbe5', vb:'0 0 28 28',
+    icon:'<path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>' }
+];
+
+function loadAddons() {
+  var a = null;
+  try { a = JSON.parse(localStorage.getItem('qh-addons')); } catch(e) {}
+  if (!Array.isArray(a)) { a = DEFAULT_ADDONS.slice(); saveAddons(a); }   // seed Dabble on first run
+  return a;
+}
+function saveAddons(a) { try { localStorage.setItem('qh-addons', JSON.stringify(a)); } catch(e) {} }
+
+var addons = loadAddons();
+function allApps() { return BUILTIN_APPS.concat(addons); }
+function isBuiltin(id) { return BUILTIN_APPS.some(function(a){ return a.id === id; }); }
+function gradOf(app) { return 'linear-gradient(145deg,' + app.c1 + ',' + app.c2 + ')'; }
+function isVisible(id) {
+  try { var m = JSON.parse(localStorage.getItem('qh-apps') || '{}'); return m[id] !== false; } catch(e) { return true; }
+}
+
+// An app's icon: a built-in SVG, or the first letter for a user-added app.
+function iconHtml(app, px) {
+  if (app.icon) return '<svg width="'+px+'" height="'+px+'" viewBox="'+app.vb+'" fill="none">'+app.icon+'</svg>';
+  var letter = (app.name || '?').trim().charAt(0).toUpperCase() || '?';
+  return '<span style="color:#fff;font-weight:600;line-height:1;font-size:'+Math.round(px*0.5)+'px;">'+esc(letter)+'</span>';
+}
+
 var currentApp = null;
 
 function openApp(name) {
@@ -65,6 +109,180 @@ function goHome() {
   currentApp = null;
 }
 
+function refreshDockEmpty() {
+  var dock = document.getElementById('dock');
+  var vis = dock.querySelectorAll('.app:not(.hidden)');
+  dock.classList.toggle('is-empty', vis.length === 0);
+}
+
+// Build one app window (a local app gets an iframe; a website gets a placeholder card).
+function buildView(app) {
+  var v = document.createElement('div');
+  v.className = 'app-view';
+  v.id = 'view-' + app.id;
+  var bar = '<div class="app-titlebar"><div class="traffic-lights">'
+    + '<button class="tl tl-close" title="Close"></button><button class="tl tl-min"></button><button class="tl tl-max"></button>'
+    + '</div><span class="app-titlebar-text">' + esc(app.name) + '</span></div>';
+  var body;
+  if (app.kind === 'local') {
+    body = '<iframe class="app-frame" src="' + app.src + '" title="' + esc(app.name) + '"></iframe>';
+  } else {
+    var host = '';
+    if (app.url) host = app.url.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    body = '<div class="app-body">'
+      + '<div class="app-body-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 36) + '</div>'
+      + '<div class="app-body-name">' + esc(app.name) + '</div>'
+      + (host ? '<div class="app-body-url">' + esc(host) + '</div>' : '')
+      + '<div class="app-body-note">On your Chromebook, this opens<br>right here as a full window.</div>'
+      + '</div>';
+  }
+  v.innerHTML = bar + body;
+  v.querySelector('.tl-close').addEventListener('click', goHome);
+  return v;
+}
+
+// Build one row in the Settings → Apps list.
+function buildSettingsRow(app) {
+  var row = document.createElement('div');
+  row.className = 'settings-row';
+  row.innerHTML =
+    '<div class="app-mini-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 14) + '</div>'
+    + '<div class="settings-row-text"><div class="settings-row-label">' + esc(app.name) + '</div>'
+    + (app.sub ? '<div class="settings-row-sub">' + esc(app.sub) + '</div>' : '') + '</div>'
+    + (isBuiltin(app.id) ? '' : '<button class="app-remove" title="Remove this app">&#x2715;</button>')
+    + '<label class="toggle"><input type="checkbox" data-appvis="' + app.id + '"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>';
+  var cb = row.querySelector('input[data-appvis]');
+  cb.checked = isVisible(app.id);
+  cb.addEventListener('change', function() { toggleAppVis(app.id, cb.checked); });
+  var rb = row.querySelector('.app-remove');
+  if (rb) rb.addEventListener('click', function() { removeApp(app.id); });
+  return row;
+}
+
+// Render the whole app list into the dock, top bar, windows, and settings.
+function renderApps() {
+  var dock = document.getElementById('dock');
+  var top = document.getElementById('topApps');
+  var views = document.getElementById('appViews');
+  var list = document.getElementById('appsList');
+  dock.querySelectorAll('.app').forEach(function(el) { el.remove(); });
+  top.innerHTML = '';
+  views.innerHTML = '';
+  list.innerHTML = '';
+
+  allApps().forEach(function(app) {
+    var hidden = !isVisible(app.id);
+
+    var d = document.createElement('a');
+    d.href = '#'; d.className = 'app' + (hidden ? ' hidden' : '');
+    d.dataset.app = app.id; d.dataset.name = app.name;
+    d.addEventListener('click', function(e) { e.preventDefault(); openApp(app.id); });
+    d.innerHTML = '<div class="app-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 26) + '</div>';
+    dock.appendChild(d);
+
+    var t = document.createElement('a');
+    t.href = '#'; t.className = 'top-app' + (hidden ? ' hidden' : '');
+    t.dataset.app = app.id; t.dataset.name = app.name;
+    t.addEventListener('click', function(e) { e.preventDefault(); openApp(app.id); });
+    t.innerHTML = '<div class="top-app-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 12) + '</div>';
+    top.appendChild(t);
+
+    views.appendChild(buildView(app));
+    list.appendChild(buildSettingsRow(app));
+  });
+
+  // keep the current app open across a re-render, if it still exists
+  if (currentApp) {
+    var v = document.getElementById('view-' + currentApp);
+    if (v) {
+      v.classList.add('active');
+      document.querySelectorAll('[data-app="' + currentApp + '"]').forEach(function(a) { a.classList.add('active'); });
+      document.getElementById('homeScreen').style.display = 'none';
+    } else {
+      currentApp = null;
+    }
+  }
+  refreshDockEmpty();
+}
+
+// Show/hide an app without removing it.
+function toggleAppVis(name, visible) {
+  document.querySelectorAll('[data-app="' + name + '"]').forEach(function(el) {
+    el.classList.toggle('hidden', !visible);
+  });
+  var cb = document.querySelector('input[data-appvis="' + name + '"]');
+  if (cb) cb.checked = visible;
+  if (!visible && currentApp === name) goHome();
+  refreshDockEmpty();
+  try { var a = JSON.parse(localStorage.getItem('qh-apps') || '{}'); a[name] = visible; localStorage.setItem('qh-apps', JSON.stringify(a)); } catch(e) {}
+}
+
+// Add a user app (name + website + colour).
+function addApp(name, url, c1, c2) {
+  name = (name || '').trim();
+  url = (url || '').trim();
+  if (!name || !url) return false;
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  var id = 'app' + Math.random().toString(36).slice(2, 8);
+  addons.push({ id:id, name:name, kind:'site', url:url, c1:c1, c2:c2 });
+  saveAddons(addons);
+  renderApps();
+  return true;
+}
+
+// Remove a user app or a default add-on (built-ins can't be removed).
+function removeApp(id) {
+  if (isBuiltin(id)) return;
+  if (currentApp === id) goHome();
+  addons = addons.filter(function(a) { return a.id !== id; });
+  saveAddons(addons);
+  try { var m = JSON.parse(localStorage.getItem('qh-apps') || '{}'); delete m[id]; localStorage.setItem('qh-apps', JSON.stringify(m)); } catch(e) {}
+  renderApps();
+}
+
+// ── Add-app form ──
+var APP_COLORS = [
+  ['#f5d0e5','#ebbad0'], ['#cdbfe6','#b6a3da'], ['#bfe3c4','#9ed0a8'],
+  ['#bcd6f0','#9ec0e6'], ['#f3d9b8','#e6c191'], ['#cfd4da','#aeb6c0']
+];
+var pickedColor = APP_COLORS[1];
+
+function renderColorSwatches() {
+  var box = document.getElementById('addAppColors');
+  box.innerHTML = '';
+  APP_COLORS.forEach(function(pair) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'color-swatch' + (pair === pickedColor ? ' active' : '');
+    b.style.background = 'linear-gradient(145deg,' + pair[0] + ',' + pair[1] + ')';
+    b.addEventListener('click', function() { pickedColor = pair; renderColorSwatches(); });
+    box.appendChild(b);
+  });
+}
+
+function openAddForm() {
+  document.getElementById('addAppForm').classList.add('open');
+  document.getElementById('addAppBtn').style.display = 'none';
+  document.getElementById('addAppName').focus();
+}
+function closeAddForm() {
+  document.getElementById('addAppForm').classList.remove('open');
+  document.getElementById('addAppBtn').style.display = '';
+  document.getElementById('addAppName').value = '';
+  document.getElementById('addAppUrl').value = '';
+}
+
+document.getElementById('addAppBtn').addEventListener('click', openAddForm);
+document.getElementById('addAppCancel').addEventListener('click', closeAddForm);
+document.getElementById('addAppSave').addEventListener('click', function() {
+  var ok = addApp(document.getElementById('addAppName').value, document.getElementById('addAppUrl').value, pickedColor[0], pickedColor[1]);
+  if (ok) closeAddForm();
+});
+
+// First render
+renderApps();
+renderColorSwatches();
+
 // ── Settings ──
 function toggleSettings() { document.getElementById('settingsOverlay').classList.toggle('open'); }
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') document.getElementById('settingsOverlay').classList.remove('open'); });
@@ -76,20 +294,6 @@ function setMode(mode) {
     b.classList.toggle('active', b.dataset.mode === mode);
   });
   try { localStorage.setItem('qh-mode', mode); } catch(e) {}
-}
-
-// ── App visibility ──
-function toggleAppVis(name, visible) {
-  document.querySelectorAll('[data-app="' + name + '"]').forEach(function(el) {
-    el.classList.toggle('hidden', !visible);
-  });
-  var cb = document.querySelector('input[data-appvis="' + name + '"]');
-  if (cb) cb.checked = visible;
-  if (!visible && currentApp === name) goHome();
-  var dock = document.getElementById('dock');
-  var vis = dock.querySelectorAll('.app:not(.hidden)');
-  dock.classList.toggle('is-empty', vis.length === 0);
-  try { var a = JSON.parse(localStorage.getItem('qh-apps') || '{}'); a[name] = visible; localStorage.setItem('qh-apps', JSON.stringify(a)); } catch(e) {}
 }
 
 // ── Clipboard ──
@@ -156,39 +360,27 @@ function setNight(on) {
   try { localStorage.setItem('qh-night', nightOn ? '1' : '0'); } catch(e) {}
 }
 
-// Restore all saved settings on load
+// Restore saved settings on load
 (function() {
-  var savedTheme=null, savedNight=null, savedBright=null, savedMode=null, savedApps=null, savedClip=null;
+  var savedTheme=null, savedNight=null, savedBright=null, savedMode=null, savedClip=null;
   try {
     savedTheme  = localStorage.getItem('qh-theme');
     savedNight  = localStorage.getItem('qh-night');
     savedBright = localStorage.getItem('qh-brightness');
     savedMode   = localStorage.getItem('qh-mode');
-    savedApps   = localStorage.getItem('qh-apps');
     savedClip   = localStorage.getItem('qh-clip');
   } catch(e) {}
 
   setTheme(savedTheme || 'purple');
 
-  // brightness — set the slider first, then night/brightness filter reads it
   if (savedBright !== null) {
     var sl = document.querySelector('.brightness-slider');
     if (sl) sl.value = savedBright;
   }
   setNight(savedNight === '1');
 
-  // app bar position (dock / top)
   if (savedMode) setMode(savedMode);
 
-  // which apps are shown
-  if (savedApps) {
-    try {
-      var a = JSON.parse(savedApps);
-      Object.keys(a).forEach(function(name) { if (a[name] === false) toggleAppVis(name, false); });
-    } catch(e) {}
-  }
-
-  // clipboard history
   if (savedClip) {
     try {
       var c = JSON.parse(savedClip);
@@ -216,10 +408,8 @@ function doUpdate() {
   fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/home-screen/index.html', { cache: 'no-store' })
     .then(function(r) { if (!r.ok) throw new Error('fetch failed'); return r.text(); })
     .then(function(html) {
-      // Safety check: make sure we actually got our home screen, not an error page
       if (html.indexOf('Quill Haven') === -1) throw new Error('unexpected content');
       btn.textContent = 'Loading new version...';
-      // Swap the running page over to the freshly downloaded version
       document.open();
       document.write(html);
       document.close();

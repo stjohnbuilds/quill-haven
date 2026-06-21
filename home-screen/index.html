@@ -43,24 +43,8 @@
   <div class="top-left">
     <button class="update-btn" id="updateBtn" onclick="doUpdate()"><span class="update-dot"></span> Update available</button>
   </div>
-  <!-- Tiny app icons for top-bar mode (centered) -->
-  <div class="top-apps" id="topApps">
-    <a href="#" class="top-app" data-app="docs" data-name="Google Docs" onclick="openApp('docs');return false;">
-      <div class="top-app-icon" style="background:linear-gradient(145deg,#f5d0e5,#ebbad0);">
-        <svg width="11" height="11" viewBox="0 0 28 28" fill="none"><rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.8" opacity="0.9"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="14" x2="16" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/></svg>
-      </div>
-    </a>
-    <a href="#" class="top-app" data-app="writing" data-name="Local Writing" onclick="openApp('writing');return false;">
-      <div class="top-app-icon" style="background:linear-gradient(145deg,#bfe3c4,#9ed0a8);">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round" opacity="0.92"/><path d="M14.5 6.5l3 3" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/></svg>
-      </div>
-    </a>
-    <a href="#" class="top-app" data-app="dabble" data-name="Dabble Writer" onclick="openApp('dabble');return false;">
-      <div class="top-app-icon" style="background:linear-gradient(145deg,#ddd0f0,#ccbbe5);">
-        <svg width="11" height="11" viewBox="0 0 28 28" fill="none"><path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/></svg>
-      </div>
-    </a>
-  </div>
+  <!-- Tiny app icons for top-bar mode (filled by js/home.js) -->
+  <div class="top-apps" id="topApps"></div>
   <div class="top-right">
     <span class="top-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg></span>
     <span class="top-icon"><svg width="18" height="14" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="22" height="10" rx="2.5"/><rect x="3.5" y="4.5" width="15" height="5" rx="1" fill="currentColor" stroke="none" opacity="0.5"/><rect x="23" y="5" width="3" height="4" rx="1" fill="currentColor" stroke="none" opacity="0.4"/></svg></span>
@@ -76,60 +60,12 @@
   <div class="date-line" id="dateLine"></div>
 </main>
 
-<!-- ── App windows ── -->
-<div class="app-view" id="view-dabble">
-  <div class="app-titlebar">
-    <div class="traffic-lights"><button class="tl tl-close" onclick="goHome()"></button><button class="tl tl-min"></button><button class="tl tl-max"></button></div>
-    <span class="app-titlebar-text">Dabble Writer</span>
-  </div>
-  <div class="app-body">
-    <div class="app-body-icon" style="background:linear-gradient(145deg,#ddd0f0,#ccbbe5);"><svg width="36" height="36" viewBox="0 0 28 28" fill="none"><path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/><line x1="14" y1="7" x2="14" y2="23" stroke="white" stroke-width="0.8" opacity="0.3"/></svg></div>
-    <div class="app-body-name">Dabble Writer</div>
-    <div class="app-body-url">app.dabblewriter.com</div>
-    <div class="app-body-note">On your Chromebook, Dabble loads<br>right here as a full window.</div>
-  </div>
-</div>
+<!-- ── App windows (filled by js/home.js) ── -->
+<div id="appViews"></div>
 
-<div class="app-view" id="view-docs">
-  <div class="app-titlebar">
-    <div class="traffic-lights"><button class="tl tl-close" onclick="goHome()"></button><button class="tl tl-min"></button><button class="tl tl-max"></button></div>
-    <span class="app-titlebar-text">Google Docs</span>
-  </div>
-  <div class="app-body">
-    <div class="app-body-icon" style="background:linear-gradient(145deg,#f5d0e5,#ebbad0);"><svg width="36" height="36" viewBox="0 0 28 28" fill="none"><rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.3" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.45"/></svg></div>
-    <div class="app-body-name">Google Docs</div>
-    <div class="app-body-url">docs.google.com</div>
-    <div class="app-body-note">On your Chromebook, Docs loads<br>right here as a full window.</div>
-  </div>
-</div>
-
-<!-- Local Writing — a real built-in app, loaded from its own files -->
-<div class="app-view" id="view-writing">
-  <div class="app-titlebar">
-    <div class="traffic-lights"><button class="tl tl-close" onclick="goHome()"></button><button class="tl tl-min"></button><button class="tl tl-max"></button></div>
-    <span class="app-titlebar-text">Local Writing</span>
-  </div>
-  <iframe class="app-frame" src="apps/writing/index.html" title="Local Writing"></iframe>
-</div>
-
-<!-- ── Dock ── -->
+<!-- ── Dock (apps filled by js/home.js) ── -->
 <nav class="dock" id="dock">
   <span class="dock-empty">Open Settings to add apps</span>
-  <a href="#" class="app" data-app="docs" data-name="Google Docs" onclick="openApp('docs');return false;">
-    <div class="app-icon" style="background:linear-gradient(145deg,#f5d0e5,#ebbad0);">
-      <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.3" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.3" stroke-linecap="round" opacity="0.45"/></svg>
-    </div>
-  </a>
-  <a href="#" class="app" data-app="writing" data-name="Local Writing" onclick="openApp('writing');return false;">
-    <div class="app-icon" style="background:linear-gradient(145deg,#bfe3c4,#9ed0a8);">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" fill="none" stroke="white" stroke-width="1.5" stroke-linejoin="round" opacity="0.92"/><path d="M14.5 6.5l3 3" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>
-    </div>
-  </a>
-  <a href="#" class="app" data-app="dabble" data-name="Dabble Writer" onclick="openApp('dabble');return false;">
-    <div class="app-icon" style="background:linear-gradient(145deg,#ddd0f0,#ccbbe5);">
-      <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/><line x1="14" y1="7" x2="14" y2="23" stroke="white" stroke-width="0.8" opacity="0.3"/></svg>
-    </div>
-  </a>
 </nav>
 
 <!-- ── Settings ── -->
@@ -188,23 +124,17 @@
       </div>
     </div>
 
-    <!-- Apps -->
+    <!-- Apps (rows filled by js/home.js) -->
     <div class="settings-section">Apps</div>
-    <div class="settings-card">
-      <div class="settings-row">
-        <div class="app-mini-icon" style="background:linear-gradient(145deg,#f5d0e5,#ebbad0);"><svg width="14" height="14" viewBox="0 0 28 28" fill="none"><rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.8" opacity="0.9"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="14" x2="16" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-label">Google Docs</div></div>
-        <label class="toggle"><input type="checkbox" checked data-appvis="docs" onchange="toggleAppVis('docs',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-      </div>
-      <div class="settings-row">
-        <div class="app-mini-icon" style="background:linear-gradient(145deg,#bfe3c4,#9ed0a8);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round" opacity="0.92"/><path d="M14.5 6.5l3 3" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-label">Local Writing</div><div class="settings-row-sub">Saves to device, not the cloud</div></div>
-        <label class="toggle"><input type="checkbox" checked data-appvis="writing" onchange="toggleAppVis('writing',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-      </div>
-      <div class="settings-row">
-        <div class="app-mini-icon" style="background:linear-gradient(145deg,#ddd0f0,#ccbbe5);"><svg width="14" height="14" viewBox="0 0 28 28" fill="none"><path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-label">Dabble Writer</div></div>
-        <label class="toggle"><input type="checkbox" checked data-appvis="dabble" onchange="toggleAppVis('dabble',this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+    <div class="settings-card" id="appsList"></div>
+    <button class="add-app-btn" id="addAppBtn">+ Add app</button>
+    <div class="add-app-form" id="addAppForm">
+      <input type="text" id="addAppName" placeholder="App name" maxlength="24" autocomplete="off">
+      <input type="text" id="addAppUrl" placeholder="Website (e.g. example.com)" autocomplete="off">
+      <div class="add-app-colors" id="addAppColors"></div>
+      <div class="add-app-actions">
+        <button type="button" class="add-app-cancel" id="addAppCancel">Cancel</button>
+        <button type="button" class="add-app-save" id="addAppSave">Add app</button>
       </div>
     </div>
 

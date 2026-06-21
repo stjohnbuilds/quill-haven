@@ -5,12 +5,8 @@
 - [ ] Dock tooltip shows on top of an open app (small visual glitch)
 
 ## Build next (the big features)
-- [ ] Add App button in settings (paste URL, name, pick colour)
 - [ ] Drag to reorder apps (grip handle on each row, order saved)
-- [ ] Make Dabble an add-on — defaults become Google Docs + Local Writing
 - [ ] Storage space indicator in settings
-- [ ] Code-health follow-up: each app icon is copy-pasted in a few spots —
-      make the apps data-driven (defined once) while building "Add App"
 
 ## For the Chromebook (later)
 - [ ] Boot sequence scripts (auto-start the home screen)
@@ -41,3 +37,8 @@
 - [x] Local Writing app — its own files (apps/writing/), EB Garamond editor,
       toolbar (bold/italic/underline/heading/bullets), chapters sidebar, autosave
       to device, word count, matches the theme. 2nd default app (green)
+- [x] Apps are now data-driven (defined once) — dock, top bar, windows, and
+      settings all render from one list; each icon defined once
+- [x] Add App button — add your own app (name, website, colour); shows a letter icon
+- [x] Remove apps — add-ons (incl. Dabble) can be removed; built-ins (Docs, Local
+      Writing) stay. Dabble is now a default add-on, not hardcoded
