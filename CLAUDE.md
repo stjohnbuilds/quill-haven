@@ -25,7 +25,7 @@ Marie. Non-technical. Talk like she's 10. No jargon.
 - Typing & Tomes: https://typingandtomes.vercel.app
 
 ## GitHub
-- Repo: mariemackaybooks/quill-haven
+- Repo: stjohnbuilds/quill-haven
 - Updates: home screen checks version.json on GitHub, shows "Update available" button in top bar
 
 ## Commands

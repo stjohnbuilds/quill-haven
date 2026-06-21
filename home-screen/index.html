@@ -537,7 +537,7 @@ function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 // ── Update check ──
 var LOCAL_VERSION = '1.0';
 function checkForUpdate() {
-  fetch('https://raw.githubusercontent.com/mariemackaybooks/quill-haven/main/version.json')
+  fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json')
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.version && d.version !== LOCAL_VERSION) {
@@ -550,7 +550,7 @@ function doUpdate() {
   var btn = document.getElementById('updateBtn');
   btn.textContent = 'Updating...';
   btn.style.pointerEvents = 'none';
-  fetch('https://raw.githubusercontent.com/mariemackaybooks/quill-haven/main/home-screen/index.html')
+  fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/home-screen/index.html')
     .then(function(r) { return r.text(); })
     .then(function(html) {
       btn.textContent = 'Reloading...';
