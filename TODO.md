@@ -6,8 +6,6 @@
 - [ ] Little loading bar underneath
 
 ## Fix soon (found in the assessment)
-- [ ] Save the rest of the settings between restarts — brightness, dock/top mode, app on/off, clipboard (theme + night light already save)
-- [ ] The "Update available" button doesn't actually update — it reloads the old page
 - [ ] Bundle the boot font locally so it works without Wi-Fi
 - [ ] Dock tooltip shows on top of an open app (small visual glitch)
 
@@ -38,5 +36,7 @@
 - [x] Removed the girly pastel themes
 - [x] Night Light fixed — its own on/off toggle, warms the screen, reverts cleanly
 - [x] Theme + Night Light saved between restarts
-- [x] Boot splash (first version — being upgraded now)
-- [x] Update checker (the "check" part only)
+- [x] Boot animation — bigger quill, typewriter tagline, loading bar
+- [x] All settings now save between restarts — brightness, dock/top, app on/off, clipboard
+- [x] Update button fixed — downloads the latest version from GitHub and loads it
+      (making it stick after a reboot is part of the Chromebook setup later)
