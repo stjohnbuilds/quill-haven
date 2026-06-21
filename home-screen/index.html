@@ -4,8 +4,54 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quill Haven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── Boot splash ── */
+    .boot-splash {
+      position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(135deg, #ede0ff 0%, #f8e0f0 45%, #e4ecff 100%);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      transition: opacity 0.8s ease;
+    }
+    .boot-splash.fade-out { opacity: 0; pointer-events: none; }
+
+    .boot-text-wrap {
+      position: relative; display: inline-flex; align-items: baseline;
+    }
+
+    .boot-text {
+      font-family: 'Great Vibes', cursive;
+      font-size: 72px; color: #6b5f6e; letter-spacing: 2px;
+      clip-path: inset(0 100% 0 0);
+      animation: writeOut 2s ease forwards 0.4s;
+    }
+    @keyframes writeOut {
+      0% { clip-path: inset(0 100% 0 0); }
+      100% { clip-path: inset(0 0% 0 0); }
+    }
+
+    .boot-quill {
+      position: absolute; right: -38px; bottom: 8px;
+      opacity: 0;
+      animation: quillAppear 0.5s ease forwards 2.2s;
+    }
+    @keyframes quillAppear {
+      0% { opacity: 0; transform: translateX(-8px) rotate(-10deg); }
+      100% { opacity: 1; transform: translateX(0) rotate(0deg); }
+    }
+
+    .boot-tagline {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px; color: #b0a0b8; letter-spacing: 3px; text-transform: uppercase;
+      margin-top: 16px; opacity: 0;
+      animation: tagFade 0.6s ease forwards 2.6s;
+    }
+    @keyframes tagFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
     body {
       width: 100vw;
@@ -291,9 +337,70 @@
 
     .settings-subtitle { font-size: 11px; color: #c5b8c9; font-weight: 400; margin-top: 1px; }
     .settings-footer { margin-top: 12px; text-align: center; font-size: 10px; color: #c5b8c9; }
+
+    /* ── Theme buttons ── */
+    .theme-btn {
+      width: 36px; height: 36px; border-radius: 10px; border: 2px solid transparent;
+      background: rgba(255,255,255,0.4); cursor: pointer; display: flex;
+      align-items: center; justify-content: center; transition: all 0.2s;
+      padding: 0;
+    }
+    .theme-btn:hover { transform: scale(1.08); }
+    .theme-btn.active { border-color: #c9a0e0; box-shadow: 0 0 0 2px rgba(201,160,224,0.3); }
+
+    /* ── Dark theme ── */
+    body.theme-dark { background: linear-gradient(135deg, #1e1a28 0%, #2a2535 45%, #1a1e2e 100%); }
+    body.theme-dark .top-bar { background: rgba(30,26,40,0.7); border-bottom-color: rgba(255,255,255,0.08); color: #a898b0; }
+    body.theme-dark .top-icon { color: #8878a0; }
+    body.theme-dark .dock { background: rgba(30,26,40,0.6); border-color: rgba(255,255,255,0.08); }
+    body.theme-dark .clock { color: #d8cce0; }
+    body.theme-dark .greeting { color: #a898b0; }
+    body.theme-dark .date-display { color: #887898; }
+    body.theme-dark .settings-panel { background: rgba(30,26,40,0.95); }
+    body.theme-dark .settings-card { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.08); }
+    body.theme-dark .settings-row-label { color: #d8cce0; }
+    body.theme-dark .settings-row-sub, body.theme-dark .settings-subtitle { color: #887898; }
+    body.theme-dark .settings-section { color: #887898; }
+    body.theme-dark .settings-footer { color: #887898; }
+    body.theme-dark .settings-panel h2 { color: #d8cce0; }
+    body.theme-dark .close-btn { color: #887898; }
+    body.theme-dark .orb-1 { background: rgba(120,60,200,0.08); }
+    body.theme-dark .orb-2 { background: rgba(160,80,140,0.08); }
+    body.theme-dark .orb-3 { background: rgba(100,120,180,0.1); }
+    body.theme-dark .clipboard-item { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.06); }
+    body.theme-dark .clipboard-text { color: #c8b8d0; }
+    body.theme-dark .bar-btn { background: rgba(255,255,255,0.08); color: #c8b8d0; }
+    body.theme-dark .bar-btn.active { background: rgba(201,160,224,0.2); color: #d8cce0; }
+    body.theme-dark .theme-btn { background: rgba(255,255,255,0.08); }
+
+    /* ── Ocean theme ── */
+    body.theme-ocean { background: linear-gradient(135deg, #d0e8f5 0%, #e0f0f8 45%, #c8ddf0 100%); }
+    body.theme-ocean .orb-1 { background: rgba(80,140,210,0.1); }
+    body.theme-ocean .orb-2 { background: rgba(100,180,200,0.12); }
+    body.theme-ocean .orb-3 { background: rgba(120,160,220,0.12); }
+
+    /* ── Sage theme ── */
+    body.theme-sage { background: linear-gradient(135deg, #d5e8d0 0%, #e8f0e0 45%, #d0e0d5 100%); }
+    body.theme-sage .orb-1 { background: rgba(80,160,100,0.08); }
+    body.theme-sage .orb-2 { background: rgba(120,180,130,0.1); }
+    body.theme-sage .orb-3 { background: rgba(100,170,140,0.12); }
   </style>
 </head>
 <body>
+
+<!-- ── Boot splash ── -->
+<div class="boot-splash" id="bootSplash">
+  <div class="boot-text-wrap">
+    <span class="boot-text">QuillHaven</span>
+    <svg class="boot-quill" width="30" height="30" viewBox="0 0 32 32" fill="none">
+      <path d="M26 2C22 6 18 12 14 18L12 24L10 28L12 26L16 22C20 16 24 10 28 4C28 3 27 2 26 2Z" fill="#b0a0b8" opacity="0.7"/>
+      <path d="M14 18L12 24L10 28" stroke="#8a6f9e" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      <path d="M26 2C27 2 28 3 28 4" stroke="#8a6f9e" stroke-width="0.8" fill="none"/>
+      <line x1="10" y1="28" x2="9" y2="29" stroke="#8a6f9e" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
+    </svg>
+  </div>
+  <div class="boot-tagline">Your writing sanctuary</div>
+</div>
 
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
@@ -393,10 +500,25 @@
         <div class="settings-row-icon" style="background:linear-gradient(145deg,#ffe9a0,#ffd970);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
         <div class="settings-row-text" style="flex:1;"><div class="settings-row-label" style="margin-bottom:4px;">Brightness</div><input type="range" min="20" max="100" value="80" class="brightness-slider" oninput="setBrightness(this.value)"></div>
       </div>
-      <div class="settings-row">
-        <div class="settings-row-icon" style="background:linear-gradient(145deg,#ffcfa0,#f5b070);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-label">Night Light</div><div class="settings-row-sub">Warm screen for late writing</div></div>
-        <label class="toggle"><input type="checkbox" id="nightToggle" onchange="toggleNight(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+      <div class="settings-row" style="flex-direction:column;align-items:stretch;gap:8px;">
+        <div class="settings-row-label">Appearance</div>
+        <div style="display:flex;justify-content:center;gap:8px;">
+          <button class="theme-btn active" data-theme="blossom" onclick="setTheme('blossom')" title="Blossom">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#ede0ff,#f8e0f0);"></div>
+          </button>
+          <button class="theme-btn" data-theme="ocean" onclick="setTheme('ocean')" title="Ocean">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#d0e8f5,#b8d4e8);"></div>
+          </button>
+          <button class="theme-btn" data-theme="sage" onclick="setTheme('sage')" title="Sage">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#d5e8d0,#c0d8b8);"></div>
+          </button>
+          <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="Dark Mode">
+            <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#2a2535,#1e1a28);border:1px solid rgba(255,255,255,0.15);"></div>
+          </button>
+          <button class="theme-btn" data-theme="night" onclick="setTheme('night')" title="Night Light" id="nightBtn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f5b070" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
       </div>
       <div class="settings-row clickable" onclick="window.open('https://accounts.google.com','_blank')">
         <div class="settings-row-icon" style="background:linear-gradient(145deg,#f5d0e5,#ebbad0);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/></svg></div>
@@ -443,6 +565,15 @@
 <div class="clipboard-copied" id="clipToast">Copied to clipboard</div>
 
 <script>
+// ── Boot splash ──
+setTimeout(function() {
+  var splash = document.getElementById('bootSplash');
+  if (splash) {
+    splash.classList.add('fade-out');
+    setTimeout(function() { splash.remove(); }, 900);
+  }
+}, 3800);
+
 // ── Clock ──
 function updateClock() {
   var now = new Date(), h = now.getHours(), m = now.getMinutes().toString().padStart(2,'0');
@@ -532,16 +663,35 @@ renderClip();
 
 // ── Brightness ──
 function setBrightness(val) {
-  document.body.style.filter = 'brightness(' + (val / 100) + ')' + (document.body.dataset.night === '1' ? ' sepia(0.25)' : '');
+  document.body.style.filter = 'brightness(' + (val / 100) + ')' + (currentTheme === 'night' ? ' sepia(0.25)' : '');
 }
 
-// ── Night Light ──
-function toggleNight(on) {
-  document.body.dataset.night = on ? '1' : '0';
-  var bright = document.querySelector('.brightness-slider');
-  var bv = bright ? bright.value : 100;
-  document.body.style.filter = 'brightness(' + (bv / 100) + ')' + (on ? ' sepia(0.25)' : '');
+// ── Themes ──
+var currentTheme = 'blossom';
+function setTheme(name) {
+  document.body.className = document.body.className.replace(/theme-\S+/g, '').trim();
+  if (name === 'night') {
+    document.body.dataset.night = '1';
+    var bv = document.querySelector('.brightness-slider') ? document.querySelector('.brightness-slider').value : 100;
+    document.body.style.filter = 'brightness(' + (bv / 100) + ') sepia(0.25)';
+  } else {
+    document.body.dataset.night = '0';
+    var bv2 = document.querySelector('.brightness-slider') ? document.querySelector('.brightness-slider').value : 100;
+    document.body.style.filter = 'brightness(' + (bv2 / 100) + ')';
+    if (name !== 'blossom') document.body.classList.add('theme-' + name);
+  }
+  if (document.body.classList.contains('top-mode')) document.body.classList.add('top-mode');
+  currentTheme = name;
+  document.querySelectorAll('.theme-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.theme === name);
+  });
+  try { localStorage.setItem('qh-theme', name); } catch(e) {}
 }
+(function() {
+  var saved = null;
+  try { saved = localStorage.getItem('qh-theme'); } catch(e) {}
+  if (saved && saved !== 'blossom') setTheme(saved);
+})();
 
 // ── Update check ──
 var LOCAL_VERSION = '1.0';
