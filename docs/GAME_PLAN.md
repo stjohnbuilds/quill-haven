@@ -217,7 +217,7 @@ The home screen is a single HTML file that looks like a real OS desktop.
 
 | Element | Value |
 |---|---|
-| Background | Theme-based gradient with frosted orbs (pastels being removed; warmer/wood direction — see Themes note below) |
+| Background | Light pastel gradient + frosted orbs (default). Themes only add a faint tint; Dark is the exception. See Themes note. |
 | Glass effect | rgba(255,255,255,0.5) + backdrop-filter blur(24px) |
 | Border | 1px solid rgba(255,255,255,0.5) |
 | Border radius | 16px (cards), 10px (icons), 6px (buttons) |
@@ -228,14 +228,21 @@ The home screen is a single HTML file that looks like a real OS desktop.
 | Toggles | Lavender (#c9a0e0) when on, grey when off |
 | Animations | Gentle, slow (20-25s orb drift), 0.15-0.3s transitions |
 
-### Themes (being reworked — June 2026)
+### Themes (decided — June 2026)
 
-The pastel themes (Blossom, Ocean, Sage) are being removed — too soft/girly for the intended user. New direction:
+There are 4 skins. A theme is about the ACCENT colour, NOT repainting the whole
+screen:
 
-- A small set of real skins that re-colour the **whole UI** (dock, panels, cards, clock, app windows, and the future writing app) — not just the background tint.
-- At least one warm **wood / rustic** theme.
-- The default skin will be calm and neutral/warm, not pink.
-- Exact palette set still to be confirmed with Marie before building.
+- **Purple (default)** — the original light look (soft pastel background, white
+  panels, lavender accent).
+- **Wood** and **Slate** — keep that same light background and white panels; they
+  only add a *whisper* of background tint and change the accent colour (toggles,
+  slider, the selected highlight, links, the writing-app caret).
+- **Dark** — the one full dark mode (re-colours everything).
+- **Night Light** is separate: a warm filter you switch on/off, not a skin.
+
+All skins live in one file — `home-screen/shared/theme.css` (CSS variables) —
+linked by the home screen and every app so they always match.
 
 ---
 
