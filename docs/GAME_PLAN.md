@@ -26,23 +26,27 @@ Marie's Chromebook is a room with one door. The door opens to a hallway with exa
 
 ## The Apps
 
-### Default (ship with these)
+### Default (built-in, ship with these)
 
-| App | URL | Icon Colour | Position |
+| App | URL | Icon Colour | Order |
 |---|---|---|---|
-| Dabble Writer | https://app.dabblewriter.com | Lavender (#ddd0f0 / #ccbbe5) | Left |
-| Google Docs | https://docs.google.com | Pastel pink (#f5d0e5 / #ebbad0) | Right |
+| Google Docs | https://docs.google.com | Pastel pink (#f5d0e5 / #ebbad0) | First |
+| Local Writing App | built-in | Pastel green | Second |
 
-### Future (added via "Add App" button in settings)
+### Add-ons (added via "Add App" button in settings)
 
 | App | URL | Icon Colour |
 |---|---|---|
-| Local Writing App | built-in | Pastel green |
+| Dabble Writer | https://app.dabblewriter.com | Lavender (#ddd0f0 / #ccbbe5) |
 | Typing & Tomes | https://typingandtomes.vercel.app | Bluish purple |
 
-### Always Whitelisted (not shown as apps, but allowed for login)
+> Note: Dabble currently ships as a default in the code. Once the "Add App" button is built, it becomes an add-on. Google Docs and the Local Writing app are the two true built-in defaults.
 
-- https://accounts.google.com
+### Always Whitelisted (not shown as apps, but needed behind the scenes)
+
+- https://accounts.google.com (Google sign-in)
+- https://fonts.googleapis.com + https://fonts.gstatic.com (boot splash font — until it's bundled locally)
+- https://raw.githubusercontent.com (update checker)
 
 ---
 
@@ -145,6 +149,18 @@ The home screen is a single HTML file that looks like a real OS desktop.
 **Update Checker:**
 - Fetches `version.json` from GitHub on page load
 - If remote version > local version, shows "Update available" button in top bar
+- ⚠ Known issue: the "apply update" step is broken — it downloads the new code but reloads the old page
+
+**Boot Splash (DONE — being upgraded):**
+- Animated "QuillHaven" in a script font with a quill pen, then "Your writing sanctuary" tagline, then fades to the home screen
+- Upgrade in progress: bigger/prettier quill, typewriter effect on both lines with a blinking cursor, and a loading bar underneath
+
+**Theme Picker (DONE — being reworked):**
+- Currently 5 skins (Blossom, Ocean, Sage, Dark, Night Light); theme choice saves between sessions
+- ⚠ Known issues: only Dark fully re-skins the UI; the others mostly tint the background; Night Light doesn't reset cleanly. See "Themes (being reworked)" under Design Language.
+
+**Known persistence gap:**
+- Only the theme saves between reloads. Brightness, dock/top mode, app on/off, and clipboard reset on reload — to be fixed.
 
 ### 2. Boot Sequence (TO BUILD)
 
@@ -184,6 +200,8 @@ The home screen is a single HTML file that looks like a real OS desktop.
 - Paste a URL, give it a name, pick a colour
 - Saves to localStorage
 - New app appears in dock/top bar
+- Drag-and-drop reordering of apps (grip handle on each row), order saved to localStorage
+- Once this exists, Dabble Writer moves from a default to an add-on
 
 ### 7. Future: Storage Indicator (PLANNED)
 
@@ -196,7 +214,7 @@ The home screen is a single HTML file that looks like a real OS desktop.
 
 | Element | Value |
 |---|---|
-| Background | Pastel purple-pink gradient with frosted orbs |
+| Background | Theme-based gradient with frosted orbs (pastels being removed; warmer/wood direction — see Themes note below) |
 | Glass effect | rgba(255,255,255,0.5) + backdrop-filter blur(24px) |
 | Border | 1px solid rgba(255,255,255,0.5) |
 | Border radius | 16px (cards), 10px (icons), 6px (buttons) |
@@ -206,6 +224,15 @@ The home screen is a single HTML file that looks like a real OS desktop.
 | Tooltips | White background, dark text, subtle shadow |
 | Toggles | Lavender (#c9a0e0) when on, grey when off |
 | Animations | Gentle, slow (20-25s orb drift), 0.15-0.3s transitions |
+
+### Themes (being reworked — June 2026)
+
+The pastel themes (Blossom, Ocean, Sage) are being removed — too soft/girly for the intended user. New direction:
+
+- A small set of real skins that re-colour the **whole UI** (dock, panels, cards, clock, app windows, and the future writing app) — not just the background tint.
+- At least one warm **wood / rustic** theme.
+- The default skin will be calm and neutral/warm, not pink.
+- Exact palette set still to be confirmed with Marie before building.
 
 ---
 
@@ -238,3 +265,4 @@ The home screen is a single HTML file that looks like a real OS desktop.
 | Version | Date | Changes |
 |---|---|---|
 | 1.0 | 2026-06-21 | Initial home screen: 2 default apps (Dabble, Docs), settings panel, clipboard history, dock/top-bar toggle, update checker |
+| 1.1 (in progress) | 2026-06-21 | Boot splash + theme picker documented; themes being reworked (pastels out, wood theme in); persistence + update-apply fixes planned; defaults changing to Google Docs + Local Writing |

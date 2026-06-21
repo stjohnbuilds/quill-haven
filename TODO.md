@@ -1,24 +1,44 @@
 # TODO — Quill Haven
 
-## Active Tasks
-- [x] Build the home screen HTML/CSS/JS — pastel purple/pink, dock, settings panel with Wi-Fi/Brightness/Night Light/Account/App Bar/Clipboard
-- [x] Mac-style dock (icons only + hover tooltip), settings cleanup, Dock/Top toggle
-- [x] Default to 2 apps only: Dabble (lavender, left) + Google Docs (pink, right)
-- [x] Centered dock icons, soft hover, white tooltips
-- [x] Clipboard history with copy-to-clipboard and toast
-- [x] Center app icons in top-bar mode
-- [x] Write Game Plan (docs/GAME_PLAN.md) — app tree, goals, design language
-- [x] Write AI Assessment Prompt (docs/AI_ASSESSMENT_PROMPT.md) — handover for fresh AI audit
-- [ ] Run AI Assessment — hand off AI_ASSESSMENT_PROMPT.md to a fresh AI session
-- [ ] Add App button in settings (paste URL, give name, pick colour)
-- [ ] Storage space indicator bar in settings
-- [ ] Build the boot sequence scripts — Linux startup that auto-loads the home screen
-- [ ] Build the lockdown config — block all sites except writing apps + accounts.google.com
-- [ ] Create USB installer package — everything needed to set up a fresh Chromebook
-- [ ] Write README instructions — step-by-step for Marie to follow when the Chromebook arrives
+## Fix now (what you just asked for)
+- [ ] Themes are broken — only Dark works, clicking the others does nothing
+- [ ] Remove the pastel themes (Blossom / Ocean / Sage) — too girly
+- [ ] Add a warm wood / rustic theme
+- [ ] Make themes re-skin EVERYTHING (dock, panels, clock, app windows) — not just tint the background
+- [ ] Night Light doesn't turn back off properly — fix the toggle
+- [ ] Bigger, prettier quill on the boot animation
+- [ ] Boot: "QuillHaven" types in, then "Your writing sanctuary" types in with a blinking cursor
+- [ ] Boot: add a little loading bar underneath
+
+## Fix soon (found in the assessment)
+- [ ] Save settings between restarts — brightness, dock/top mode, app on/off, clipboard (right now only theme saves)
+- [ ] The "Update available" button doesn't actually update — it reloads the old page
+- [ ] Bundle the boot font locally so it works without Wi-Fi
+- [ ] Dock tooltip shows on top of an open app (small visual glitch)
+
+## Build next (the big features)
+- [ ] Local Writing app — built-in, green icon, "Saves to device, not the cloud", matches the theme
+- [ ] Add App button in settings (paste URL, name, pick colour)
+- [ ] Drag to reorder apps (grip handle on each row, order saved)
+- [ ] Make Dabble an add-on — defaults become Google Docs + Local Writing
+- [ ] Storage space indicator in settings
+
+## For the Chromebook (later)
+- [ ] Boot sequence scripts (auto-start the home screen)
+- [ ] Lockdown config (block everything except the writing apps + login + fonts + update)
+- [ ] USB installer package
+- [ ] README on GitHub so the repo explains itself
 
 ## Future
-- [ ] Local writing app (contentEditable, formatting toolbar, sidebar, AI spell checker)
-- [ ] 4 default apps: Dabble (lavender), Google Docs (pink), Local Writing App (green), T&T (bluish purple)
+- [ ] AI spell checker in the writing app (3-level slider + off)
 
-## Archived
+## Done
+- [x] Home screen — background, orbs, top bar, clock, greeting, date
+- [x] Dock with apps + hover tooltips
+- [x] Top bar / Dock toggle
+- [x] Settings panel (open / close / X / click-outside / Escape)
+- [x] Clipboard history (within a session)
+- [x] App views with traffic-light close buttons
+- [x] Boot splash (first version — being upgraded)
+- [x] Theme picker (being reworked)
+- [x] Update checker (the "check" part only)
