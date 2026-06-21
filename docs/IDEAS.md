@@ -5,8 +5,8 @@ Nice-to-haves to do later — not built yet.
 ## Themes
 - **Hue slider** under the colour (Purple) theme: a slider that slides ALL the
   pastel colours — and the icon colours — through different hues at once.
-- **Nicer hover names** on the theme swatches (do better than plain "Purple/Wood/
-  Slate/Dark"); show a tidy label on hover.
+- DONE: theme swatches show a hover name; app icons now shift with the theme
+  (browns in Wood, blues/slate in Slate); settings icons follow the accent.
 
 ## Add App
 - Let the user **pick an icon** from a few choices (heart, clover, quill,

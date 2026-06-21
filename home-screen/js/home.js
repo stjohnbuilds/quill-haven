@@ -62,7 +62,7 @@ var BUILTIN_APPS = [
 var DEFAULT_ADDONS = [
   { id:'dabble', name:'Dabble Writer', kind:'site', url:'https://app.dabblewriter.com',
     c1:'#ddd0f0', c2:'#ccbbe5', vb:'0 0 28 28',
-    icon:'<path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/><line x1="14" y1="7" x2="14" y2="23" stroke="white" stroke-width="0.8" opacity="0.3"/>' }
+    icon:'<path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/><line x1="14" y1="7" x2="14" y2="23" stroke="white" stroke-width="1.1" opacity="0.5"/>' }
 ];
 
 function loadAddons() {
@@ -76,7 +76,27 @@ function saveAddons(a) { try { localStorage.setItem('qh-addons', JSON.stringify(
 var addons = loadAddons();
 function allApps() { return BUILTIN_APPS.concat(addons); }
 function isBuiltin(id) { return BUILTIN_APPS.some(function(a){ return a.id === id; }); }
-function gradOf(app) { return 'linear-gradient(145deg,' + app.c1 + ',' + app.c2 + ')'; }
+// Per-theme colours for the APP icons. The default (Purple) theme uses each
+// app's own colour; Wood/Slate shift the known apps toward the theme palette.
+var currentTheme = 'purple';
+var THEME_APP_COLORS = {
+  wood: {
+    docs:    ['#d8c3a6', '#c6a87f'],
+    writing: ['#c6c39c', '#aaa177'],
+    dabble:  ['#d5c3b0', '#bfa78f']
+  },
+  grey: {
+    docs:    ['#c0d4ee', '#9fbce4'],
+    writing: ['#c2ccc6', '#a4b1aa'],
+    dabble:  ['#c6cad6', '#abb1c0']
+  }
+};
+function appColors(app) {
+  var pal = THEME_APP_COLORS[currentTheme];
+  if (pal && pal[app.id]) return pal[app.id];
+  return [app.c1, app.c2];
+}
+function gradOf(app) { var c = appColors(app); return 'linear-gradient(145deg,' + c[0] + ',' + c[1] + ')'; }
 function isVisible(id) {
   try { var m = JSON.parse(localStorage.getItem('qh-apps') || '{}'); return m[id] !== false; } catch(e) { return true; }
 }
@@ -115,6 +135,35 @@ function goHome() {
   currentApp = null;
 }
 
+// Right-click an app icon for a small menu (restart / close)
+var appMenu = null;
+function hideAppMenu() {
+  if (appMenu) { appMenu.remove(); appMenu = null; }
+  document.removeEventListener('click', hideAppMenu);
+}
+function restartApp(id) {
+  var view = document.getElementById('view-' + id);
+  if (view) { var ifr = view.querySelector('iframe'); if (ifr) ifr.src = ifr.src; }
+  openApp(id);
+}
+function showAppMenu(e, id) {
+  hideAppMenu();
+  var m = document.createElement('div');
+  m.className = 'app-menu';
+  m.innerHTML = '<button type="button" data-act="restart">Restart app</button><button type="button" data-act="close">Close</button>';
+  m.style.left = e.clientX + 'px';
+  if (e.clientY > window.innerHeight / 2) { m.style.top = (e.clientY - 6) + 'px'; m.style.transform = 'translateY(-100%)'; }
+  else { m.style.top = (e.clientY + 6) + 'px'; }
+  m.addEventListener('click', function(ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    if (b.dataset.act === 'restart') restartApp(id); else goHome();
+    hideAppMenu();
+  });
+  document.body.appendChild(m);
+  appMenu = m;
+  setTimeout(function() { document.addEventListener('click', hideAppMenu); }, 0);
+}
+
 function refreshDockEmpty() {
   var dock = document.getElementById('dock');
   var vis = dock.querySelectorAll('.app:not(.hidden)');
@@ -146,7 +195,7 @@ function buildSettingsRow(app) {
   var row = document.createElement('div');
   row.className = 'settings-row';
   row.innerHTML =
-    '<div class="app-mini-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 14) + '</div>'
+    '<div class="app-mini-icon" data-appicon="' + app.id + '" style="background:' + gradOf(app) + ';">' + iconHtml(app, 14) + '</div>'
     + '<div class="settings-row-text"><div class="settings-row-label">' + esc(app.name) + '</div>'
     + (app.sub ? '<div class="settings-row-sub">' + esc(app.sub) + '</div>' : '') + '</div>'
     + (isBuiltin(app.id) ? '' : '<button class="app-remove" title="Remove this app">&#x2715;</button>')
@@ -177,6 +226,7 @@ function renderApps() {
     d.href = '#'; d.className = 'app' + (hidden ? ' hidden' : '');
     d.dataset.app = app.id; d.dataset.name = app.name;
     d.addEventListener('click', function(e) { e.preventDefault(); openApp(app.id); });
+    d.addEventListener('contextmenu', function(e) { e.preventDefault(); showAppMenu(e, app.id); });
     d.innerHTML = '<div class="app-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 26) + '</div>';
     dock.appendChild(d);
 
@@ -184,6 +234,7 @@ function renderApps() {
     t.href = '#'; t.className = 'top-app' + (hidden ? ' hidden' : '');
     t.dataset.app = app.id; t.dataset.name = app.name;
     t.addEventListener('click', function(e) { e.preventDefault(); openApp(app.id); });
+    t.addEventListener('contextmenu', function(e) { e.preventDefault(); showAppMenu(e, app.id); });
     t.innerHTML = '<div class="top-app-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 12) + '</div>';
     top.appendChild(t);
 
@@ -215,6 +266,18 @@ function toggleAppVis(name, visible) {
   if (!visible && currentApp === name) goHome();
   refreshDockEmpty();
   try { var a = JSON.parse(localStorage.getItem('qh-apps') || '{}'); a[name] = visible; localStorage.setItem('qh-apps', JSON.stringify(a)); } catch(e) {}
+}
+
+// Recolour app icons in place when the theme changes (no view/iframe rebuild).
+function recolorAppIcons() {
+  allApps().forEach(function(app) {
+    var g = gradOf(app);
+    document.querySelectorAll('[data-app="' + app.id + '"] .app-icon, [data-app="' + app.id + '"] .top-app-icon').forEach(function(el) { el.style.background = g; });
+    var mini = document.querySelector('.app-mini-icon[data-appicon="' + app.id + '"]');
+    if (mini) mini.style.background = g;
+    var view = document.getElementById('view-' + app.id);
+    if (view) { var bi = view.querySelector('.app-body-icon'); if (bi) bi.style.background = g; }
+  });
 }
 
 // Add a user app (name + website + colour).
@@ -327,7 +390,6 @@ renderClip();
 // ── Appearance: theme skin + night light + brightness ──
 // A theme re-colours the whole UI (via CSS variables).
 // Night Light is separate: a warm filter you switch on/off.
-var currentTheme = 'purple';
 var nightOn = false;
 var THEMES = ['purple', 'wood', 'grey', 'dark'];
 
@@ -346,6 +408,7 @@ function setTheme(name) {
   document.body.classList.remove('theme-wood', 'theme-grey', 'theme-dark');
   if (name !== 'purple') document.body.classList.add('theme-' + name);
   currentTheme = name;
+  recolorAppIcons();   // recolour app icons in place (no view/iframe rebuild)
   document.querySelectorAll('.theme-btn').forEach(function(b) {
     b.classList.toggle('active', b.dataset.theme === name);
   });
