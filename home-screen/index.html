@@ -259,10 +259,14 @@
     .toggle input:checked ~ .toggle-thumb { transform: translateX(16px); }
 
     /* Clipboard */
-    .clipboard-scroll { max-height: 260px; overflow-y: auto; }
+    .clipboard-scroll { min-height: 120px; max-height: 260px; overflow-y: auto; }
     .clipboard-scroll::-webkit-scrollbar { width: 3px; }
     .clipboard-scroll::-webkit-scrollbar-thumb { background: rgba(147,128,159,0.2); border-radius: 3px; }
-    .clipboard-empty { padding: 16px; text-align: center; font-size: 11px; color: #b8aabb; }
+    .clipboard-empty { padding: 30px 16px; text-align: center; font-size: 12px; color: #b8aabb; }
+
+    /* Brightness slider */
+    .brightness-slider { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; background: #e8e0ed; outline: none; }
+    .brightness-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #c9a0e0; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
     .clipboard-item {
       display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px;
       border-bottom: 1px solid rgba(147,128,159,0.08); cursor: pointer; transition: background 0.15s;
@@ -309,10 +313,10 @@
     </div>
   </div>
   <div class="top-right">
-    <span class="top-datetime" id="topBarTime"></span>
-    <button class="settings-btn" onclick="toggleSettings()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
-    <span class="top-icon"><svg width="18" height="14" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="22" height="10" rx="2.5"/><rect x="3.5" y="4.5" width="15" height="5" rx="1" fill="currentColor" stroke="none" opacity="0.5"/><rect x="23" y="5" width="3" height="4" rx="1" fill="currentColor" stroke="none" opacity="0.4"/></svg></span>
     <span class="top-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg></span>
+    <span class="top-icon"><svg width="18" height="14" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="22" height="10" rx="2.5"/><rect x="3.5" y="4.5" width="15" height="5" rx="1" fill="currentColor" stroke="none" opacity="0.5"/><rect x="23" y="5" width="3" height="4" rx="1" fill="currentColor" stroke="none" opacity="0.4"/></svg></span>
+    <button class="settings-btn" onclick="toggleSettings()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    <span class="top-datetime" id="topBarTime"></span>
   </div>
 </header>
 
@@ -423,6 +427,30 @@
       </div>
     </div>
 
+    <!-- Brightness -->
+    <div class="settings-section">Brightness</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <div class="settings-row-icon" style="background:linear-gradient(145deg,#ffe9a0,#ffd970);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
+        <div class="settings-row-text" style="flex:1;"><input type="range" min="20" max="100" value="80" class="brightness-slider" oninput="setBrightness(this.value)"></div>
+      </div>
+    </div>
+
+    <!-- Spell Check & Night Light -->
+    <div class="settings-section">Writing</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <div class="settings-row-icon" style="background:linear-gradient(145deg,#a0c4ff,#88b4f8);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-label">Spell Check</div><div class="settings-row-sub">Red underlines on typos</div></div>
+        <label class="toggle"><input type="checkbox" checked id="spellToggle"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-icon" style="background:linear-gradient(145deg,#ffcfa0,#f5b070);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-label">Night Light</div><div class="settings-row-sub">Warm screen for late writing</div></div>
+        <label class="toggle"><input type="checkbox" id="nightToggle" onchange="toggleNight(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+      </div>
+    </div>
+
     <!-- Apps -->
     <div class="settings-section">Apps</div>
     <div class="settings-card">
@@ -448,6 +476,19 @@
     <div class="settings-card">
       <div class="clipboard-scroll" id="clipboardList">
         <div class="clipboard-empty">No items yet<br><span style="font-size:9px;opacity:0.7;">Copy text in any app to see it here</span></div>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="settings-section">About</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <div class="settings-row-icon" style="background:linear-gradient(145deg,#d8c8e8,#c8b8d8);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-label">Quill Haven</div><div class="settings-row-sub">Version 1.0 · Made with 🌸</div></div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-icon" style="background:linear-gradient(145deg,#c8bdd0,#b8adc0);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-label">Device</div><div class="settings-row-sub">Acer Chromebook Spin 311</div></div>
       </div>
     </div>
 
@@ -533,6 +574,19 @@ function renderClip() {
 }
 function copyClip(idx) { if (clipHist[idx]) navigator.clipboard.writeText(clipHist[idx].t); }
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
+
+// ── Brightness ──
+function setBrightness(val) {
+  document.body.style.filter = 'brightness(' + (val / 100) + ')' + (document.body.dataset.night === '1' ? ' sepia(0.25)' : '');
+}
+
+// ── Night Light ──
+function toggleNight(on) {
+  document.body.dataset.night = on ? '1' : '0';
+  var bright = document.querySelector('.brightness-slider');
+  var bv = bright ? bright.value : 100;
+  document.body.style.filter = 'brightness(' + (bv / 100) + ')' + (on ? ' sepia(0.25)' : '');
+}
 
 // ── Update check ──
 var LOCAL_VERSION = '1.0';
