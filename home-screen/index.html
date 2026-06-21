@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
   <title>Quill Haven</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="shared/theme.css">
-  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="shared/theme.css?v=4">
+  <link rel="stylesheet" href="css/home.css?v=4">
 </head>
 <body>
 
@@ -97,6 +99,7 @@
             <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#3a3448,#1e1a28);border:1px solid rgba(255,255,255,0.15);"></div>
           </button>
         </div>
+        <input type="range" min="0" max="360" value="0" class="hue-slider" id="hueSlider" oninput="setHue(this.value)" title="Slide the colour">
       </div>
       <div class="settings-row">
         <div class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
@@ -126,6 +129,7 @@
       <input type="text" id="addAppName" placeholder="App name" maxlength="24" autocomplete="off">
       <input type="text" id="addAppUrl" placeholder="Website (e.g. example.com)" autocomplete="off">
       <div class="add-app-colors" id="addAppColors"></div>
+      <div class="add-app-icons" id="addAppIcons"></div>
       <div class="add-app-actions">
         <button type="button" class="add-app-cancel" id="addAppCancel">Cancel</button>
         <button type="button" class="add-app-save" id="addAppSave">Add app</button>
@@ -146,6 +150,6 @@
 
 <div class="clipboard-copied" id="clipToast">Copied to clipboard</div>
 
-<script src="js/home.js"></script>
+<script src="js/home.js?v=4"></script>
 </body>
 </html>

@@ -3,21 +3,24 @@
 Nice-to-haves to do later — not built yet.
 
 ## Themes
-- **Hue slider** under the colour (Purple) theme: a slider that slides ALL the
-  pastel colours — and the icon colours — through different hues at once.
+- DONE: **Hue slider** under the colour (Purple) theme slides ALL the pastels and
+  the icon colours through different hues at once.
 - DONE: theme swatches show a hover name; app icons now shift with the theme
-  (browns in Wood, blues/slate in Slate); settings icons follow the accent.
+  (cool taupe in Wood, blues/slate in Slate); settings icons follow the accent.
 
 ## Add App
-- Let the user **pick an icon** from a few choices (heart, clover, quill,
-  notebook, …) in a little pop-up, alongside name + website + colour.
+- DONE: the user can **pick an icon** (letter, quill, book, heart, star, pencil,
+  leaf) alongside name + website + colour.
 - Offer a **quick list of common apps** (popular writing/web apps) to add in one tap.
 - Keep the "+ Add app" button small/low-key where it is. (Confirmed — leave as is.)
 
 ## Icons
-- **Dabble Writer icon** — Marie still isn't keen ("looks like trash"). It's
-  currently restored to the original open-book + spine. Needs a better design or
-  a reference for what Dabble should look like.
+- **Boot screen icon** — Marie wants the *St John Author Studio* logo here, NOT a
+  generic quill. No logo file exists in the project yet — NEED Marie to provide
+  the image/SVG, then it replaces the placeholder quill on the boot splash.
+- **Dabble Writer icon** — Marie still isn't keen ("looks like trash"). Currently
+  the original open-book + centre spine (spine line now more visible). Needs a
+  better design or a reference for what Dabble should look like.
 - **Local Writing quill** — now a clean feather; can be refined further if wanted.
 
 ## Home screen (parked)

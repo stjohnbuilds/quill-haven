@@ -53,7 +53,7 @@ var BUILTIN_APPS = [
   { id:'docs', name:'Google Docs', kind:'site', url:'https://docs.google.com',
     c1:'#f5d0e5', c2:'#ebbad0', vb:'0 0 28 28',
     icon:'<rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.4" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>' },
-  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html',
+  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=4',
     c1:'#bfe3c4', c2:'#9ed0a8', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
     icon:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/><path d="M16 8 2 22" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/><path d="M17.5 15H9" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>' }
 ];
@@ -62,7 +62,7 @@ var BUILTIN_APPS = [
 var DEFAULT_ADDONS = [
   { id:'dabble', name:'Dabble Writer', kind:'site', url:'https://app.dabblewriter.com',
     c1:'#ddd0f0', c2:'#ccbbe5', vb:'0 0 28 28',
-    icon:'<path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/><line x1="14" y1="7" x2="14" y2="23" stroke="white" stroke-width="1.1" opacity="0.5"/>' }
+    icon:'<path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/><line x1="14" y1="7" x2="14" y2="23" stroke="white" stroke-width="1.4" opacity="0.65"/>' }
 ];
 
 function loadAddons() {
@@ -81,9 +81,9 @@ function isBuiltin(id) { return BUILTIN_APPS.some(function(a){ return a.id === i
 var currentTheme = 'purple';
 var THEME_APP_COLORS = {
   wood: {
-    docs:    ['#d8c3a6', '#c6a87f'],
-    writing: ['#c6c39c', '#aaa177'],
-    dabble:  ['#d5c3b0', '#bfa78f']
+    docs:    ['#c7c0b6', '#afa698'],
+    writing: ['#bcc0b4', '#a3a895'],
+    dabble:  ['#c3bcb4', '#a99e92']
   },
   grey: {
     docs:    ['#c0d4ee', '#9fbce4'],
@@ -103,7 +103,7 @@ function isVisible(id) {
 
 // An app's icon: a built-in SVG, or the first letter for a user-added app.
 function iconHtml(app, px) {
-  if (app.icon) return '<svg width="'+px+'" height="'+px+'" viewBox="'+app.vb+'" fill="none">'+app.icon+'</svg>';
+  if (app.icon) return '<svg width="'+px+'" height="'+px+'" viewBox="'+(app.vb||'0 0 24 24')+'" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+app.icon+'</svg>';
   var letter = (app.name || '?').trim().charAt(0).toUpperCase() || '?';
   return '<span style="color:#fff;font-weight:600;line-height:1;font-size:'+Math.round(px*0.5)+'px;">'+esc(letter)+'</span>';
 }
@@ -281,13 +281,15 @@ function recolorAppIcons() {
 }
 
 // Add a user app (name + website + colour).
-function addApp(name, url, c1, c2) {
+function addApp(name, url, c1, c2, icon, vb) {
   name = (name || '').trim();
   url = (url || '').trim();
   if (!name || !url) return false;
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
   var id = 'app' + Math.random().toString(36).slice(2, 8);
-  addons.push({ id:id, name:name, kind:'site', url:url, c1:c1, c2:c2 });
+  var app = { id:id, name:name, kind:'site', url:url, c1:c1, c2:c2 };
+  if (icon) { app.icon = icon; app.vb = vb || '0 0 24 24'; }
+  addons.push(app);
   saveAddons(addons);
   renderApps();
   return true;
@@ -310,6 +312,17 @@ var APP_COLORS = [
 ];
 var pickedColor = APP_COLORS[1];
 
+// Icon choices for a user-added app (or a letter if none picked).
+var ICON_CHOICES = [
+  { id:'quill',  vb:'0 0 24 24', paths:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/>' },
+  { id:'book',   vb:'0 0 24 24', paths:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' },
+  { id:'heart',  vb:'0 0 24 24', paths:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1.1-1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>' },
+  { id:'star',   vb:'0 0 24 24', paths:'<path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>' },
+  { id:'pencil', vb:'0 0 24 24', paths:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>' },
+  { id:'leaf',   vb:'0 0 24 24', paths:'<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>' }
+];
+var pickedIcon = null;
+
 function renderColorSwatches() {
   var box = document.getElementById('addAppColors');
   box.innerHTML = '';
@@ -319,6 +332,27 @@ function renderColorSwatches() {
     b.className = 'color-swatch' + (pair === pickedColor ? ' active' : '');
     b.style.background = 'linear-gradient(145deg,' + pair[0] + ',' + pair[1] + ')';
     b.addEventListener('click', function() { pickedColor = pair; renderColorSwatches(); });
+    box.appendChild(b);
+  });
+}
+
+function renderIconChoices() {
+  var box = document.getElementById('addAppIcons');
+  if (!box) return;
+  box.innerHTML = '';
+  var none = document.createElement('button');
+  none.type = 'button';
+  none.className = 'icon-choice' + (pickedIcon === null ? ' active' : '');
+  none.title = 'Letter';
+  none.textContent = 'A';
+  none.addEventListener('click', function() { pickedIcon = null; renderIconChoices(); });
+  box.appendChild(none);
+  ICON_CHOICES.forEach(function(ch) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'icon-choice' + (pickedIcon === ch ? ' active' : '');
+    b.innerHTML = '<svg width="16" height="16" viewBox="' + ch.vb + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ch.paths + '</svg>';
+    b.addEventListener('click', function() { pickedIcon = ch; renderIconChoices(); });
     box.appendChild(b);
   });
 }
@@ -333,18 +367,23 @@ function closeAddForm() {
   document.getElementById('addAppBtn').style.display = '';
   document.getElementById('addAppName').value = '';
   document.getElementById('addAppUrl').value = '';
+  pickedIcon = null;
+  renderIconChoices();
 }
 
 document.getElementById('addAppBtn').addEventListener('click', openAddForm);
 document.getElementById('addAppCancel').addEventListener('click', closeAddForm);
 document.getElementById('addAppSave').addEventListener('click', function() {
-  var ok = addApp(document.getElementById('addAppName').value, document.getElementById('addAppUrl').value, pickedColor[0], pickedColor[1]);
+  var ic = pickedIcon ? pickedIcon.paths : null;
+  var vb = pickedIcon ? pickedIcon.vb : null;
+  var ok = addApp(document.getElementById('addAppName').value, document.getElementById('addAppUrl').value, pickedColor[0], pickedColor[1], ic, vb);
   if (ok) closeAddForm();
 });
 
 // First render
 renderApps();
 renderColorSwatches();
+renderIconChoices();
 
 // ── Settings ──
 function toggleSettings() { document.getElementById('settingsOverlay').classList.toggle('open'); }
@@ -391,14 +430,22 @@ renderClip();
 // A theme re-colours the whole UI (via CSS variables).
 // Night Light is separate: a warm filter you switch on/off.
 var nightOn = false;
+var hueDeg = 0;
 var THEMES = ['purple', 'wood', 'grey', 'dark'];
 
 function applyFilter() {
   var slider = document.querySelector('.brightness-slider');
   var b = slider ? slider.value : 100;
   var f = 'brightness(' + (b / 100) + ')';
+  if (currentTheme === 'purple' && hueDeg) f += ' hue-rotate(' + hueDeg + 'deg)';
   if (nightOn) f += ' sepia(0.35) saturate(0.9) brightness(0.96)';
   document.body.style.filter = f;
+}
+
+function setHue(v) {
+  hueDeg = parseInt(v, 10) || 0;
+  applyFilter();
+  try { localStorage.setItem('qh-hue', hueDeg); } catch(e) {}
 }
 
 function setBrightness(val) { applyFilter(); try { localStorage.setItem('qh-brightness', val); } catch(e) {} }
@@ -412,6 +459,9 @@ function setTheme(name) {
   document.querySelectorAll('.theme-btn').forEach(function(b) {
     b.classList.toggle('active', b.dataset.theme === name);
   });
+  var hs = document.getElementById('hueSlider');
+  if (hs) hs.classList.toggle('show', name === 'purple');  // hue slider only for the colour theme
+  applyFilter();
   try { localStorage.setItem('qh-theme', name); } catch(e) {}
 }
 
@@ -425,21 +475,28 @@ function setNight(on) {
 
 // Restore saved settings on load
 (function() {
-  var savedTheme=null, savedNight=null, savedBright=null, savedMode=null, savedClip=null;
+  var savedTheme=null, savedNight=null, savedBright=null, savedMode=null, savedClip=null, savedHue=null;
   try {
     savedTheme  = localStorage.getItem('qh-theme');
     savedNight  = localStorage.getItem('qh-night');
     savedBright = localStorage.getItem('qh-brightness');
     savedMode   = localStorage.getItem('qh-mode');
     savedClip   = localStorage.getItem('qh-clip');
+    savedHue    = localStorage.getItem('qh-hue');
   } catch(e) {}
 
-  setTheme(savedTheme || 'purple');
-
+  // set the sliders first so applyFilter reads the right values
   if (savedBright !== null) {
     var sl = document.querySelector('.brightness-slider');
     if (sl) sl.value = savedBright;
   }
+  if (savedHue !== null) {
+    hueDeg = parseInt(savedHue, 10) || 0;
+    var hsl = document.getElementById('hueSlider');
+    if (hsl) hsl.value = hueDeg;
+  }
+
+  setTheme(savedTheme || 'purple');
   setNight(savedNight === '1');
 
   if (savedMode) setMode(savedMode);

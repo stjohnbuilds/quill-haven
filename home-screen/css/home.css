@@ -401,6 +401,29 @@ body.top-mode .dock { display: none; }
 .add-app-save { background: var(--accent); color: #fff; }
 .add-app-save:hover, .add-app-cancel:hover { opacity: 0.85; }
 
+/* Icon picker for a new app */
+.add-app-icons { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; padding: 2px 0; }
+.icon-choice {
+  width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--card-border);
+  background: var(--panel-bg); color: var(--accent-strong); cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600;
+  transition: all 0.15s;
+}
+.icon-choice:hover { transform: scale(1.08); }
+.icon-choice.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+
+/* Hue slider — only shown under the colour (Purple) theme */
+.hue-slider {
+  display: none; -webkit-appearance: none; width: 70%; max-width: 220px; margin: 4px auto 0;
+  height: 6px; border-radius: 3px; outline: none;
+  background: linear-gradient(90deg, #d98c8c, #d9cf8c, #8cd99a, #8ccdd9, #9a8cd9, #d98ccb, #d98c8c);
+}
+.hue-slider.show { display: block; }
+.hue-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
 /* ── Theme buttons ── */
 .theme-btn {
   position: relative;
