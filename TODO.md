@@ -5,6 +5,9 @@
 - [ ] Dock tooltip shows on top of an open app (small visual glitch)
 
 ## Build next (the big features)
+- [ ] Local Writing v2 — Notes + Projects tabs sidebar (T&T feel), title+subtitle,
+      strikethrough, numbered chapters, rename. WAITING on Marie's detailed nav
+      plan — captured in docs/WRITING_APP_PLAN.md
 - [ ] Drag to reorder apps (grip handle on each row, order saved)
 - [ ] Storage space indicator in settings
 

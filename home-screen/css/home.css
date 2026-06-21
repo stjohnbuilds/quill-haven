@@ -22,23 +22,16 @@
 .boot-text {
   font-family: 'Great Vibes', cursive;
   font-size: 80px; color: #6b5f6e; letter-spacing: 2px;
-  clip-path: inset(0 100% 0 0);
-  animation: writeOut 2s ease forwards 0.4s;
+  opacity: 0;
+  animation: bootFade 1s ease forwards 0.3s;
 }
-@keyframes writeOut {
-  0% { clip-path: inset(0 100% 0 0); }
-  100% { clip-path: inset(0 0% 0 0); }
-}
+.boot-haven { margin-left: 4px; }
+@keyframes bootFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
 .boot-quill {
-  position: absolute; right: -54px; bottom: 4px;
-  opacity: 0; transform-origin: bottom left;
-  filter: drop-shadow(0 3px 6px rgba(138,111,158,0.35));
-  animation: quillAppear 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards 2.05s;
-}
-@keyframes quillAppear {
-  0% { opacity: 0; transform: translate(-10px,6px) rotate(-12deg) scale(0.85); }
-  100% { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
+  position: absolute; right: -50px; bottom: 12px;
+  opacity: 0;
+  animation: bootFade 0.9s ease forwards 1s;
 }
 
 .boot-tagline {
