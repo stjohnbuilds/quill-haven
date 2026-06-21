@@ -99,6 +99,11 @@ function openApp(name) {
   document.querySelectorAll('[data-app]').forEach(function(a) {
     a.classList.toggle('active', a.dataset.app === name);
   });
+  var app = allApps().filter(function(a) { return a.id === name; })[0];
+  var nm = document.getElementById('openAppName');
+  if (nm) nm.textContent = app ? app.name : '';
+  var tag = document.getElementById('openAppTag');
+  if (tag) tag.classList.add('show');
   currentApp = name;
 }
 
@@ -106,6 +111,7 @@ function goHome() {
   document.querySelectorAll('.app-view').forEach(function(v) { v.classList.remove('active'); });
   document.getElementById('homeScreen').style.display = 'flex';
   document.querySelectorAll('[data-app]').forEach(function(a) { a.classList.remove('active'); });
+  var tag = document.getElementById('openAppTag'); if (tag) tag.classList.remove('show');
   currentApp = null;
 }
 
@@ -120,24 +126,18 @@ function buildView(app) {
   var v = document.createElement('div');
   v.className = 'app-view';
   v.id = 'view-' + app.id;
-  var bar = '<div class="app-titlebar"><div class="traffic-lights">'
-    + '<button class="tl tl-close" title="Close"></button><button class="tl tl-min"></button><button class="tl tl-max"></button>'
-    + '</div><span class="app-titlebar-text">' + esc(app.name) + '</span></div>';
-  var body;
   if (app.kind === 'local') {
-    body = '<iframe class="app-frame" src="' + app.src + '" title="' + esc(app.name) + '"></iframe>';
+    v.innerHTML = '<iframe class="app-frame" src="' + app.src + '" title="' + esc(app.name) + '"></iframe>';
   } else {
     var host = '';
     if (app.url) host = app.url.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-    body = '<div class="app-body">'
+    v.innerHTML = '<div class="app-body">'
       + '<div class="app-body-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 36) + '</div>'
       + '<div class="app-body-name">' + esc(app.name) + '</div>'
       + (host ? '<div class="app-body-url">' + esc(host) + '</div>' : '')
       + '<div class="app-body-note">On your Chromebook, this opens<br>right here as a full window.</div>'
       + '</div>';
   }
-  v.innerHTML = bar + body;
-  v.querySelector('.tl-close').addEventListener('click', goHome);
   return v;
 }
 

@@ -109,9 +109,19 @@ body {
 .top-right { display: flex; align-items: center; gap: 8px; }
 .top-icon { color: var(--bar-icon); opacity: 0.7; display: flex; align-items: center; }
 
-/* Top bar app icons (hidden in dock mode) */
-.top-apps { display: none; gap: 5px; align-items: center; position: absolute; left: 50%; transform: translateX(-50%); }
+/* Top bar app icons (hidden in dock mode) — sit next to the status icons */
+.top-apps { display: none; gap: 5px; align-items: center; }
 body.top-mode .top-apps { display: flex; }
+
+/* Open-app label + close, shown in the top bar while an app is open */
+.open-app-tag { display: none; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--bar-text); }
+.open-app-tag.show { display: flex; }
+.open-app-x {
+  background: none; border: none; cursor: pointer; color: var(--bar-icon); padding: 0;
+  width: 18px; height: 18px; border-radius: 50%; font-size: 11px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.open-app-x:hover { background: var(--row-hover); color: var(--text-strong); }
 
 .top-app {
   position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent;
@@ -160,17 +170,7 @@ body.top-mode .top-apps { display: flex; }
 body.top-mode .app-view { bottom: 0; }
 @keyframes winIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-.app-titlebar {
-  height: 34px; display: flex; align-items: center; padding: 0 12px; gap: 10px;
-  background: var(--titlebar-bg); border-bottom: 1px solid var(--titlebar-border); flex-shrink: 0;
-}
-.traffic-lights { display: flex; gap: 7px; align-items: center; }
-.tl { width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; transition: opacity 0.15s; }
-.tl:hover { opacity: 0.8; }
-.tl-close { background: #ff5f57; }
-.tl-min { background: #ffbd2e; cursor: default; }
-.tl-max { background: #28c840; cursor: default; }
-.app-titlebar-text { flex: 1; text-align: center; font-size: 12px; font-weight: 500; color: var(--text-soft); margin-right: 46px; }
+/* (app windows have no title bar — they're closed via the top-bar X) */
 
 /* Built-in app loaded as a real page (e.g. Local Writing) */
 .app-frame { flex: 1; width: 100%; border: 0; display: block; background: var(--appbody-bg); }
