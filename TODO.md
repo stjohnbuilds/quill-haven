@@ -1,14 +1,5 @@
 # TODO — Quill Haven
 
-## Building now
-- [ ] Local Writing app — its own files under `apps/writing/` (not jammed into
-      the home screen). EB Garamond editor, small format toolbar, chapters
-      sidebar, autosave to the device, word count, matches the active theme.
-      Keep v1 simple.
-- [ ] Code-health pass — keep the whole project cleanly structured, no big
-      blobs of code (see `docs/CODE_HEALTH.md`). First step: move the theme
-      colours into `shared/theme.css` so the writing app can share them.
-
 ## Fix soon (found in the assessment)
 - [ ] Bundle the boot font locally so it works without Wi-Fi
 - [ ] Dock tooltip shows on top of an open app (small visual glitch)
@@ -18,6 +9,8 @@
 - [ ] Drag to reorder apps (grip handle on each row, order saved)
 - [ ] Make Dabble an add-on — defaults become Google Docs + Local Writing
 - [ ] Storage space indicator in settings
+- [ ] Code-health follow-up: each app icon is copy-pasted in a few spots —
+      make the apps data-driven (defined once) while building "Add App"
 
 ## For the Chromebook (later)
 - [ ] Boot sequence scripts (auto-start the home screen)
@@ -43,3 +36,8 @@
 - [x] All settings now save between restarts — brightness, dock/top, app on/off, clipboard
 - [x] Update button fixed — downloads the latest version from GitHub and loads it
       (making it stick after a reboot is part of the Chromebook setup later)
+- [x] Code health: split the one 958-line file into index.html (227 lines) +
+      css/home.css + shared/theme.css + js/home.js — themes are now one shared file
+- [x] Local Writing app — its own files (apps/writing/), EB Garamond editor,
+      toolbar (bold/italic/underline/heading/bullets), chapters sidebar, autosave
+      to device, word count, matches the theme. 2nd default app (green)

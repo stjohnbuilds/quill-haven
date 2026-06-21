@@ -31,17 +31,23 @@ home-screen/
    screen's code.
 5. **Keep files small and readable.** If a file grows too big, split it.
 
-## Where we are today (honest state)
+## Where we are today
 
-- The home screen is still one file (`index.html`) with its CSS and JS inside
-  it. That's fine for now — but the theme/colour part should move into
-  `shared/theme.css` so the writing app can share the exact same skins.
+- **Done:** the home screen is split into `index.html` (structure, ~227 lines),
+  `css/home.css` (looks), `js/home.js` (behaviour), and `shared/theme.css`
+  (the skins). The old single file was 958 lines.
+- The Local Writing app lives in `apps/writing/` as three small files and links
+  the same `shared/theme.css`, so it wears the exact same skin.
+- **Remaining:** each app's icon is still copy-pasted in a few places. The clean
+  fix is to make the apps data-driven (defined once) — best done together with
+  the "Add App" feature.
 
 ## Code-health follow-ups (tracked in TODO.md)
 
-- Move the home screen's theme variables into `shared/theme.css`.
-- Later: split the home screen's own CSS and JS into `home.css` / `home.js`
-  the same way, so `index.html` is just structure.
+- Done: theme variables moved to `shared/theme.css`; home screen split into
+  `home.css` / `home.js`; `index.html` is now just structure.
+- Remaining: make the apps data-driven so each icon is defined once (do this
+  with the "Add App" feature).
 
 ## How the Local Writing app fits
 

@@ -1,0 +1,167 @@
+/* ───────────────────────────────────────────────
+   Quill Haven — SKINS (one source of truth)
+   Linked by the home screen AND every app, so they
+   all wear the same theme. A theme re-colours the
+   whole UI by overriding these variables.
+   Night Light is NOT a skin — it's a separate warm
+   filter (handled in JS).
+   Default skin = Purple (the :root values below).
+─────────────────────────────────────────────── */
+:root {
+  --bg: linear-gradient(135deg, #ece0ff 0%, #f1e2fb 45%, #e6e9ff 100%);
+  --orb1: rgba(170,110,235,0.12);
+  --orb2: rgba(150,120,225,0.12);
+  --orb3: rgba(150,160,235,0.13);
+  --text-strong: #4a4350;
+  --text-soft: #6b5f72;
+  --text-muted: #a08fb0;
+  --text-faint: #bdaecb;
+  --bar-bg: rgba(255,255,255,0.38);
+  --bar-border: rgba(255,255,255,0.45);
+  --bar-text: #6b5f72;
+  --bar-icon: #9a86ad;
+  --dock-bg: rgba(255,255,255,0.42);
+  --dock-border: rgba(255,255,255,0.55);
+  --dot: rgba(74,67,80,0.45);
+  --tooltip-bg: rgba(255,255,255,0.94);
+  --tooltip-text: #595254;
+  --panel-bg: rgba(255,255,255,0.96);
+  --overlay-bg: rgba(238,232,248,0.82);
+  --section: #a08fb0;
+  --card-bg: rgba(255,255,255,0.55);
+  --card-border: rgba(140,120,165,0.12);
+  --row-border: rgba(140,120,165,0.10);
+  --row-hover: rgba(140,120,165,0.06);
+  --label: #4a4350;
+  --sub: #a08fb0;
+  --accent: #b083e0;
+  --accent-strong: #9a64d6;
+  --toggle-off: #d5cdd8;
+  --toggle-thumb: #ffffff;
+  --seg-bg: rgba(140,120,165,0.12);
+  --seg-active-bg: #ffffff;
+  --slider-track: #e8e0ed;
+  --titlebar-bg: #f5f2f7;
+  --titlebar-border: #e8e0ed;
+  --appbody-bg: linear-gradient(180deg, #faf8fc 0%, #f3eef8 100%);
+}
+
+/* ── Wood / Rustic skin ── */
+body.theme-wood {
+  --bg: linear-gradient(135deg, #e9dac2 0%, #e0cdad 45%, #d8c19c 100%);
+  --orb1: rgba(150,100,55,0.10);
+  --orb2: rgba(175,130,80,0.12);
+  --orb3: rgba(140,110,70,0.10);
+  --text-strong: #463320;
+  --text-soft: #6b5236;
+  --text-muted: #9c8160;
+  --text-faint: #b29a78;
+  --bar-bg: rgba(255,248,236,0.50);
+  --bar-border: rgba(120,90,55,0.18);
+  --bar-text: #6b5236;
+  --bar-icon: #9c7d52;
+  --dock-bg: rgba(255,248,236,0.55);
+  --dock-border: rgba(120,90,55,0.22);
+  --dot: rgba(70,51,32,0.45);
+  --tooltip-bg: rgba(60,42,26,0.92);
+  --tooltip-text: #f3e6d2;
+  --panel-bg: rgba(247,238,224,0.97);
+  --overlay-bg: rgba(225,205,175,0.82);
+  --section: #9c8160;
+  --card-bg: rgba(255,250,240,0.60);
+  --card-border: rgba(120,90,55,0.16);
+  --row-border: rgba(120,90,55,0.12);
+  --row-hover: rgba(120,90,55,0.07);
+  --label: #463320;
+  --sub: #9c8160;
+  --accent: #b07a45;
+  --accent-strong: #97632f;
+  --toggle-off: #cdbca4;
+  --toggle-thumb: #fff8ee;
+  --seg-bg: rgba(120,90,55,0.14);
+  --seg-active-bg: #fff8ee;
+  --slider-track: #d8c6ab;
+  --titlebar-bg: #efe2cd;
+  --titlebar-border: #ddc9ad;
+  --appbody-bg: linear-gradient(180deg, #f7efe0 0%, #efe2cd 100%);
+}
+
+/* ── Slate / Grey skin (basic, masculine) ── */
+body.theme-grey {
+  --bg: linear-gradient(135deg, #e6e8ec 0%, #dcdfe5 45%, #e2e4e9 100%);
+  --orb1: rgba(90,105,125,0.08);
+  --orb2: rgba(110,120,140,0.10);
+  --orb3: rgba(100,115,140,0.10);
+  --text-strong: #353a42;
+  --text-soft: #545b66;
+  --text-muted: #8a929e;
+  --text-faint: #a6adb8;
+  --bar-bg: rgba(255,255,255,0.45);
+  --bar-border: rgba(90,100,115,0.16);
+  --bar-text: #545b66;
+  --bar-icon: #7c8694;
+  --dock-bg: rgba(255,255,255,0.50);
+  --dock-border: rgba(90,100,115,0.18);
+  --dot: rgba(53,58,66,0.45);
+  --tooltip-bg: rgba(45,50,58,0.92);
+  --tooltip-text: #eef0f3;
+  --panel-bg: rgba(250,251,252,0.97);
+  --overlay-bg: rgba(214,218,224,0.82);
+  --section: #8a929e;
+  --card-bg: rgba(255,255,255,0.60);
+  --card-border: rgba(90,100,115,0.14);
+  --row-border: rgba(90,100,115,0.10);
+  --row-hover: rgba(90,100,115,0.06);
+  --label: #353a42;
+  --sub: #8a929e;
+  --accent: #6b7787;
+  --accent-strong: #515c6b;
+  --toggle-off: #c8cdd4;
+  --toggle-thumb: #ffffff;
+  --seg-bg: rgba(90,100,115,0.12);
+  --seg-active-bg: #ffffff;
+  --slider-track: #d3d7dd;
+  --titlebar-bg: #eceef1;
+  --titlebar-border: #dcdfe5;
+  --appbody-bg: linear-gradient(180deg, #fafbfc 0%, #eceef1 100%);
+}
+
+/* ── Dark skin ── */
+body.theme-dark {
+  --bg: linear-gradient(135deg, #1e1a28 0%, #2a2535 45%, #1a1e2e 100%);
+  --orb1: rgba(120,60,200,0.08);
+  --orb2: rgba(160,80,140,0.08);
+  --orb3: rgba(100,120,180,0.10);
+  --text-strong: #d8cce0;
+  --text-soft: #a898b0;
+  --text-muted: #887898;
+  --text-faint: #6f6280;
+  --bar-bg: rgba(30,26,40,0.70);
+  --bar-border: rgba(255,255,255,0.08);
+  --bar-text: #a898b0;
+  --bar-icon: #8878a0;
+  --dock-bg: rgba(30,26,40,0.60);
+  --dock-border: rgba(255,255,255,0.08);
+  --dot: rgba(216,204,224,0.55);
+  --tooltip-bg: rgba(45,40,58,0.95);
+  --tooltip-text: #d8cce0;
+  --panel-bg: rgba(30,26,40,0.97);
+  --overlay-bg: rgba(20,17,28,0.78);
+  --section: #887898;
+  --card-bg: rgba(255,255,255,0.06);
+  --card-border: rgba(255,255,255,0.08);
+  --row-border: rgba(255,255,255,0.06);
+  --row-hover: rgba(255,255,255,0.05);
+  --label: #d8cce0;
+  --sub: #887898;
+  --accent: #c9a0e0;
+  --accent-strong: #b083e0;
+  --toggle-off: #4a4258;
+  --toggle-thumb: #e8e0f0;
+  --seg-bg: rgba(255,255,255,0.08);
+  --seg-active-bg: rgba(255,255,255,0.16);
+  --slider-track: #3a3448;
+  --titlebar-bg: #26222f;
+  --titlebar-border: #353040;
+  --appbody-bg: linear-gradient(180deg, #221e2c 0%, #1a1726 100%);
+}
