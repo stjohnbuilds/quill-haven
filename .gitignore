@@ -1,0 +1,12 @@
+# Claude Code hook logs
+.claude/hook-activity.log
+.claude/edit-log.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
