@@ -32,12 +32,12 @@
 
     /* ── Top bar ── */
     .top-bar {
-      height: 32px; display: flex; align-items: center; justify-content: center;
+      height: 32px; display: flex; align-items: center; justify-content: space-between;
       padding: 0 14px; z-index: 20; font-size: 12px; color: #6b5f6e; position: relative;
       background: rgba(255,255,255,0.35); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
       border-bottom: 1px solid rgba(255,255,255,0.4);
     }
-    .top-left { display: flex; align-items: center; gap: 8px; position: absolute; left: 14px; }
+    .top-left { display: flex; align-items: center; gap: 8px; }
     .update-btn {
       background: rgba(201,160,224,0.15); border: 1px solid rgba(201,160,224,0.3);
       border-radius: 6px; padding: 2px 10px; font-size: 10px; font-weight: 500;
@@ -56,7 +56,7 @@
     .top-icon { color: #a893b0; opacity: 0.7; display: flex; align-items: center; }
 
     /* Top bar app icons (hidden in dock mode) */
-    .top-apps { display: none; gap: 5px; align-items: center; margin-right: 4px; }
+    .top-apps { display: none; gap: 5px; align-items: center; position: absolute; left: 50%; transform: translateX(-50%); }
     body.top-mode .top-apps { display: flex; }
 
     .top-app {
@@ -303,19 +303,19 @@
 <header class="top-bar">
   <div class="top-left">
     <button class="update-btn" id="updateBtn" onclick="doUpdate()"><span class="update-dot"></span> Update available</button>
-    <!-- Tiny app icons for top-bar mode -->
-    <div class="top-apps" id="topApps">
-      <a href="#" class="top-app" data-app="dabble" data-name="Dabble Writer" onclick="openApp('dabble');return false;">
-        <div class="top-app-icon" style="background:linear-gradient(145deg,#ddd0f0,#ccbbe5);">
-          <svg width="11" height="11" viewBox="0 0 28 28" fill="none"><path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/></svg>
-        </div>
-      </a>
-      <a href="#" class="top-app" data-app="docs" data-name="Google Docs" onclick="openApp('docs');return false;">
-        <div class="top-app-icon" style="background:linear-gradient(145deg,#f5d0e5,#ebbad0);">
-          <svg width="11" height="11" viewBox="0 0 28 28" fill="none"><rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.8" opacity="0.9"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="14" x2="16" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/></svg>
-        </div>
-      </a>
-    </div>
+  </div>
+  <!-- Tiny app icons for top-bar mode (centered) -->
+  <div class="top-apps" id="topApps">
+    <a href="#" class="top-app" data-app="dabble" data-name="Dabble Writer" onclick="openApp('dabble');return false;">
+      <div class="top-app-icon" style="background:linear-gradient(145deg,#ddd0f0,#ccbbe5);">
+        <svg width="11" height="11" viewBox="0 0 28 28" fill="none"><path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/></svg>
+      </div>
+    </a>
+    <a href="#" class="top-app" data-app="docs" data-name="Google Docs" onclick="openApp('docs');return false;">
+      <div class="top-app-icon" style="background:linear-gradient(145deg,#f5d0e5,#ebbad0);">
+        <svg width="11" height="11" viewBox="0 0 28 28" fill="none"><rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.8" opacity="0.9"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="14" x2="16" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/></svg>
+      </div>
+    </a>
   </div>
   <div class="top-right">
     <span class="top-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg></span>
