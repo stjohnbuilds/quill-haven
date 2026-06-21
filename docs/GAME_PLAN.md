@@ -54,19 +54,20 @@ Marie's Chromebook is a room with one door. The door opens to a hallway with exa
 
 ```text
 QuillHaven/
-├── home-screen/
-│   └── index.html              THE home screen — single file, all CSS/JS embedded
-│                                 ├── Background: pastel purple-pink gradient + animated orbs
-│                                 ├── Top bar: Wi-Fi, battery, settings cog, date/time
-│                                 ├── Clock: centered time + greeting + date
-│                                 ├── Dock: frosted glass bar, centered, app icons
-│                                 ├── Top-bar mode: app icons centered in top bar (toggle in settings)
-│                                 ├── Settings overlay:
-│                                 │   ├── Settings card: Wi-Fi, Brightness, Night Light, Google Account, App Bar toggle
-│                                 │   ├── Apps card: per-app visibility toggles
-│                                 │   └── Clipboard History: last copied items, click to re-copy
-│                                 ├── App views: fullscreen iframe wrappers with traffic-light close buttons
-│                                 └── Update checker: fetches version.json from GitHub
+├── home-screen/                THE home screen (static HTML/CSS/JS, no build step)
+│   ├── index.html              structure only (top bar, clock, dock, settings)
+│   ├── shared/
+│   │   └── theme.css           the skins — colour variables, shared by EVERY page
+│   ├── css/
+│   │   └── home.css            home screen styles (layout + components)
+│   ├── js/
+│   │   └── home.js             home screen logic — apps (defined once), clock,
+│   │                             settings, themes, clipboard, Add App, update check
+│   └── apps/
+│       └── writing/            the built-in Local Writing app
+│           ├── index.html      editor structure
+│           ├── writing.css     editor styles (uses shared/theme.css)
+│           └── writing.js      editor + chapters + autosave
 │
 ├── boot/                        (TO BUILD) Linux boot sequence scripts
 │   ├── autologin.conf           auto-login config
@@ -82,6 +83,8 @@ QuillHaven/
 │
 ├── docs/
 │   ├── GAME_PLAN.md             (this file) source of truth for the whole project
+│   ├── CODE_HEALTH.md           file structure + code-health rules (current truth)
+│   ├── HANDOVER_TO_NEW_CHAT.md  bootstrap for the next AI session
 │   └── AI_ASSESSMENT_PROMPT.md  handover prompt for a fresh AI to audit everything
 │
 ├── version.json                 version number for update checker
