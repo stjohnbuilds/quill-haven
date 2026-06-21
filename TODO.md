@@ -1,17 +1,12 @@
 # TODO — Quill Haven
 
-## Fix now (what you just asked for)
-- [ ] Themes are broken — only Dark works, clicking the others does nothing
-- [ ] Remove the pastel themes (Blossom / Ocean / Sage) — too girly
-- [ ] Add a warm wood / rustic theme
-- [ ] Make themes re-skin EVERYTHING (dock, panels, clock, app windows) — not just tint the background
-- [ ] Night Light doesn't turn back off properly — fix the toggle
-- [ ] Bigger, prettier quill on the boot animation
-- [ ] Boot: "QuillHaven" types in, then "Your writing sanctuary" types in with a blinking cursor
-- [ ] Boot: add a little loading bar underneath
+## Next up (the boot animation)
+- [ ] Bigger, prettier quill on the boot screen
+- [ ] "QuillHaven" writes in, then "Your writing sanctuary" types in with a blinking cursor
+- [ ] Little loading bar underneath
 
 ## Fix soon (found in the assessment)
-- [ ] Save settings between restarts — brightness, dock/top mode, app on/off, clipboard (right now only theme saves)
+- [ ] Save the rest of the settings between restarts — brightness, dock/top mode, app on/off, clipboard (theme + night light already save)
 - [ ] The "Update available" button doesn't actually update — it reloads the old page
 - [ ] Bundle the boot font locally so it works without Wi-Fi
 - [ ] Dock tooltip shows on top of an open app (small visual glitch)
@@ -39,6 +34,9 @@
 - [x] Settings panel (open / close / X / click-outside / Escape)
 - [x] Clipboard history (within a session)
 - [x] App views with traffic-light close buttons
-- [x] Boot splash (first version — being upgraded)
-- [x] Theme picker (being reworked)
+- [x] Themes reworked into real skins — Purple (default), Wood, Slate, Dark (each re-colours the whole UI)
+- [x] Removed the girly pastel themes
+- [x] Night Light fixed — its own on/off toggle, warms the screen, reverts cleanly
+- [x] Theme + Night Light saved between restarts
+- [x] Boot splash (first version — being upgraded now)
 - [x] Update checker (the "check" part only)

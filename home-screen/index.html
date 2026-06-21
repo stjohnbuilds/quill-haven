@@ -26,7 +26,7 @@
 
     .boot-text {
       font-family: 'Great Vibes', cursive;
-      font-size: 72px; color: #6b5f6e; letter-spacing: 2px;
+      font-size: 80px; color: #6b5f6e; letter-spacing: 2px;
       clip-path: inset(0 100% 0 0);
       animation: writeOut 2s ease forwards 0.4s;
     }
@@ -36,22 +36,41 @@
     }
 
     .boot-quill {
-      position: absolute; right: -38px; bottom: 8px;
-      opacity: 0;
-      animation: quillAppear 0.5s ease forwards 2.2s;
+      position: absolute; right: -54px; bottom: 4px;
+      opacity: 0; transform-origin: bottom left;
+      filter: drop-shadow(0 3px 6px rgba(138,111,158,0.35));
+      animation: quillAppear 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards 2.05s;
     }
     @keyframes quillAppear {
-      0% { opacity: 0; transform: translateX(-8px) rotate(-10deg); }
-      100% { opacity: 1; transform: translateX(0) rotate(0deg); }
+      0% { opacity: 0; transform: translate(-10px,6px) rotate(-12deg) scale(0.85); }
+      100% { opacity: 1; transform: translate(0,0) rotate(0deg) scale(1); }
     }
 
     .boot-tagline {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 13px; color: #b0a0b8; letter-spacing: 3px; text-transform: uppercase;
-      margin-top: 16px; opacity: 0;
-      animation: tagFade 0.6s ease forwards 2.6s;
+      font-size: 13px; color: #a08fb8; letter-spacing: 3px; text-transform: uppercase;
+      margin-top: 18px; opacity: 0; min-height: 16px;
+      display: inline-flex; align-items: center;
+      animation: tagFade 0.4s ease forwards 2.5s;
     }
     @keyframes tagFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .boot-cursor {
+      display: inline-block; width: 2px; height: 14px; margin-left: 3px;
+      background: #9f78cf; animation: bootBlink 0.8s step-end infinite;
+    }
+    @keyframes bootBlink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+    .boot-loader {
+      width: 170px; height: 4px; border-radius: 4px; margin-top: 28px; overflow: hidden;
+      background: rgba(138,111,158,0.18); opacity: 0;
+      animation: tagFade 0.4s ease forwards 2.7s;
+    }
+    .boot-loader-fill {
+      width: 0; height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, #cba6e6, #9f78cf);
+      animation: loadFill 3.6s ease-in-out forwards 0.5s;
+    }
+    @keyframes loadFill { 0% { width: 0; } 100% { width: 100%; } }
 
     /* ───────────────────────────────────────────────
        THEME VARIABLES — default skin = Purple
@@ -518,14 +537,22 @@
 <div class="boot-splash" id="bootSplash">
   <div class="boot-text-wrap">
     <span class="boot-text">QuillHaven</span>
-    <svg class="boot-quill" width="30" height="30" viewBox="0 0 32 32" fill="none">
-      <path d="M26 2C22 6 18 12 14 18L12 24L10 28L12 26L16 22C20 16 24 10 28 4C28 3 27 2 26 2Z" fill="#b0a0b8" opacity="0.7"/>
-      <path d="M14 18L12 24L10 28" stroke="#8a6f9e" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-      <path d="M26 2C27 2 28 3 28 4" stroke="#8a6f9e" stroke-width="0.8" fill="none"/>
-      <line x1="10" y1="28" x2="9" y2="29" stroke="#8a6f9e" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
+    <svg class="boot-quill" width="56" height="56" viewBox="0 0 48 48" fill="none">
+      <path d="M41 7 C25 9 14 19 10 33 C9.4 35.2 9.6 37 11 38 C12.4 39.4 14.2 39.6 16.5 39 C30 35 39 24 41 7 Z" fill="url(#qfeather)"/>
+      <path d="M41 7 C28 16 18 27 11 38" stroke="#ffffff" stroke-width="1.1" opacity="0.5" stroke-linecap="round"/>
+      <path d="M35 13 L30 17 M30 16 L25 19 M25 21 L20 24 M21 26 L17 30" stroke="#ffffff" stroke-width="0.8" opacity="0.35" stroke-linecap="round"/>
+      <path d="M11 38 L7.5 42.5" stroke="#8a6f9e" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="7" cy="43" r="1" fill="#8a6f9e" opacity="0.7"/>
+      <defs>
+        <linearGradient id="qfeather" x1="10" y1="7" x2="41" y2="39" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#cba6e6"/>
+          <stop offset="1" stop-color="#9f78cf"/>
+        </linearGradient>
+      </defs>
     </svg>
   </div>
-  <div class="boot-tagline">Your writing sanctuary</div>
+  <div class="boot-tagline"><span id="bootType"></span><span class="boot-cursor"></span></div>
+  <div class="boot-loader"><div class="boot-loader-fill"></div></div>
 </div>
 
 <div class="orb orb-1"></div>
@@ -694,13 +721,34 @@
 
 <script>
 // ── Boot splash ──
-setTimeout(function() {
-  var splash = document.getElementById('bootSplash');
-  if (splash) {
-    splash.classList.add('fade-out');
-    setTimeout(function() { splash.remove(); }, 900);
+(function() {
+  var typeEl = document.getElementById('bootType');
+  var full = 'Your writing sanctuary';
+  // #frozen holds the final composed frame (for previewing the design)
+  if (location.hash === '#frozen') {
+    if (typeEl) typeEl.textContent = full;
+    var f = document.querySelector('.boot-loader-fill'); if (f) { f.style.animation = 'none'; f.style.width = '100%'; }
+    var t = document.querySelector('.boot-text'); if (t) { t.style.animation = 'none'; t.style.clipPath = 'inset(0 0 0 0)'; }
+    var q = document.querySelector('.boot-quill'); if (q) { q.style.animation = 'none'; q.style.opacity = '1'; q.style.transform = 'none'; }
+    var g = document.querySelector('.boot-tagline'); if (g) { g.style.animation = 'none'; g.style.opacity = '1'; }
+    return;
   }
-}, 3800);
+  var i = 0;
+  setTimeout(function startTyping() {
+    var iv = setInterval(function() {
+      i++;
+      if (typeEl) typeEl.textContent = full.slice(0, i);
+      if (i >= full.length) clearInterval(iv);
+    }, 62);
+  }, 2700);
+  setTimeout(function() {
+    var splash = document.getElementById('bootSplash');
+    if (splash) {
+      splash.classList.add('fade-out');
+      setTimeout(function() { splash.remove(); }, 900);
+    }
+  }, 4600);
+})();
 
 // ── Clock ──
 function updateClock() {
