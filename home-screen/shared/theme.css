@@ -48,18 +48,18 @@
   --slider-track: #e8e0ed;
   --titlebar-bg: #f5f2f7;
   --titlebar-border: #e8e0ed;
-  --appbody-bg: linear-gradient(180deg, #fdfdfe 0%, #f7f7f9 100%);
+  --appbody-bg: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
 }
 
 /* ── Wood / Rustic ──
    Same light look; just a faint warm tint + warm accent. */
 body.theme-wood {
-  --bg: linear-gradient(135deg, #f3f2f0 0%, #f5f4f1 45%, #f1f0ed 100%);
-  --orb1: rgba(120,115,105,0.05);
-  --orb2: rgba(130,123,112,0.05);
-  --orb3: rgba(122,118,110,0.05);
-  --accent: #86766c;
-  --accent-strong: #645850;
+  --bg: linear-gradient(135deg, #eff1f3 0%, #f1f3f5 45%, #edf0f2 100%);
+  --orb1: rgba(110,118,125,0.05);
+  --orb2: rgba(120,126,132,0.05);
+  --orb3: rgba(112,120,128,0.05);
+  --accent: #837b74;
+  --accent-strong: #615a54;
 }
 
 /* ── Slate / Grey ──

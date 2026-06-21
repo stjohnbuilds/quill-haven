@@ -53,7 +53,7 @@ var BUILTIN_APPS = [
   { id:'docs', name:'Google Docs', kind:'site', url:'https://docs.google.com',
     c1:'#f5d0e5', c2:'#ebbad0', vb:'0 0 28 28',
     icon:'<rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.4" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>' },
-  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=5',
+  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=6',
     c1:'#bfe3c4', c2:'#9ed0a8', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
     icon:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/><path d="M16 8 2 22" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/><path d="M17.5 15H9" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>' }
 ];
@@ -81,9 +81,9 @@ function isBuiltin(id) { return BUILTIN_APPS.some(function(a){ return a.id === i
 var currentTheme = 'purple';
 var THEME_APP_COLORS = {
   wood: {
-    docs:    ['#c7c0b6', '#afa698'],
-    writing: ['#bcc0b4', '#a3a895'],
-    dabble:  ['#c3bcb4', '#a99e92']
+    docs:    ['#c4c3c1', '#aaa9a6'],
+    writing: ['#bfc2bf', '#a6aaa4'],
+    dabble:  ['#c2c1c2', '#a7a4a4']
   },
   grey: {
     docs:    ['#c0d4ee', '#9fbce4'],
@@ -298,11 +298,30 @@ function addApp(name, url, c1, c2, icon, vb) {
 // Remove a user app or a default add-on (built-ins can't be removed).
 function removeApp(id) {
   if (isBuiltin(id)) return;
-  if (currentApp === id) goHome();
-  addons = addons.filter(function(a) { return a.id !== id; });
-  saveAddons(addons);
-  try { var m = JSON.parse(localStorage.getItem('qh-apps') || '{}'); delete m[id]; localStorage.setItem('qh-apps', JSON.stringify(m)); } catch(e) {}
-  renderApps();
+  var app = allApps().filter(function(a) { return a.id === id; })[0];
+  var nm = app ? app.name : 'this app';
+  showConfirm('Remove ' + nm + '?', 'It comes off your home screen. You can add it again later.', function() {
+    if (currentApp === id) goHome();
+    addons = addons.filter(function(a) { return a.id !== id; });
+    saveAddons(addons);
+    try { var m = JSON.parse(localStorage.getItem('qh-apps') || '{}'); delete m[id]; localStorage.setItem('qh-apps', JSON.stringify(m)); } catch(e) {}
+    renderApps();
+  });
+}
+
+// Small confirmation popup (used before removing an app)
+function showConfirm(title, msg, onYes) {
+  var ov = document.createElement('div');
+  ov.className = 'confirm-overlay';
+  ov.innerHTML = '<div class="confirm-box"><div class="confirm-title"></div><div class="confirm-msg"></div>'
+    + '<div class="confirm-actions"><button type="button" class="confirm-cancel">Cancel</button><button type="button" class="confirm-yes">Remove</button></div></div>';
+  ov.querySelector('.confirm-title').textContent = title;
+  ov.querySelector('.confirm-msg').textContent = msg;
+  function close() { ov.remove(); }
+  ov.addEventListener('click', function(e) { if (e.target === ov) close(); });
+  ov.querySelector('.confirm-cancel').addEventListener('click', close);
+  ov.querySelector('.confirm-yes').addEventListener('click', function() { close(); onYes(); });
+  document.body.appendChild(ov);
 }
 
 // ── Add-app form ──
