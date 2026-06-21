@@ -53,7 +53,7 @@ var BUILTIN_APPS = [
   { id:'docs', name:'Google Docs', kind:'site', url:'https://docs.google.com',
     c1:'#f5d0e5', c2:'#ebbad0', vb:'0 0 28 28',
     icon:'<rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.4" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>' },
-  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=4',
+  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=5',
     c1:'#bfe3c4', c2:'#9ed0a8', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
     icon:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/><path d="M16 8 2 22" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/><path d="M17.5 15H9" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>' }
 ];
@@ -437,7 +437,7 @@ function applyFilter() {
   var slider = document.querySelector('.brightness-slider');
   var b = slider ? slider.value : 100;
   var f = 'brightness(' + (b / 100) + ')';
-  if (currentTheme === 'purple' && hueDeg) f += ' hue-rotate(' + hueDeg + 'deg)';
+  if ((currentTheme === 'purple' || currentTheme === 'dark') && hueDeg) f += ' hue-rotate(' + hueDeg + 'deg)';
   if (nightOn) f += ' sepia(0.35) saturate(0.9) brightness(0.96)';
   document.body.style.filter = f;
 }
@@ -460,7 +460,7 @@ function setTheme(name) {
     b.classList.toggle('active', b.dataset.theme === name);
   });
   var hs = document.getElementById('hueSlider');
-  if (hs) hs.classList.toggle('show', name === 'purple');  // hue slider only for the colour theme
+  if (hs) hs.classList.toggle('show', name === 'purple' || name === 'dark');  // hue slider for the colour + dark themes
   applyFilter();
   try { localStorage.setItem('qh-theme', name); } catch(e) {}
 }
