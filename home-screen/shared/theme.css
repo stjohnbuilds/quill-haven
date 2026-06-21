@@ -13,10 +13,10 @@
 
 /* ── Default skin = Purple (the original light look) ── */
 :root {
-  --bg: linear-gradient(135deg, #ede0ff 0%, #f8e0f0 45%, #e4ecff 100%);
-  --orb1: rgba(183,103,255,0.10);
-  --orb2: rgba(210,139,181,0.12);
-  --orb3: rgba(198,212,229,0.15);
+  --bg: linear-gradient(135deg, #f6eeff 0%, #fcf3f8 45%, #f0f5ff 100%);
+  --orb1: rgba(183,103,255,0.07);
+  --orb2: rgba(210,139,181,0.08);
+  --orb3: rgba(198,212,229,0.10);
   --text-strong: #595254;
   --text-soft: #6b5f6e;
   --text-muted: #a893b0;
@@ -54,23 +54,23 @@
 /* ── Wood / Rustic ──
    Same light look; just a faint warm tint + warm accent. */
 body.theme-wood {
-  --bg: linear-gradient(135deg, #f3ece0 0%, #f6f1e7 45%, #efe8dc 100%);
-  --orb1: rgba(180,130,70,0.08);
-  --orb2: rgba(200,150,90,0.09);
-  --orb3: rgba(170,140,90,0.08);
-  --accent: #bd7f44;
-  --accent-strong: #9c6531;
+  --bg: linear-gradient(135deg, #f4efe8 0%, #f6f2ec 45%, #f1ebe3 100%);
+  --orb1: rgba(150,120,90,0.06);
+  --orb2: rgba(165,135,100,0.07);
+  --orb3: rgba(150,125,95,0.06);
+  --accent: #b5835a;
+  --accent-strong: #936238;
 }
 
 /* ── Slate / Grey ──
    Same light look; just a faint cool tint + slate accent. */
 body.theme-grey {
-  --bg: linear-gradient(135deg, #ebedf1 0%, #eef0f3 45%, #e8ebef 100%);
-  --orb1: rgba(90,105,125,0.07);
-  --orb2: rgba(110,120,140,0.08);
-  --orb3: rgba(100,115,140,0.08);
-  --accent: #7c8a9c;
-  --accent-strong: #5d6a7a;
+  --bg: linear-gradient(135deg, #eeeef0 0%, #f2f2f4 45%, #ececee 100%);
+  --orb1: rgba(120,120,130,0.06);
+  --orb2: rgba(130,130,140,0.07);
+  --orb3: rgba(120,122,132,0.06);
+  --accent: #8c919b;
+  --accent-strong: #6b7079;
 }
 
 /* ── Dark ── the one full dark mode (re-colours everything) ── */

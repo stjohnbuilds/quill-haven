@@ -55,7 +55,7 @@ var BUILTIN_APPS = [
     icon:'<rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.4" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>' },
   { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html',
     c1:'#bfe3c4', c2:'#9ed0a8', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
-    icon:'<path d="M19 5 C13 6 8 11 6.5 17 C6.2 18 6.8 18.8 7.8 18.5 C13 17 18 12 19 5 Z" fill="none" stroke="white" stroke-width="1.4" stroke-linejoin="round" opacity="0.92"/><path d="M19 5 C14.5 9 10.5 13 7.8 18.5" stroke="white" stroke-width="0.9" stroke-linecap="round" opacity="0.55"/><path d="M7.8 18.5 L5.5 21" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.9"/>' }
+    icon:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/><path d="M16 8 2 22" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/><path d="M17.5 15H9" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>' }
 ];
 
 // Add-ons ship by default but can be removed (and the user can add their own).

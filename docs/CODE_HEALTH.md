@@ -50,6 +50,20 @@ home-screen/
 - Optional later: `js/home.js` could be split into `home.js` + `apps.js` if it
   keeps growing. Not needed yet.
 
+## Deep-dive / full-scan checklist (for a tester or the next AI)
+
+Run all of these and report pass / fail with evidence:
+
+- [ ] **No duplicate functions** — `grep -oE "^function [a-zA-Z0-9_]+" home-screen/js/home.js | sort | uniq -d` returns nothing.
+- [ ] **No orphaned CSS** — every class defined in a `.css` file is used in HTML or JS.
+- [ ] **No dead markers** — no `TODO` / `FIXME` / `console.log` left in shipped code.
+- [ ] **No leftover hardcoded markup** that should come from the data-driven app list.
+- [ ] **One source of truth** — all colours live in `shared/theme.css`; every app is defined once in the `BUILTIN_APPS` / add-ons list in `home.js` (icon, colour, name pulled from there for dock, top bar, window, and settings).
+- [ ] **One job per file** — structure (HTML), looks (CSS), behaviour (JS) kept apart; no giant blob.
+- [ ] **No frameworks, no build step**; `index.html` is structure only.
+- [ ] **Themes** — every skin keeps the light background + white panels (Dark excepted); only a faint tint + the accent colour change.
+- [ ] **Works after reload** — theme, night light, brightness, app bar, app on/off, clipboard, and Local Writing content all persist.
+
 ## How the Local Writing app fits
 
 - Lives in `apps/writing/` as three small files.

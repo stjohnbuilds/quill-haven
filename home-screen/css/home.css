@@ -8,7 +8,7 @@
 /* ── Boot splash ── */
 .boot-splash {
   position: fixed; inset: 0; z-index: 9999;
-  background: linear-gradient(135deg, #ede0ff 0%, #f8e0f0 45%, #e4ecff 100%);
+  background: linear-gradient(135deg, #f6eeff 0%, #fcf3f8 45%, #f0f5ff 100%);
   display: flex; align-items: center; justify-content: center;
   flex-direction: column;
   transition: opacity 0.8s ease;
@@ -29,7 +29,7 @@
 @keyframes bootFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
 .boot-quill {
-  position: absolute; right: -50px; bottom: 12px;
+  position: absolute; right: -58px; bottom: 14px;
   opacity: 0;
   animation: bootFade 0.9s ease forwards 1s;
 }
@@ -286,6 +286,7 @@ body.top-mode .dock { display: none; }
 .settings-row-icon {
   width: 28px; height: 28px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: var(--accent);
 }
 .settings-row-text { flex: 1; min-width: 0; }
 .settings-row-label { font-size: 13px; color: var(--label); font-weight: 500; }
