@@ -1,16 +1,19 @@
 # TODO — Quill Haven
 
-## Next up (the boot animation)
-- [ ] Bigger, prettier quill on the boot screen
-- [ ] "QuillHaven" writes in, then "Your writing sanctuary" types in with a blinking cursor
-- [ ] Little loading bar underneath
+## Building now
+- [ ] Local Writing app — its own files under `apps/writing/` (not jammed into
+      the home screen). EB Garamond editor, small format toolbar, chapters
+      sidebar, autosave to the device, word count, matches the active theme.
+      Keep v1 simple.
+- [ ] Code-health pass — keep the whole project cleanly structured, no big
+      blobs of code (see `docs/CODE_HEALTH.md`). First step: move the theme
+      colours into `shared/theme.css` so the writing app can share them.
 
 ## Fix soon (found in the assessment)
 - [ ] Bundle the boot font locally so it works without Wi-Fi
 - [ ] Dock tooltip shows on top of an open app (small visual glitch)
 
 ## Build next (the big features)
-- [ ] Local Writing app — built-in, green icon, "Saves to device, not the cloud", matches the theme
 - [ ] Add App button in settings (paste URL, name, pick colour)
 - [ ] Drag to reorder apps (grip handle on each row, order saved)
 - [ ] Make Dabble an add-on — defaults become Google Docs + Local Writing
