@@ -9,10 +9,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="shared/theme.css?v=6">
-  <link rel="stylesheet" href="css/home.css?v=6">
+  <link rel="stylesheet" href="shared/theme.css?v=7">
+  <link rel="stylesheet" href="css/home.css?v=7">
 </head>
 <body>
+
+<!-- Apply the saved theme immediately so the boot splash matches it (no flash) -->
+<script>(function(){try{var t=localStorage.getItem('qh-theme');if(t&&t!=='purple')document.body.classList.add('theme-'+t);}catch(e){}})();</script>
 
 <!-- ── Boot splash ── -->
 <div class="boot-splash" id="bootSplash">
@@ -152,6 +155,6 @@
 
 <div class="clipboard-copied" id="clipToast">Copied to clipboard</div>
 
-<script src="js/home.js?v=6"></script>
+<script src="js/home.js?v=7"></script>
 </body>
 </html>

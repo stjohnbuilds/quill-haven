@@ -54,12 +54,12 @@
 /* ── Wood / Rustic ──
    Same light look; just a faint warm tint + warm accent. */
 body.theme-wood {
-  --bg: linear-gradient(135deg, #eff1f3 0%, #f1f3f5 45%, #edf0f2 100%);
-  --orb1: rgba(110,118,125,0.05);
-  --orb2: rgba(120,126,132,0.05);
-  --orb3: rgba(112,120,128,0.05);
-  --accent: #837b74;
-  --accent-strong: #615a54;
+  --bg: linear-gradient(135deg, #f1f0ee 0%, #f3f2f0 45%, #efeeeb 100%);
+  --orb1: rgba(140,128,112,0.05);
+  --orb2: rgba(150,135,118,0.05);
+  --orb3: rgba(142,130,114,0.05);
+  --accent: #897e72;
+  --accent-strong: #675e54;
 }
 
 /* ── Slate / Grey ──
