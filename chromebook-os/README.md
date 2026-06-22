@@ -1,21 +1,24 @@
-# Chromebook OS packages
+# Chromebook setup
 
-Two Chromebooks, two different setups:
+Two folders, one for each Chromebook:
 
-## `arm-chromeos/` — for the Acer Spin 311 (the one you have)
+## `Setup This Chromebook/`
 
-That Chromebook has an ARM chip, so we **can't** wipe ChromeOS off it.
-This package makes it pretend to be a Quill Haven device: install
-Quill Haven as an app, set it to open at login, hide the shelf, remove
-everything else. As close to "its own OS" as we can get without
+For the Chromebook you have **right now**. No USB needed — everything
+happens through Chrome on the Chromebook itself. Sign in → Quill Haven
+opens. As close to "its own operating system" as we can get without
 reformatting.
 
-→ Open `arm-chromeos/SETUP.md` and follow the steps.
+→ Open `Setup This Chromebook/SETUP.md` and follow the steps.
 
-## `intel-linux/` — for the Gateway Chromebook 311 (when it arrives)
+## `Reformat OS/`
 
-That one has an Intel chip, so we **can** wipe ChromeOS and put a real
-Linux OS on it that boots straight into Quill Haven. No login screen,
-no Chrome underneath — the real thing.
+For the **other Chromebook** (the one being delivered). That one we CAN
+reformat — wipe ChromeOS off completely, install a real custom operating
+system that boots straight into Quill Haven. No sign-in screen, no
+Chrome underneath, the real thing.
 
-This package will be built once you have the Gateway in your hands.
+You'll need a **16GB USB stick** and about an hour. Don't try it alone
+— open a chat with Claude and walk through it together.
+
+→ Open `Reformat OS/SETUP.md` and follow the steps.
