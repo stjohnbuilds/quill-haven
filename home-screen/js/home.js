@@ -224,7 +224,7 @@ var BUILTIN_APPS = [
   { id:'docs', name:'Google Docs', kind:'site', url:'https://docs.google.com',
     c1:'#f7cfe6', c2:'#eeb1cf', vb:'0 0 28 28',
     icon:'<rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.4" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>' },
-  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=19',
+  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=20',
     c1:'#c2e8c9', c2:'#97d6a4', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
     icon:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/><path d="M16 8 2 22" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/><path d="M17.5 15H9" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>' },
   { id:'files', name:'Files', kind:'local', src:'apps/files/index.html?v=6',
@@ -779,21 +779,127 @@ function updateStorage() {
   }
 }
 
-// ── Google Drive (UI only — actual sign-in needs a Cloud project setup) ──
-function driveState() { try { return localStorage.getItem('qh-drive') || 'unconnected'; } catch(e) { return 'unconnected'; } }
+// ── Google Drive ──
+// Setup is in two parts:
+//   (1) Owner pastes a Google OAuth Client ID once (stored in qh-drive-client).
+//       Get one from console.cloud.google.com -> Create OAuth client (Web).
+//   (2) User clicks "Sign in with Google" — token cached in memory + sessionStorage.
+// Without a Client ID the framework stays inactive but visible. Other code calls
+// QHDrive.requireConnection() to block uploads until the chain is set up.
+window.QHDrive = (function () {
+  var GIS_URL = 'https://accounts.google.com/gsi/client';
+  var SCOPE = 'https://www.googleapis.com/auth/drive.file';
+  var tokenClient = null, gisReady = false, gisLoading = null;
+  function clientId() { try { return localStorage.getItem('qh-drive-client') || ''; } catch(e) { return ''; } }
+  function setClientId(v) { try { v ? localStorage.setItem('qh-drive-client', v) : localStorage.removeItem('qh-drive-client'); } catch(e) {} }
+  function getToken() { try { var raw = sessionStorage.getItem('qh-drive-token'); return raw ? JSON.parse(raw) : null; } catch(e) { return null; } }
+  function setToken(t) { try { t ? sessionStorage.setItem('qh-drive-token', JSON.stringify(t)) : sessionStorage.removeItem('qh-drive-token'); } catch(e) {} }
+  function getEmail() { try { return localStorage.getItem('qh-drive-email') || ''; } catch(e) { return ''; } }
+  function setEmail(v) { try { v ? localStorage.setItem('qh-drive-email', v) : localStorage.removeItem('qh-drive-email'); } catch(e) {} }
+  function isSignedIn() { var t = getToken(); return !!(t && t.access_token && t.expires_at && t.expires_at > Date.now()); }
+  function loadGIS() {
+    if (gisReady) return Promise.resolve();
+    if (gisLoading) return gisLoading;
+    gisLoading = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = GIS_URL; s.async = true; s.defer = true;
+      s.onload = function () { gisReady = true; resolve(); };
+      s.onerror = function () { reject(new Error('Couldn\'t load Google sign-in. Check your internet.')); };
+      document.head.appendChild(s);
+    });
+    return gisLoading;
+  }
+  function ensureTokenClient() {
+    var cid = clientId();
+    if (!cid) return Promise.reject(new Error('Paste your Google OAuth Client ID in Settings first.'));
+    return loadGIS().then(function () {
+      if (tokenClient) return tokenClient;
+      tokenClient = window.google.accounts.oauth2.initTokenClient({
+        client_id: cid, scope: SCOPE, callback: function () {}
+      });
+      return tokenClient;
+    });
+  }
+  function signIn() {
+    return ensureTokenClient().then(function (tc) {
+      return new Promise(function (resolve, reject) {
+        tc.callback = function (resp) {
+          if (resp.error) { reject(resp); return; }
+          var t = { access_token: resp.access_token, expires_at: Date.now() + (resp.expires_in - 60) * 1000 };
+          setToken(t);
+          // Fetch the user's email for display (drive.file scope doesn't include profile,
+          // so use the userinfo endpoint with the access token)
+          fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + t.access_token } })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (info) { if (info && info.email) setEmail(info.email); resolve(t); })
+            .catch(function () { resolve(t); });
+        };
+        tc.requestAccessToken({ prompt: getEmail() ? '' : 'consent' });
+      });
+    });
+  }
+  function signOut() {
+    var t = getToken();
+    if (t && t.access_token && window.google && window.google.accounts && window.google.accounts.oauth2) {
+      try { window.google.accounts.oauth2.revoke(t.access_token, function () {}); } catch (e) {}
+    }
+    setToken(null); setEmail('');
+  }
+  function uploadFile(name, blob, mimeType) {
+    if (!isSignedIn()) return signIn().then(function () { return uploadFile(name, blob, mimeType); });
+    var t = getToken();
+    var metadata = { name: name, mimeType: mimeType || blob.type || 'application/octet-stream' };
+    var form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', blob);
+    return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + t.access_token }, body: form
+    }).then(function (r) {
+      if (r.status === 401) { setToken(null); throw new Error('Drive session expired — sign in again.'); }
+      if (!r.ok) return r.text().then(function (txt) { throw new Error('Drive upload failed: ' + (txt || r.status)); });
+      return r.json();
+    });
+  }
+  return {
+    hasClientId: function () { return !!clientId(); },
+    clientId: clientId, setClientId: setClientId,
+    isSignedIn: isSignedIn, signIn: signIn, signOut: signOut,
+    email: getEmail, uploadFile: uploadFile
+  };
+})();
+function driveState() {
+  if (!window.QHDrive) return 'unconnected';
+  if (!QHDrive.hasClientId()) return 'no-client-id';
+  if (!QHDrive.isSignedIn()) return 'signed-out';
+  return 'connected';
+}
 function syncDriveRow() {
   var sub = document.getElementById('driveSub');
   if (!sub) return;
   var st = driveState();
-  if (st === 'connected') sub.textContent = 'Connected — your work backs up to Drive';
+  if (st === 'connected') sub.textContent = 'Connected as ' + (QHDrive.email() || 'Google') + ' — back up your writing';
+  else if (st === 'signed-out') sub.textContent = 'Ready — tap to sign in to Google';
   else sub.textContent = 'Not connected — back up your writing';
 }
 function openDriveConnect() {
   if (!window.qhConfirm) return;
+  var st = driveState();
+  if (st === 'no-client-id') {
+    var cid = window.prompt('Paste your Google OAuth Client ID (looks like 1234-abcd.apps.googleusercontent.com).\n\nDon\'t have one? Open docs/DRIVE_SETUP.md for the 10-minute setup.', '');
+    if (cid && cid.trim()) { QHDrive.setClientId(cid.trim()); syncDriveRow(); openDriveConnect(); }
+    return;
+  }
+  if (st === 'signed-out') {
+    QHDrive.signIn().then(syncDriveRow).catch(function (err) {
+      window.qhConfirm({ title: 'Sign-in didn\'t work', message: String(err && (err.message || err.error_description) || err), confirmText: 'OK' });
+    });
+    return;
+  }
+  // Connected — offer Sign out / Disconnect (forget Client ID too)
   window.qhConfirm({
-    title: 'Connect Google Drive',
-    message: 'Saving to Drive needs a one-time Google sign-in. The Connect button isn’t wired up yet — once it is, signing in here will let the writing app back up your manuscripts off-device.',
-    confirmText: 'OK'
+    title: 'Google Drive connected', message: 'Signed in as ' + (QHDrive.email() || 'your Google account') + '. Sign out keeps the Client ID; Disconnect forgets it too.',
+    confirmText: 'Sign out', cancelText: 'Close',
+    onConfirm: function () { QHDrive.signOut(); syncDriveRow(); }
   });
 }
 

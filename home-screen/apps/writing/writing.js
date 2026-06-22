@@ -1031,13 +1031,28 @@
     }
   }
   function doDownloadDrive() {
-    if (window.qhConfirm) {
-      window.qhConfirm({
+    var QHDrive = (window.parent && window.parent !== window && window.parent.QHDrive) || window.QHDrive || null;
+    if (!QHDrive) {
+      if (window.qhConfirm) window.qhConfirm({ title: 'Drive isn\'t available here', message: 'Open the writing app from inside Quill Haven (the home screen) so it can reach the Drive setup.', confirmText: 'OK' });
+      return;
+    }
+    if (!QHDrive.hasClientId()) {
+      if (window.qhConfirm) window.qhConfirm({
         title: 'Connect Google Drive first',
-        message: 'Saving to Drive needs a one-time Google sign-in. Set it up in Settings > Google Drive when ready. Until then, use "This book" or "Full backup".',
+        message: 'Open the home screen, tap the cog, find Google Drive, and paste your OAuth Client ID. One-time setup — see docs/DRIVE_SETUP.md for the steps. Then come back and try Drive again.',
         confirmText: 'OK'
       });
+      return;
     }
+    var blob = generateFullBackupZip();
+    var when = new Date();
+    var stamp = when.getFullYear() + '-' + String(when.getMonth() + 1).padStart(2, '0') + '-' + String(when.getDate()).padStart(2, '0') + '_' + String(when.getHours()).padStart(2, '0') + String(when.getMinutes()).padStart(2, '0');
+    var name = 'quill-haven-backup-' + stamp + '.zip';
+    QHDrive.uploadFile(name, blob, 'application/zip').then(function (file) {
+      if (window.qhConfirm) window.qhConfirm({ title: 'Saved to Drive', message: '"' + (file.name || name) + '" is now in your Google Drive.', confirmText: 'OK' });
+    }).catch(function (err) {
+      if (window.qhConfirm) window.qhConfirm({ title: 'Drive save failed', message: String(err && err.message || err), confirmText: 'OK' });
+    });
   }
   // Export a single note as its own .rtf manuscript
   function generateNoteRtf(note) {
