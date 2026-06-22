@@ -33,11 +33,11 @@ TODO.md → this file.
 ## GOTCHAS THAT WILL BITE YOU
 
 1. **CACHING — bump `?v=N` on EVERY CSS/JS change.** Marie's browser caches hard;
-   "nothing happened" = stale cache. Locations and CURRENT versions:
-   - `index.html`: theme.css **?v=21**, home.css / home.js at **?v=22**, confirm.js **?v=2**
-   - `js/home.js` app srcs: `apps/writing/index.html?v=17`, `apps/files/index.html?v=4`
-   - `apps/writing/index.html`: theme/writing.css/writing.js at **?v=16**, confirm.js **?v=2**
-   - `apps/files/index.html`: theme **?v=2**, files.css **?v=3**, files.js **?v=4**, confirm.js **?v=2**
+   "nothing happened" = stale cache. Locations and CURRENT versions (2026-06-22):
+   - `index.html`: theme.css **?v=21**, home.css **?v=24**, home.js **?v=24**, confirm.js **?v=2**
+   - `js/home.js` iframe srcs: `apps/writing/index.html?v=18`, `apps/files/index.html?v=5`
+   - `apps/writing/index.html`: theme **?v=16**, writing.css **?v=18**, writing.js **?v=18**, confirm.js **?v=2**
+   - `apps/files/index.html`: theme **?v=2**, files.css **?v=4**, files.js **?v=5**, confirm.js **?v=2**
    When you change a shared file (theme.css or confirm.js), bump it in ALL pages
    that link it, and bump the iframe `src` in home.js so the app window reloads.
 2. **Preview throttles background timers** → the boot splash can "hang" in
@@ -91,36 +91,58 @@ TODO.md → this file.
 - Bug sweep done: destructive popups focus Cancel (no accidental Enter-delete);
   data-URL backgrounds quoted; picture-save warns when storage is full.
 
-## DONE — "Move the background PICKER into Settings" ✅ (finishing batch #1, 2026-06-21)
+## DONE — finishing batch (2026-06-22) ✅
 
-Built + verified in preview. The "Background" row in Settings is now always
-visible with a thumbnail strip (Default tile + one tile per Files picture, tap to
-set, active tile = accent ring). Fill/Fit + Dim show only once a picture is set;
-the Default tile clears it (old "Remove background" button removed). Files →
-Pictures lost its "Set as background" buttons + Default card (now Add + Delete
-only, a "Background ·" tag on the current one, header hint "Set your background in
-Settings."). `setBg` + `renderBgGallery` added in home.js; `qh-files` added to the
-storage listener so newly-added pictures appear live. Caches bumped:
-home.css ?v=22, home.js ?v=22, files iframe src ?v=4, files.css ?v=3, files.js ?v=4.
+All seven items from `docs/FINISHING_BATCH.md` shipped + verified in preview:
+1. Background picker → Settings (already done).
+2. **Download → "This device" / "Google Drive"** with a real RTF manuscript
+   exporter (Times New Roman 12pt, double-spaced, title page, chapters on
+   new pages, first-line paragraph indents that go flush after every
+   heading, strips highlights, escapes Unicode). Saves a copy into Files →
+   Documents alongside the browser download.
+3. **Trash + undo** for the writing app — soft-delete with 6-second undo
+   toast, third "Trash" tab that appears once anything's in it; restore vs
+   Delete-forever; orphan items restore as a Note rather than vanishing.
+4. **+ Chapter / Part** — Project's `+` opens a tiny menu. Parts add an
+   optional `Project → Part → Chapter → Scene` level; chapter numbering
+   stays sequential; parts get their own heading page in the RTF.
+5. **Files folders + drag + rename** — sub-folders in Documents/Pictures,
+   drag files between them, rename anything. Folder deletes go through
+   Trash with restore.
+6. **Google Drive UI** — honest "Connect Drive" row in Settings + matching
+   "Connect first" message from Download → Drive. **Actual OAuth still
+   needs a Google Cloud project setup (Marie's call).**
+7. **Home polish** — live Wi-Fi (`navigator.onLine`), live battery
+   (`navigator.getBattery`), boot loader driven by real load events,
+   Region/timezone picker, Add App refuses distraction domains.
 
-## DO NEXT — finishing batch #2: Download → "This device" / "Google Drive"
+Also new: **Windows kiosk package** at `chromebook-os/Windows/SETUP.md` +
+`setup-windows.ps1` at the repo root. Three device paths now covered
+(Windows / Not Formattable / Formattable).
 
-- **Download button → "This device" / "Google Drive"** + manuscript export (RTF,
-  no library; first-line indent rules). Lands a copy in Files → Documents. (Study
-  Typing & Tomes export, READ-ONLY.) ← highest value next.
-- **Trash + undo for the writing app** (soft-delete projects/notes, restore).
-- **Save to Google Drive** (the real off-device backup).
-- **Files v2 basics**: make folders, drag files between folders, rename files.
-- **"+" → Chapter or Part** (needs Marie's steer: is a Part above Chapters, or
-  just another word for a Scene? T&T groups chapters under "Volumes" = Parts).
-- **Home polish**: live Wi-Fi/battery, real-progress loading bar, Region/timezone
-  setting, ban distraction sites in Add App.
-- **THE DEVICE HALF (the big one)**: boot straight into Quill Haven (kiosk),
-  lockdown, USB installer, README. This is what makes it a real device (~5% done).
-- Someday: AI spell checker in the writing app.
+## DO NEXT — the device half (the BIG remaining chunk)
 
-Rough status: **~60% overall** — the screen + apps (what Marie uses daily) is ~80%
-done; the device-install half is barely started.
+- **One-step USB image** for the Formattable Chromebook path — current
+  Reformat OS guide is "install Linux Mint, then run our script", which
+  works but is multi-step. Bake everything into a custom ISO so it's just
+  "boot from USB → wait → done".
+- **Real Drive sync** — wire up the OAuth flow once Marie sets up a
+  Google Cloud project + client ID. Until then the UI is honest about
+  needing setup.
+- **True site allowlist on Windows** — Edge URL allowlist via registry
+  policy (the kiosk only enforces fullscreen, not URL whitelisting).
+- **True site allowlist on Linux** — Chromium managed policy in
+  `/etc/chromium/policies/managed/` — that's the proper wall. Currently
+  `setup.sh` only does the kiosk launcher.
+- **Family Link path for ChromeOS** — for the Not Formattable Chromebook,
+  the real lockdown story is a managed child account; doc'd but not
+  scripted.
+- **Someday:** AI spell checker in the writing app.
+
+Rough status: **~75% overall.** The app side (what Marie uses daily) is
+~95% done. The device-install half is ~30% done — written guides for all
+three device paths exist, plus shell + PowerShell installers; the
+one-step USB image and the real lockdown policies are what's left.
 
 ## MARIE'S STYLE / WATCH-OUTS
 

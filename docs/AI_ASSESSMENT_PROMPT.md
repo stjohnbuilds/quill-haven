@@ -1,228 +1,173 @@
 # Quill Haven — Full Assessment Prompt
 
-Copy this entire file into a fresh AI chat. Tell the AI to follow the rules exactly. This is a thorough top-to-bottom check of the entire Quill Haven project.
+Copy this entire file into a fresh AI chat. Tell the AI to follow the rules
+exactly. This is a top-to-bottom check of the entire Quill Haven project.
 
 ---
 
 ## Who you're reporting to
 
-Marie. Non-coder. She'll READ your report. Use plain English in the summary and the recommended-actions list. Structured detail (file paths, line numbers, code snippets) is fine inside sections, but the **summary at the top** must be readable by someone who doesn't code.
-
-## The app
-
-**Quill Haven** — a custom Linux-based OS for an Acer Chromebook Spin 311. When it boots, it shows a clean home screen with ONLY writing apps (currently Dabble Writer and Google Docs). Nothing else — no browser, no settings to wander into, no apps. Locked by design.
-
-- **Project folder:** `/Users/mariemackay/Dev/QuillHaven`
-- **GitHub repo:** `https://github.com/stjohnbuilds/quill-haven`
-- **Home screen:** `home-screen/index.html` (static HTML/CSS/JS, single file, no build step)
-- **Preview:** `python3 -m http.server 8081 -d home-screen` then open `http://localhost:8081`
-- **Design:** pastel purple-pink background, frosted glass dock/panels, animated orbs
+Marie. Non-coder. She'll READ your report. Use plain English in the summary
+and the recommended-actions list. Structured detail (file paths, line
+numbers) is fine inside sections, but the **summary at the top** must be
+readable by someone who doesn't code.
 
 ## The job
 
-A **top-to-bottom assessment** of everything in this project. Rate each area. Find every bug, gap, and rough edge. **Do not fix anything.** Just report.
+A top-to-bottom assessment of everything in this project. Rate each area.
+Find every bug, gap, and rough edge. **Do not fix anything.** Just report.
+
+## What Quill Haven is (one paragraph)
+
+Quill Haven is a writing-only operating system. It ships as a static
+HTML/CSS/JS "home screen" + two built-in apps (Local Writing, Files) that
+together feel like a real OS. The device side wraps that home screen in a
+fullscreen browser (Chromium kiosk on Linux, Edge kiosk on Windows, or PWA
+on locked-down ChromeOS) so the device, on power-on, opens straight into
+the home screen and nothing else.
 
 ---
 
 ## READ THESE FILES FIRST (in order)
 
-1. `CLAUDE.md` — project rules and context
-2. `docs/GAME_PLAN.md` — the full game plan with app tree, goals, and design language
-3. `TODO.md` — what's done and what's left
-4. `home-screen/index.html` — the ENTIRE home screen (read the whole file, it's one file)
+You MUST read these before doing the checklist below.
+
+1. `CLAUDE.md` — project rules.
+2. `docs/GAME_PLAN.md` — **source of truth.** App goals, full file tree,
+   feature breakdown, design language, version history.
+3. `docs/CODE_HEALTH.md` — code rules + deep-dive checklist. This file's
+   checklist IS the technical health audit — run it.
+4. `TODO.md` — what's done and what's left, with status.
+5. `docs/HANDOVER_TO_NEW_CHAT.md` — gotchas, cache-version map, current
+   state notes.
+6. `chromebook-os/README.md` — the three device-install paths
+   (Windows / Not Formattable / Formattable).
+7. `home-screen/index.html`, `home-screen/js/home.js`,
+   `home-screen/apps/writing/writing.js`, `home-screen/apps/files/files.js`
+   — read each one fully. They're small enough.
+
+If anything in those files contradicts anything below, the files are
+authoritative — flag the contradiction as a finding.
 
 ---
 
-## Section A — Visual & Design Check
+## How to preview
 
-Open the home screen in a browser preview (`python3 -m http.server 8081 -d home-screen`).
+A preview server is configured in `.claude/launch.json`. From this project
+directory, start it however your harness exposes it (typically a
+preview/dev-server tool); the home screen lives on port 8081. The boot
+splash throttles in some preview environments — append `#frozen` to the
+URL to see the final composed boot frame without waiting.
 
-### A1. Home screen (default state)
-
-Check and rate each:
-
-- [ ] Background gradient loads correctly (pastel purple-pink)
-- [ ] Animated orbs visible and moving slowly
-- [ ] Top bar: Wi-Fi icon, battery icon, settings cog, date/time — all visible
-- [ ] Date/time updates live (watch for 10+ seconds)
-- [ ] Clock area: large time, greeting matches time of day, correct date
-- [ ] Dock: frosted glass bar at bottom, centered
-- [ ] Dock: exactly 2 icons — Dabble (lavender, LEFT) and Google Docs (pink, RIGHT)
-- [ ] Dock: hover shows white tooltip with app name
-- [ ] Dock: hover animation is gentle (not aggressive bounce)
-- [ ] No extra apps showing (T&T should NOT be in dock)
-- [ ] Footer visible at bottom of settings: "Quill Haven v1.0 🌸"
-- [ ] Overall feel: modern, calm, pretty — not chunky or school-laptop
-
-### A2. Settings panel
-
-- [ ] Settings cog in top bar opens settings panel
-- [ ] Settings panel closes with X button
-- [ ] Settings panel closes with click outside
-- [ ] Wi-Fi row shows "Connected" (display only)
-- [ ] Brightness slider works (screen gets darker/brighter)
-- [ ] Night Light toggle works (warm sepia tint)
-- [ ] Google Account row exists with "Sign in for Docs"
-- [ ] App Bar toggle: "Dock" and "Top" buttons
-- [ ] Switching to "Top" hides dock, shows icons centered in top bar
-- [ ] Switching back to "Dock" shows dock again, hides top icons
-- [ ] Apps section: only Dabble Writer and Google Docs listed
-- [ ] Apps section: Dabble first (lavender mini icon), Docs second (pink mini icon)
-- [ ] App toggles work — turning off an app hides it from dock/top bar
-- [ ] Clipboard History section exists (empty when no copies made)
-
-### A3. App views
-
-- [ ] Clicking Dabble icon opens a fullscreen overlay
-- [ ] Dabble overlay has traffic-light close buttons (red/yellow/green)
-- [ ] Red button closes the overlay and returns to home screen
-- [ ] Clicking Google Docs icon opens a fullscreen overlay
-- [ ] Docs overlay has traffic-light close buttons
-- [ ] Red button closes and returns to home screen
-- [ ] Can open one app, close it, open the other — no glitches
-
-### A4. Responsiveness
-
-- [ ] Resize browser to phone size (375px wide) — does it still look decent?
-- [ ] Resize to tablet (768px) — dock still centered?
-- [ ] Resize to wide desktop (1920px) — nothing breaks?
-- [ ] The Chromebook screen is 11.6" / 1366x768 — does it look right at that size?
+If you can't run a preview server, say so plainly under "What I couldn't
+test" — don't guess what it looks like.
 
 ---
 
-## Section B — Code Quality
+## The assessment
 
-Read `home-screen/index.html` line by line.
+### A. Visual & Design Check
 
-### B1. HTML structure
+Open the home screen in the preview and walk the **24-point Usability +
+Interface check from `CLAUDE.md`** (the global rules file in the user's
+home directory; if your harness doesn't expose it, the 12 Usability + 13
+Interface points are also reproduced in many Marie-side bibles — apply
+the spirit: every interface finding must name a SPECIFIC element).
 
-- [ ] Valid HTML5 doctype and structure
-- [ ] All elements properly closed
-- [ ] No orphan elements (floating divs, buttons with no purpose)
-- [ ] IDs are unique (no duplicate IDs)
-- [ ] Semantic HTML where appropriate (nav, header, main, etc.)
+Plus check each of these on the home screen + each app:
 
-### B2. CSS quality
+- Boot splash fades cleanly (loading bar reaches 100% by `window load`).
+- Top bar: live Wi-Fi opacity, live battery fill width, clock + date.
+- Greeting matches local time (verify with the Region picker in Settings).
+- Dock vs Top mode toggle works; switching persists.
+- App icons: Google Docs, Local Writing, Files, Dabble (in that order in
+  the dock). Hover tooltips. Right-click → Restart / Close.
+- Settings panel: Wi-Fi (live), Brightness, Theme (4 skins) + hue slider,
+  Night Light, Google Account link, **Google Drive** (honest "not
+  connected" state), App Bar Dock/Top toggle, Storage bar, **Region**
+  (timezone), **Background** picker (always visible, with thumb strip),
+  apps list (drag handle + on/off + remove), Add App, Clipboard history.
+- All four skins (Purple / Wood / Slate / Dark) work end-to-end; the
+  writing app and files app pick up the same skin via the `qh-theme`
+  storage event.
+- Local Writing: Notes / Projects / Trash tabs; quill side panel
+  collapses to a faded quill; faint edge-collapse arrow halfway down the
+  panel; download icon top-right in the side; pill toolbar (B / I / U /
+  S / highlight); centred page; word count; "Saved".
+- Writing: `+` on a project opens **Chapter / Part** menu; Parts create
+  a `Project → Part → Chapter → Scene` level; chapter numbering stays
+  sequential across top-level + parts.
+- Writing: delete a scene / chapter / part / project / note — see undo
+  toast, see Trash tab appear with the right count badge.
+- Files: Documents / Pictures / Downloads / USB / Trash in the sidebar.
+- Files: "+ New folder" tile creates a folder with inline rename; drag a
+  file card onto a folder to move it in; folder click → navigate in;
+  back tile → root.
+- Add App refuses obvious distraction domains (try facebook.com,
+  youtube.com, gmail.com) — friendly popup, no add.
 
-- [ ] No unused CSS rules (check every class — is it used in the HTML?)
-- [ ] No conflicting rules (two rules fighting over the same element)
-- [ ] Animations are smooth (no jank, no excessive repaints)
-- [ ] Consistent spacing system (not random pixel values)
-- [ ] Dark/light contrast sufficient for readability
-- [ ] Frosted glass effect works (backdrop-filter)
-- [ ] Mobile-safe (no overflow, no elements cut off)
+### B. Code Quality
 
-### B3. JavaScript quality
+Run the **Deep-dive / full-scan checklist** in `docs/CODE_HEALTH.md`.
+Every item there. Report `✓ pass` / `⚠ minor` / `❌ broken` with file
+paths and line numbers.
 
-- [ ] No console errors on page load
-- [ ] No console errors when interacting with every feature
-- [ ] All `onclick` handlers work
-- [ ] No memory leaks (intervals cleaned up, no unbounded arrays)
-- [ ] `setInterval` for clock — does it clean up? (it shouldn't need to in a single-page app, but check)
-- [ ] Clipboard history: does it cap the array size? (won't grow forever?)
-- [ ] Settings state: does toggling Dock/Top mode persist correctly?
-- [ ] App visibility: does toggling apps on/off persist?
-- [ ] Update checker: does it handle fetch failures gracefully? (no internet, wrong URL, etc.)
-- [ ] Version comparison: does it correctly compare version numbers?
-- [ ] No dead code (functions that are never called)
-- [ ] No broken references (calling a function that doesn't exist)
+### C. Feature Completeness
 
-### B4. Security
+Compare what's actually built against `docs/GAME_PLAN.md` and `TODO.md`.
 
-- [ ] No inline `eval()` or `Function()` constructor
-- [ ] No external scripts loaded from CDNs
-- [ ] No sensitive data in the file (API keys, tokens, passwords)
-- [ ] iframe sandbox attributes on app views? (optional but good)
-- [ ] XSS risk: clipboard text is escaped before rendering?
+- **Done:** list every feature that's fully built and working.
+- **Partially done:** anything that exists but is broken, incomplete, or
+  has rough edges.
+- **Not started:** anything from GAME_PLAN that hasn't been built. (The
+  OS-install half — boot kiosk script, lockdown policy, USB installer —
+  is partial: written guides exist in `chromebook-os/` + `setup.sh` +
+  `setup-windows.ps1` at the repo root, but a one-step USB image
+  doesn't.)
+- **Undocumented:** anything built that ISN'T described in GAME_PLAN.
 
----
+### D. Project Health
 
-## Section C — Feature Completeness
+- **Files** — anything orphaned or unnecessary. List each top-level file
+  in `home-screen/` and `chromebook-os/` with: what it does, needed yes/no.
+- **Git** — `git log --oneline -20` and `git status`. Are commits clean
+  and descriptive? Any uncommitted changes?
+- **GitHub** — does the README exist and make sense? Is `version.json`
+  correct and used by the update checker? Pages deployment succeeding
+  (https://stjohnbuilds.github.io/quill-haven/ loads)?
+- **Hooks** — read every file in `.claude/hooks/`. Does
+  `.claude/hooks/_log.sh` exist and append to `.claude/hook-activity.log`?
+  Is the log actually getting entries?
 
-Compare the current state against the Game Plan (`docs/GAME_PLAN.md`).
+### E. Readiness for Next Phases
 
-### C1. What's DONE and working
-
-List every feature that is fully built and functional.
-
-### C2. What's PARTIALLY done
-
-List anything that exists but is broken, incomplete, or has rough edges.
-
-### C3. What's NOT started
-
-List everything from the Game Plan that hasn't been built yet.
-
-### C4. What's MISSING from the Game Plan
-
-Is there anything in the code that ISN'T described in the Game Plan? (features built but not documented)
-
----
-
-## Section D — File & Project Health
-
-### D1. File inventory
-
-- List every file in the project. For each: what it does, whether it's needed.
-- Any files that seem orphaned or unnecessary?
-
-### D2. Git health
-
-```bash
-git log --oneline -20
-git status
-```
-
-- Are commits clean and descriptive?
-- Any uncommitted changes?
-- Any files that should be in .gitignore but aren't?
-
-### D3. GitHub repo
-
-- Does the repo README exist? Is it useful?
-- Is `version.json` correct? Does the update checker point at the right GitHub URL?
-- Are there any issues/PRs open?
-
-### D4. Hooks
-
-- Read every hook in `.claude/hooks/`. For each: what it does, does it work, is it necessary.
-- Does `.claude/hooks/_log.sh` exist and work?
-- Check `.claude/hook-activity.log` — are hooks actually running?
-
----
-
-## Section E — Readiness for Next Phases
-
-### E1. Boot sequence readiness
-
-- Is the home screen ready to be loaded by a Linux boot script?
-- Any hardcoded paths that would break on the Chromebook?
-- Any features that require a web server vs. loading as a local file?
-
-### E2. Lockdown readiness
-
-- Which URLs need to be whitelisted for each app to work?
-- Are there any external resources the home screen loads that would be blocked?
-- Google sign-in flow: will it work inside a locked-down Chromium?
-
-### E3. Future app readiness
-
-- Is the "Add App" feature designed well enough to build?
-- Is the settings panel structured to accommodate more apps?
-- Is there room in the dock for 4-5 apps without crowding?
+- **Boot kiosk readiness.** Does `setup.sh` install Chromium and write a
+  working autostart launcher? Does the recovery escape hatch
+  (`quill-haven-recovery`) actually drop the user to the desktop?
+- **Windows kiosk readiness.** Does `setup-windows.ps1` write a Startup
+  `.cmd` that launches Edge in `--kiosk` with the right URL? Does the
+  guide cover auto-login + taskbar autohide?
+- **Lockdown readiness.** A true URL allowlist (block all sites except
+  Quill Haven + the 3 writing apps) is NOT in place yet for any device.
+  For Linux it's a Chromium managed policy in `/etc/chromium/policies/`.
+  For Windows it's an Edge managed policy via registry. For ChromeOS it's
+  Family Link or enrollment. Flag the gap.
+- **Data safety.** All writing lives in `localStorage` (`qh-writing2`,
+  `qh-files`). One device wipe = total loss. Real Google Drive sync is
+  the safety net but actual OAuth isn't wired (UI is honest about this).
+  Is there ANY other code path that could silently lose data? Verify
+  autosave fires on every input event and on `beforeunload`. Verify trash
+  always preserves the full payload.
 
 ---
 
 ## Output format (EXACT)
 
-Use this format. One report per section.
-
-````
+```
 # QUILL HAVEN ASSESSMENT — <date>
 
 ## PLAIN-ENGLISH SUMMARY
-
-- Section A (Visual): N passes, M issues, K broken
+- Section A (Visual): N passes, M minor, K broken
 - Section B (Code): N clean, M warnings, K problems
 - Section C (Features): N done, M partial, K not started
 - Section D (Project): <one-sentence verdict>
@@ -234,80 +179,69 @@ Things Marie should know first:
 3. <plain-English bullet>
 
 ## RATINGS
-
-Give an honest rating for each area:
-
 | Area | Rating | Notes |
 |---|---|---|
-| Visual design | ★★★★☆ | <short note> |
-| Code quality | ★★★☆☆ | <short note> |
-| Feature completeness | ★★☆☆☆ | <short note> |
+| Visual / UX | ★★★★☆ | <short note> |
+| Code quality | ★★★★☆ | <short note> |
+| Feature completeness (app) | ★★★★★ | <short note> |
+| Feature completeness (OS install) | ★★☆☆☆ | <short note> |
 | Project health | ★★★★☆ | <short note> |
-| Readiness for next phase | ★★☆☆☆ | <short note> |
-| **Overall** | **★★★☆☆** | <short note> |
+| **Overall** | **★★★★☆** | <short note> |
 
-## A. VISUAL & DESIGN CHECK
-### A1-A4
-For each checklist item: ✓ pass / ⚠ minor / ❌ broken — with a short note.
+## A. VISUAL & DESIGN
+Per check: ✓ pass / ⚠ minor / ❌ broken — with a SPECIFIC element name.
 
 ## B. CODE QUALITY
-### B1-B4
-For each checklist item: ✓ pass / ⚠ minor / ❌ broken — with a short note.
+Per CODE_HEALTH checklist item: ✓ / ⚠ / ❌ — with file path + line.
 
 ## C. FEATURE COMPLETENESS
-### C1. Done
-- <feature> — works: <yes/partially/no>
-### C2. Partially done
-- <feature> — what's missing: <detail>
-### C3. Not started
+### Done
+- <feature> — works yes/partially/no
+### Partial
+- <feature> — what's missing
+### Not started
 - <feature>
-### C4. Undocumented
-- <feature found in code but not in Game Plan>
+### Undocumented
+- <feature found in code but not in GAME_PLAN>
 
 ## D. PROJECT HEALTH
-### D1. Files
-- <file> — <purpose> — needed: yes/no
-### D2. Git
-- <assessment>
-### D3. GitHub
-- <assessment>
-### D4. Hooks
-- <hook> — <does it work>
+### Files / Git / GitHub / Hooks
+- <one bullet per area>
 
 ## E. READINESS
-### E1-E3
-- <plain-English assessment per area>
+- <plain-English verdict per area>
 
-## SUMMARY COUNTS
-
-- Visual checks passed: N / total
-- Code checks passed: N / total
-- Features done: N
-- Features partial: N
-- Features not started: N
-- Dead files: N
-- Bugs found: N
-
-## TOP 10 THINGS TO FIX (do NOT fix — just list)
-
-1. <specific thing> — why it matters
-2. <specific thing> — why it matters
+## TOP 10 THINGS TO FIX (don't fix — just list)
+1. <specific finding> — why it matters
 ...
+10. <...>
 
 ## WHAT I COULDN'T TEST
-
 - <anything you couldn't verify and why>
-````
+```
 
 ---
 
 ## Hard rules — non-negotiable
 
 1. **Don't fix anything.** Just report.
-2. **Don't use confidence words** ("85% sure", "should be fine", "trust me it works"). Use plain words: "fully checked", "code reads right but didn't run", "didn't test".
-3. **Every finding must include a specific file path, line number, or element name.** No vague verdicts like "the code looks clean overall".
-4. **Actually open the preview in a browser and look at it.** Don't just read the code and guess what it looks like.
-5. **Rate honestly.** Marie would rather hear "this needs work" than "looks great" followed by bugs. Prior AIs have told her things were clean when they weren't.
+2. **No confidence percentages** ("85% sure", "should be fine", "trust me
+   it works"). Marie's no-self-cert hook blocks these. Use plain words:
+   "fully checked" / "code reads right but didn't run" / "didn't test".
+3. **Every finding must include a specific file path, line number, or
+   element name.** No vague verdicts like "the code looks clean overall".
+4. **Actually open the preview in a browser and look at it.** Don't just
+   read the code and guess what it looks like. If your harness can't run
+   a preview, say so under "What I couldn't test."
+5. **Rate honestly.** Marie would rather hear "this needs work" than
+   "looks great" followed by bugs. Prior AIs have told her things were
+   clean when they weren't.
 6. **Run every section.** If you stop early, say so at the top.
-7. **Read the ENTIRE `index.html` file.** It's one file. No excuse to skip parts.
-8. **Compare against the Game Plan.** If something in the Game Plan isn't built, that's a finding. If something is built but not in the Game Plan, that's also a finding.
+7. **Read the WHOLE file when asked.** Don't skip sections you find
+   boring.
+8. **Compare against the Game Plan.** If something in GAME_PLAN isn't
+   built, that's a finding. If something is built but not in GAME_PLAN,
+   that's also a finding (means the docs are stale, which IS a problem).
+9. **Don't comfort the user.** Marie's CLAUDE.md hard-rules forbid
+   "breathe", "calm down", "I understand this is frustrating", etc. Just
+   report the facts.
