@@ -101,31 +101,43 @@ need to swap that for normal PC firmware first.
 > this step easily, so this is the point of no return. Make sure you
 > want to keep going before you start.
 
-1. Open the **Chrome browser** on the Chromebook.
-2. Press **Ctrl + Alt + T** at the same time. A black terminal window
-   opens called **crosh**.
-3. Type this and press Enter:
+1. Press **Ctrl + Alt + → (Forward arrow)** all at once. The Forward
+   arrow is the second key in the top row (the one after Back ←). The
+   screen goes black with white text — that's a real text-only terminal.
+2. At the `localhost login:` prompt, type:
 
    ```
-   shell
+   chronos
    ```
 
-4. Then paste this whole line (right-click → Paste, or Ctrl+Shift+V):
+   and press Enter. If it asks for a password, press Enter (or use the
+   one you set, if you set one).
+3. Type or paste this whole line (Ctrl+Shift+V to paste), then press
+   Enter:
 
    ```
    cd; curl -LO mrchromebox.tech/firmware-util.sh && sudo bash firmware-util.sh
    ```
 
-5. Press Enter. A menu appears (white text on dark background).
-6. Type the number for **Install/Update UEFI (Full ROM) Firmware** and
+   The flag in the middle is `-LO` (one short dash, capital **L**, then
+   capital **O** — two letters squished together).
+4. A menu appears (white text on dark background).
+5. Type the number for **Install/Update UEFI (Full ROM) Firmware** and
    press Enter.
-7. It will warn you several times. Type **Y** and press Enter for each
+6. It will warn you several times. Type **Y** and press Enter for each
    warning, until it asks if you want a backup.
-8. **Say YES to the backup.** It saves a copy of the original firmware
+7. **Say YES to the backup.** It saves a copy of the original firmware
    to your USB stick — keep it somewhere safe forever (it's the only
    way to put ChromeOS back exactly as it was).
-9. Wait. The screen will print lots of text. When it finishes, the
+8. Wait. The screen will print lots of text. When it finishes, the
    Chromebook will turn off.
+
+> **Why not the normal Chrome terminal (crosh)?** On newer ChromeOS
+> versions `sudo` in crosh fails with a "no new privileges" error. The
+> Forward-arrow terminal above doesn't have that limit.
+>
+> If you ever want to get back to the normal ChromeOS desktop while
+> still in the text terminal: **Ctrl + Alt + ← (Back arrow)**.
 
 ✅ The Chromebook is no longer a Chromebook. Don't turn it on yet.
 
