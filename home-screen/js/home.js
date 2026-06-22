@@ -1,11 +1,12 @@
 // ── Boot splash ──
+// Loader bar tracks REAL progress: ~30% on DOMContentLoaded, ~70% when fonts are
+// ready, 100% on window load. The splash fades after the bar reaches the end.
 (function() {
   var typeEl = document.getElementById('bootType');
   var full = 'Your writing sanctuary';
-  // #frozen holds the final composed frame (for previewing the design)
   if (location.hash === '#frozen') {
     if (typeEl) typeEl.textContent = full;
-    var f = document.querySelector('.boot-loader-fill'); if (f) { f.style.animation = 'none'; f.style.width = '100%'; }
+    var f = document.querySelector('.boot-loader-fill'); if (f) { f.style.width = '100%'; }
     var t = document.querySelector('.boot-text'); if (t) { t.style.animation = 'none'; t.style.opacity = '1'; }
     var q = document.querySelector('.boot-quill'); if (q) { q.style.animation = 'none'; q.style.opacity = '1'; q.style.transform = 'none'; }
     var g = document.querySelector('.boot-tagline'); if (g) { g.style.animation = 'none'; g.style.opacity = '1'; }
@@ -19,29 +20,122 @@
       if (i >= full.length) clearInterval(iv);
     }, 62);
   }, 2700);
-  setTimeout(function() {
-    var splash = document.getElementById('bootSplash');
-    if (splash) {
-      splash.classList.add('fade-out');
-      setTimeout(function() { splash.remove(); }, 900);
-    }
-  }, 5400);
+  function setLoader(pct) { var f = document.querySelector('.boot-loader-fill'); if (f) f.style.width = pct + '%'; }
+  setLoader(15);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setLoader(35); });
+  else setLoader(35);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setLoader(75); });
+  function finishLoad() {
+    setLoader(100);
+    // Min splash time so the typing animation finishes; then fade
+    setTimeout(function () {
+      var splash = document.getElementById('bootSplash');
+      if (splash) { splash.classList.add('fade-out'); setTimeout(function () { splash.remove(); }, 900); }
+    }, 1300);
+  }
+  if (document.readyState === 'complete') finishLoad();
+  else window.addEventListener('load', finishLoad);
+  // Hard ceiling so the splash never gets stuck
+  setTimeout(function () { var s = document.getElementById('bootSplash'); if (s && !s.classList.contains('fade-out')) { setLoader(100); s.classList.add('fade-out'); setTimeout(function () { s.remove(); }, 900); } }, 8000);
 })();
 
+// ── Timezone ──
+function getTz() { try { return localStorage.getItem('qh-tz') || ''; } catch (e) { return ''; } }
+function setTimezone(v) { try { if (v) localStorage.setItem('qh-tz', v); else localStorage.removeItem('qh-tz'); } catch (e) {} updateClock(); }
+// Common zones — kept short on purpose. "Auto" follows the browser/device.
+var TZ_OPTIONS = [
+  ['', 'Auto (device)'],
+  ['America/Los_Angeles', 'Los Angeles (Pacific)'],
+  ['America/Denver', 'Denver (Mountain)'],
+  ['America/Chicago', 'Chicago (Central)'],
+  ['America/New_York', 'New York (Eastern)'],
+  ['America/Toronto', 'Toronto (Eastern)'],
+  ['America/Halifax', 'Halifax (Atlantic)'],
+  ['Atlantic/Reykjavik', 'Reykjavík'],
+  ['Europe/London', 'London'],
+  ['Europe/Paris', 'Paris / Berlin / Rome'],
+  ['Europe/Athens', 'Athens / Helsinki'],
+  ['Europe/Moscow', 'Moscow'],
+  ['Asia/Dubai', 'Dubai'],
+  ['Asia/Kolkata', 'India (Kolkata)'],
+  ['Asia/Singapore', 'Singapore / Hong Kong'],
+  ['Asia/Shanghai', 'Shanghai / Beijing'],
+  ['Asia/Tokyo', 'Tokyo / Seoul'],
+  ['Australia/Sydney', 'Sydney / Melbourne'],
+  ['Pacific/Auckland', 'Auckland'],
+  ['UTC', 'UTC']
+];
+function buildTzSelect() {
+  var sel = document.getElementById('tzSelect'); if (!sel) return;
+  if (sel.options.length) return; // already built
+  var current = getTz();
+  TZ_OPTIONS.forEach(function (pair) {
+    var o = document.createElement('option');
+    o.value = pair[0]; o.textContent = pair[1];
+    if (pair[0] === current) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
 // ── Clock ──
+var DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function partsInZone(now, tz) {
+  if (!tz) return { h: now.getHours(), m: now.getMinutes(), day: now.getDay(), mon: now.getMonth(), date: now.getDate() };
+  try {
+    var fmt = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', minute: 'numeric', weekday: 'short', month: 'short', day: 'numeric', hour12: false });
+    var p = {}; fmt.formatToParts(now).forEach(function (x) { p[x.type] = x.value; });
+    // Build a Date by parsing the formatted parts; for day-of-week we map back
+    var dayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    var monMap = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+    var h = parseInt(p.hour, 10); if (h === 24) h = 0;
+    return { h: h, m: parseInt(p.minute, 10), day: dayMap[p.weekday] || 0, mon: monMap[p.month] || 0, date: parseInt(p.day, 10) };
+  } catch (e) {
+    return { h: now.getHours(), m: now.getMinutes(), day: now.getDay(), mon: now.getMonth(), date: now.getDate() };
+  }
+}
 function updateClock() {
-  var now = new Date(), h = now.getHours(), m = now.getMinutes().toString().padStart(2,'0');
-  var h12 = h % 12 || 12, ampm = h >= 12 ? 'PM' : 'AM';
-  document.getElementById('clock').textContent = h12 + ':' + m;
+  var now = new Date();
+  var p = partsInZone(now, getTz());
+  var mStr = String(p.m).padStart(2, '0');
+  var h12 = p.h % 12 || 12, ampm = p.h >= 12 ? 'PM' : 'AM';
+  document.getElementById('clock').textContent = h12 + ':' + mStr;
   var g = 'Good evening';
-  if (h < 12) g = 'Good morning'; else if (h < 17) g = 'Good afternoon';
+  if (p.h < 12) g = 'Good morning'; else if (p.h < 17) g = 'Good afternoon';
   document.getElementById('greeting').textContent = g;
-  var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  document.getElementById('dateLine').textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate();
-  document.getElementById('topBarTime').textContent = days[now.getDay()].slice(0,3) + ', ' + months[now.getMonth()] + ' ' + now.getDate() + '  ' + h12 + ':' + m + ' ' + ampm;
+  document.getElementById('dateLine').textContent = DAY_NAMES[p.day] + ', ' + MONTH_NAMES[p.mon] + ' ' + p.date;
+  document.getElementById('topBarTime').textContent = DAY_NAMES[p.day].slice(0, 3) + ', ' + MONTH_NAMES[p.mon] + ' ' + p.date + '  ' + h12 + ':' + mStr + ' ' + ampm;
 }
 updateClock(); setInterval(updateClock, 1000);
+
+// ── Live Wi-Fi (online/offline) ──
+function updateOnline() {
+  var on = (typeof navigator !== 'undefined' && navigator.onLine !== false);
+  var icon = document.getElementById('topWifi');
+  var sub = document.getElementById('wifiSub');
+  if (icon) { icon.style.opacity = on ? '' : '0.35'; icon.title = on ? 'Connected' : 'Offline'; }
+  if (sub) { sub.textContent = on ? 'Connected' : 'Offline'; }
+}
+window.addEventListener('online', updateOnline);
+window.addEventListener('offline', updateOnline);
+updateOnline();
+
+// ── Live battery (uses navigator.getBattery if the browser exposes it) ──
+function updateBatteryUI(level, charging) {
+  var fill = document.getElementById('topBatteryFill');
+  var icon = document.getElementById('topBattery');
+  if (fill) { fill.setAttribute('width', String(Math.max(0.5, Math.min(15, 15 * level)))); fill.setAttribute('opacity', charging ? '0.95' : '0.7'); }
+  if (icon) { var pct = Math.round(level * 100); icon.title = pct + '%' + (charging ? ' (charging)' : ''); }
+}
+(function initBattery() {
+  if (!navigator.getBattery) return; // Older Safari etc — leave the static icon
+  navigator.getBattery().then(function (b) {
+    function sync() { updateBatteryUI(b.level || 0, b.charging); }
+    b.addEventListener('levelchange', sync);
+    b.addEventListener('chargingchange', sync);
+    sync();
+  }).catch(function () {});
+})();
 
 // ── Custom background (picture set from the Files app, tuned in Settings) ──
 function applyBg() {
@@ -130,10 +224,10 @@ var BUILTIN_APPS = [
   { id:'docs', name:'Google Docs', kind:'site', url:'https://docs.google.com',
     c1:'#f7cfe6', c2:'#eeb1cf', vb:'0 0 28 28',
     icon:'<rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.4" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>' },
-  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=17',
+  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=18',
     c1:'#c2e8c9', c2:'#97d6a4', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
     icon:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/><path d="M16 8 2 22" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/><path d="M17.5 15H9" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>' },
-  { id:'files', name:'Files', kind:'local', src:'apps/files/index.html?v=4',
+  { id:'files', name:'Files', kind:'local', src:'apps/files/index.html?v=5',
     c1:'#c4d4f7', c2:'#a0bcee', vb:'0 0 24 24', sub:'Documents, pictures, USB',
     icon:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="white" stroke-width="1.5" stroke-linejoin="round" opacity="0.92"/>' }
 ];
@@ -425,12 +519,36 @@ function recolorAppIcons() {
   });
 }
 
+// Common distraction sites — refused by Add App so they can't sneak onto the home screen.
+var DISTRACTION_HOSTS = [
+  'facebook.com', 'instagram.com', 'x.com', 'twitter.com', 'tiktok.com',
+  'reddit.com', 'snapchat.com', 'pinterest.com', 'threads.net', 'linkedin.com',
+  'youtube.com', 'netflix.com', 'hulu.com', 'disneyplus.com', 'hbomax.com',
+  'twitch.tv', 'peacocktv.com', 'paramountplus.com', 'tumblr.com',
+  'gmail.com', 'mail.google.com', 'mail.yahoo.com', 'outlook.com', 'outlook.live.com'
+];
+function isDistractionUrl(url) {
+  try {
+    var u = new URL(url);
+    var host = u.hostname.toLowerCase().replace(/^www\./, '');
+    return DISTRACTION_HOSTS.some(function (d) { return host === d || host.endsWith('.' + d); });
+  } catch (e) { return false; }
+}
+
 // Add a user app (name + website + colour).
 function addApp(name, url, c1, c2, icon, vb) {
   name = (name || '').trim();
   url = (url || '').trim();
   if (!name || !url) return false;
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  if (isDistractionUrl(url)) {
+    if (window.qhConfirm) window.qhConfirm({
+      title: 'That one’s a distraction',
+      message: 'Quill Haven keeps social media, video sites and email off the home screen on purpose. Try a writing or research site instead.',
+      confirmText: 'OK'
+    });
+    return false;
+  }
   var id = 'app' + Math.random().toString(36).slice(2, 8);
   var app = { id:id, name:name, kind:'site', url:url, c1:c1, c2:c2 };
   if (icon) { app.icon = icon; app.vb = vb || '0 0 24 24'; }
@@ -632,7 +750,7 @@ renderIconChoices();
 // ── Settings ──
 function toggleSettings() {
   var open = document.getElementById('settingsOverlay').classList.toggle('open');
-  if (open) { updateStorage(); syncBgRow(); }
+  if (open) { updateStorage(); syncBgRow(); syncDriveRow(); buildTzSelect(); }
 }
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') document.getElementById('settingsOverlay').classList.remove('open'); });
 
@@ -659,6 +777,24 @@ function updateStorage() {
     fill.style.width = '2%';
     text.textContent = 'Plenty of room';
   }
+}
+
+// ── Google Drive (UI only — actual sign-in needs a Cloud project setup) ──
+function driveState() { try { return localStorage.getItem('qh-drive') || 'unconnected'; } catch(e) { return 'unconnected'; } }
+function syncDriveRow() {
+  var sub = document.getElementById('driveSub');
+  if (!sub) return;
+  var st = driveState();
+  if (st === 'connected') sub.textContent = 'Connected — your work backs up to Drive';
+  else sub.textContent = 'Not connected — back up your writing';
+}
+function openDriveConnect() {
+  if (!window.qhConfirm) return;
+  window.qhConfirm({
+    title: 'Connect Google Drive',
+    message: 'Saving to Drive needs a one-time Google sign-in. The Connect button isn’t wired up yet — once it is, signing in here will let the writing app back up your manuscripts off-device.',
+    confirmText: 'OK'
+  });
 }
 
 // ── Display mode ──

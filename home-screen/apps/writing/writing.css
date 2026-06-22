@@ -66,7 +66,7 @@ body.side-collapsed .nav-quill { display: flex; }
 
 /* ── Side panel ── */
 .side {
-  width: 232px; flex-shrink: 0;
+  width: 232px; flex-shrink: 0; position: relative;
   display: flex; flex-direction: column;
   background: var(--card-bg);
   border-right: 1px solid var(--card-border);
@@ -90,12 +90,114 @@ body.side-collapsed .side { margin-left: -233px; opacity: 0; pointer-events: non
 }
 .tab:hover { color: var(--label); }
 .tab.active { background: var(--card-bg); color: var(--accent-strong); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-.side-collapse {
+.tab.tab-trash { flex: 0 0 38px; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 4px; position: relative; }
+.tab.tab-trash svg { display: block; }
+.trash-count {
+  font-size: 10px; font-weight: 700; background: var(--accent); color: #fff;
+  border-radius: 999px; padding: 1px 5px; min-width: 14px; text-align: center; line-height: 1.3;
+}
+.side-download {
   width: 28px; height: 28px; flex-shrink: 0; border: none; background: none;
   cursor: pointer; border-radius: 7px; color: var(--text-muted);
-  display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s;
 }
-.side-collapse:hover { background: var(--row-hover); color: var(--label); }
+.side-download:hover { background: var(--row-hover); color: var(--accent-strong); }
+.side-download.on { background: var(--accent); color: #fff; }
+
+/* Faint collapse arrow on the right edge of the side panel, halfway down */
+.edge-collapse {
+  position: absolute; top: 50%; right: -11px; transform: translateY(-50%);
+  width: 22px; height: 38px; border: 1px solid var(--card-border); cursor: pointer;
+  background: var(--card-bg); border-radius: 0 11px 11px 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-faint); opacity: 0.42; transition: opacity 0.18s, color 0.18s, background 0.18s;
+  z-index: 10;
+}
+.edge-collapse:hover { opacity: 1; color: var(--accent-strong); background: var(--row-hover); }
+body.side-collapsed .edge-collapse { display: none; }
+
+/* Download dropdown menu */
+.dl-menu {
+  position: fixed; z-index: 60;
+  min-width: 220px; padding: 6px;
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  box-shadow: 0 14px 36px rgba(0,0,0,0.16);
+  display: flex; flex-direction: column; gap: 2px;
+  animation: dlPop 0.14s ease;
+}
+@keyframes dlPop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.dl-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border: none; background: none; cursor: pointer;
+  border-radius: 8px; font-family: inherit; text-align: left; width: 100%;
+  color: var(--label); transition: background 0.12s;
+}
+.dl-item:hover { background: var(--row-hover); }
+.dl-item.disabled { opacity: 0.55; cursor: default; }
+.dl-item.disabled:hover { background: transparent; }
+.dl-icon {
+  width: 28px; height: 28px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--panel-bg); border-radius: 8px; color: var(--accent-strong);
+}
+.dl-text { display: flex; flex-direction: column; min-width: 0; }
+.dl-name { font-size: 13px; font-weight: 600; color: var(--text-strong); }
+.dl-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+/* Undo toast (bottom-center) */
+.undo-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  padding: 9px 9px 9px 16px; display: flex; align-items: center; gap: 10px;
+  z-index: 70; min-width: 230px; max-width: calc(100% - 32px);
+  animation: toastPop 0.18s ease;
+}
+@keyframes toastPop { from { transform: translate(-50%, 10px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+.undo-toast.fade { opacity: 0; transition: opacity 0.2s; }
+.undo-msg { font-size: 13px; color: var(--text-strong); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.undo-btn {
+  border: none; background: var(--accent); color: #fff;
+  padding: 6px 14px; border-radius: 8px; font-family: inherit;
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s; flex-shrink: 0;
+}
+.undo-btn:hover { opacity: 0.86; }
+
+/* Trash rows in the trash panel */
+.trash-row { font-size: 12.5px; }
+.trash-kind {
+  width: 20px; height: 20px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-faint); margin-right: 2px;
+}
+.trash-meta { font-size: 11px; color: var(--text-faint); margin-left: 6px; flex-shrink: 0; }
+.row-restore {
+  width: 22px; height: 22px; flex-shrink: 0; border: none; background: none; cursor: pointer;
+  border-radius: 6px; color: var(--text-faint); font-size: 14px;
+  display: none; align-items: center; justify-content: center; transition: background 0.12s, color 0.12s;
+}
+.row:hover .row-restore { display: flex; }
+.row-restore:hover { background: var(--card-bg); color: var(--accent-strong); }
+
+/* Tiny floating add menu (Chapter / Part) */
+.popup-menu {
+  position: fixed; z-index: 60;
+  min-width: 180px; padding: 6px;
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 11px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.14);
+  display: flex; flex-direction: column; gap: 2px;
+  animation: dlPop 0.14s ease;
+}
+.popup-item {
+  display: flex; flex-direction: column; align-items: stretch; gap: 1px;
+  padding: 7px 10px; border: none; background: none; cursor: pointer;
+  border-radius: 7px; font-family: inherit; text-align: left;
+  color: var(--label); transition: background 0.12s;
+}
+.popup-item:hover { background: var(--row-hover); }
+.popup-name { font-size: 13px; font-weight: 600; color: var(--text-strong); }
+.popup-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
 
 .side-scroll { flex: 1; overflow-y: auto; padding: 4px 8px 8px; }
 .side-scroll::-webkit-scrollbar { width: 5px; }
@@ -135,6 +237,7 @@ body.side-collapsed .side { margin-left: -233px; opacity: 0; pointer-events: non
 .children { margin-left: 16px; padding-left: 2px; }
 
 .project-row { font-weight: 600; color: var(--text-strong); margin-top: 2px; }
+.part-row { font-weight: 600; color: var(--label); font-style: italic; }
 .tree-empty { font-size: 12px; color: var(--text-faint); padding: 10px 8px; line-height: 1.5; }
 
 .side-foot { padding: 8px; border-top: 1px solid var(--card-border); }

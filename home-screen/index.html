@@ -10,7 +10,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="shared/theme.css?v=21">
-  <link rel="stylesheet" href="css/home.css?v=22">
+  <link rel="stylesheet" href="css/home.css?v=24">
 </head>
 <body>
 
@@ -41,8 +41,8 @@
   <div class="top-right">
     <!-- App icons (top-bar mode) sit next to the status icons -->
     <div class="top-apps" id="topApps"></div>
-    <span class="top-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg></span>
-    <span class="top-icon"><svg width="18" height="14" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="22" height="10" rx="2.5"/><rect x="3.5" y="4.5" width="15" height="5" rx="1" fill="currentColor" stroke="none" opacity="0.5"/><rect x="23" y="5" width="3" height="4" rx="1" fill="currentColor" stroke="none" opacity="0.4"/></svg></span>
+    <span class="top-icon" id="topWifi" title="Connected"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg></span>
+    <span class="top-icon" id="topBattery" title="Battery"><svg width="18" height="14" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="22" height="10" rx="2.5"/><rect id="topBatteryFill" x="3.5" y="4.5" width="15" height="5" rx="1" fill="currentColor" stroke="none" opacity="0.6"/><rect x="23" y="5" width="3" height="4" rx="1" fill="currentColor" stroke="none" opacity="0.4"/></svg></span>
     <button class="settings-btn" onclick="toggleSettings()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     <span class="top-datetime" id="topBarTime"></span>
   </div>
@@ -76,7 +76,7 @@
     <div class="settings-card">
       <div class="settings-row">
         <div class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="white" stroke="none"/></svg></div>
-        <div class="settings-row-text"><div class="settings-row-label">Wi-Fi</div><div class="settings-row-sub">Connected</div></div>
+        <div class="settings-row-text"><div class="settings-row-label">Wi-Fi</div><div class="settings-row-sub" id="wifiSub">Connected</div></div>
       </div>
       <div class="settings-row">
         <div class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
@@ -110,6 +110,11 @@
         <div class="settings-row-text"><div class="settings-row-label">Google Account</div><div class="settings-row-sub">Sign in for Docs</div></div>
         <span class="settings-row-arrow">&#x203A;</span>
       </div>
+      <div class="settings-row clickable" id="driveRow" onclick="openDriveConnect()">
+        <div class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m7 4 5 8-5 8"/><path d="m17 4-5 8 5 8"/><path d="M2 20h20"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-label">Google Drive</div><div class="settings-row-sub" id="driveSub">Not connected — back up your writing</div></div>
+        <span class="settings-row-arrow" id="driveArrow">&#x203A;</span>
+      </div>
       <div class="settings-row">
         <div class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
         <div class="settings-row-text"><div class="settings-row-label">App Bar</div><div class="settings-row-sub">Where your apps live</div></div>
@@ -125,6 +130,11 @@
           <div class="storage-bar"><div class="storage-bar-fill" id="storageFill"></div></div>
           <div class="settings-row-sub" id="storageText" style="margin-top:6px;">Checking…</div>
         </div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/><path d="M2 12h20"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-label">Region</div><div class="settings-row-sub">Time zone — keeps the clock right</div></div>
+        <select id="tzSelect" class="tz-select" onchange="setTimezone(this.value)"></select>
       </div>
       <div class="settings-row" id="bgRow" style="flex-direction:column;align-items:stretch;gap:9px;">
         <div style="display:flex;align-items:center;gap:8px;">
@@ -173,7 +183,7 @@
 <div class="clipboard-copied" id="clipToast">Copied to clipboard</div>
 
 <script src="shared/confirm.js?v=2"></script>
-<script src="js/home.js?v=22"></script>
+<script src="js/home.js?v=24"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

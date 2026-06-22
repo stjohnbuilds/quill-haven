@@ -54,28 +54,55 @@
   // make sure the shape is whole
   if (!Array.isArray(data.notes)) data.notes = [];
   if (!Array.isArray(data.projects)) data.projects = [];
+  if (!Array.isArray(data.trash)) data.trash = [];
+  data.projects.forEach(function (p) {
+    if (!Array.isArray(p.chapters)) p.chapters = [];
+    if (!Array.isArray(p.parts)) p.parts = [];
+    p.parts.forEach(function (pt) { if (!Array.isArray(pt.chapters)) pt.chapters = []; });
+  });
   if (!data.sel) data.sel = { note: null, scene: null };
   if (!data.open) data.open = {};
-  if (data.tab !== 'notes' && data.tab !== 'projects') data.tab = 'projects';
+  if (data.tab !== 'notes' && data.tab !== 'projects' && data.tab !== 'trash') data.tab = 'projects';
   persist();
 
   // ── Lookups ──
+  // Chapters can live at project.chapters (top-level) OR inside project.parts[i].chapters.
+  // Walk every chapter in a project, with its containing part (null if top-level).
+  function walkChapters(project, fn) {
+    (project.chapters || []).forEach(function (c) { fn(c, null); });
+    (project.parts || []).forEach(function (pt) {
+      (pt.chapters || []).forEach(function (c) { fn(c, pt); });
+    });
+  }
   function findNote(id) { for (var i = 0; i < data.notes.length; i++) if (data.notes[i].id === id) return data.notes[i]; return null; }
   function findProject(id) { for (var i = 0; i < data.projects.length; i++) if (data.projects[i].id === id) return data.projects[i]; return null; }
-  function findChapter(id) {
+  function findPartCtx(id) {
     for (var i = 0; i < data.projects.length; i++) {
-      var ch = data.projects[i].chapters;
-      for (var j = 0; j < ch.length; j++) if (ch[j].id === id) return ch[j];
+      var pjs = data.projects[i].parts || [];
+      for (var j = 0; j < pjs.length; j++) if (pjs[j].id === id) return { project: data.projects[i], part: pjs[j] };
     }
     return null;
   }
+  function findPart(id) { var x = findPartCtx(id); return x ? x.part : null; }
+  function findChapterCtx(id) {
+    for (var i = 0; i < data.projects.length; i++) {
+      var p = data.projects[i];
+      var hit = null;
+      walkChapters(p, function (c, pt) { if (!hit && c.id === id) hit = { project: p, part: pt, chapter: c }; });
+      if (hit) return hit;
+    }
+    return null;
+  }
+  function findChapter(id) { var x = findChapterCtx(id); return x ? x.chapter : null; }
   function findSceneCtx(id) {
     for (var i = 0; i < data.projects.length; i++) {
       var p = data.projects[i];
-      for (var j = 0; j < p.chapters.length; j++) {
-        var c = p.chapters[j];
-        for (var k = 0; k < c.scenes.length; k++) if (c.scenes[k].id === id) return { project: p, chapter: c, scene: c.scenes[k] };
-      }
+      var hit = null;
+      walkChapters(p, function (c, pt) {
+        if (hit) return;
+        for (var k = 0; k < c.scenes.length; k++) if (c.scenes[k].id === id) { hit = { project: p, part: pt, chapter: c, scene: c.scenes[k] }; return; }
+      });
+      if (hit) return hit;
     }
     return null;
   }
@@ -83,7 +110,9 @@
   function firstScene() {
     for (var i = 0; i < data.projects.length; i++) {
       var p = data.projects[i];
-      for (var j = 0; j < p.chapters.length; j++) if (p.chapters[j].scenes.length) return p.chapters[j].scenes[0];
+      var first = null;
+      walkChapters(p, function (c) { if (!first && c.scenes && c.scenes.length) first = c.scenes[0]; });
+      if (first) return first;
     }
     return null;
   }
@@ -92,6 +121,9 @@
   var side = document.getElementById('side');
   var notesPanel = document.getElementById('notesPanel');
   var projectsPanel = document.getElementById('projectsPanel');
+  var trashPanel = document.getElementById('trashPanel');
+  var trashTab = document.querySelector('.tab-trash');
+  var trashCount = document.getElementById('trashCount');
   var sideFoot = document.getElementById('sideFoot');
   var docEl = document.getElementById('doc');
   var emptyState = document.getElementById('emptyState');
@@ -104,12 +136,17 @@
   var toolbar = document.getElementById('toolbar');
   var hlBtn = document.getElementById('hlBtn');
   var hlMenu = document.getElementById('hlMenu');
+  var downloadBtn = document.getElementById('downloadBtn');
+  var dlMenu = document.getElementById('dlMenu');
 
   function el(tag, cls) { var e = document.createElement(tag); if (cls) e.className = cls; return e; }
   function txt(node) { return (node.textContent || '').replace(/ /g, ' ').trim(); }
 
+  function esc(s) { return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function dateStr(ms) { var d = new Date(ms); var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return mo[d.getMonth()] + ' ' + d.getDate(); }
+
   function confirmDanger(title, message, onYes) {
-    if (window.qhConfirm) window.qhConfirm({ title: title, message: message, confirmText: 'Delete', danger: true, onConfirm: onYes });
+    if (window.qhConfirm) window.qhConfirm({ title: title, message: message, confirmText: 'Delete forever', danger: true, onConfirm: onYes });
     else if (window.confirm(title + (message ? '\n' + message : ''))) onYes();
   }
 
@@ -131,13 +168,41 @@
     document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.dataset.tab === data.tab); });
     notesPanel.hidden = data.tab !== 'notes';
     projectsPanel.hidden = data.tab !== 'projects';
+    if (trashPanel) trashPanel.hidden = data.tab !== 'trash';
     renderNotes();
     renderProjects();
+    renderTrash();
     renderFoot();
+    syncDownloadBtn();
+    syncTrashTab();
+  }
+  function syncTrashTab() {
+    if (!trashTab) return;
+    var n = data.trash.length;
+    trashTab.hidden = !n && data.tab !== 'trash';
+    if (trashCount) {
+      trashCount.hidden = !n;
+      trashCount.textContent = String(n);
+    }
+  }
+
+  function currentProject() {
+    var ctx = data.sel.scene ? findSceneCtx(data.sel.scene) : null;
+    return ctx ? ctx.project : null;
+  }
+  function syncDownloadBtn() {
+    if (!downloadBtn) return;
+    downloadBtn.hidden = !(data.tab === 'projects' && currentProject());
   }
 
   function renderFoot() {
     sideFoot.innerHTML = '';
+    if (data.tab === 'trash') {
+      if (!data.trash.length) return;
+      var emp = el('button', 'add-btn ghost'); emp.type = 'button'; emp.textContent = 'Empty trash';
+      emp.addEventListener('click', emptyTrash);
+      sideFoot.appendChild(emp); return;
+    }
     var b = el('button', 'add-btn'); b.type = 'button';
     if (data.tab === 'notes') { b.textContent = '+ New note'; b.addEventListener('click', addNote); }
     else { b.textContent = '+ New project'; b.addEventListener('click', addProject); }
@@ -173,22 +238,51 @@
       var isOpen = !!data.open[p.id];
       var row = el('div', 'row project-row' + (isOpen ? ' open' : ''));
       var name = el('span', 'row-name'); name.textContent = p.name || 'Untitled project';
-      var edit = editBtn('Rename project'); var add = addBtn('Add chapter'); var del = delBtn('Delete project');
+      var edit = editBtn('Rename project'); var add = addBtn('Add chapter or part'); var del = delBtn('Delete project');
       row.append(caretEl(false), name, edit, add, del);
       row.addEventListener('click', function (e) { if (e.target === add || e.target === del) return; toggleOpen(p.id); });
       name.addEventListener('dblclick', function (e) { e.stopPropagation(); startRename(name, node, p, 'name'); });
       edit.addEventListener('click', function (e) { e.stopPropagation(); startRename(name, node, p, 'name'); });
-      add.addEventListener('click', function (e) { e.stopPropagation(); addChapter(p.id); });
+      add.addEventListener('click', function (e) {
+        e.stopPropagation();
+        openAddMenu(add, [
+          { label: 'Chapter', sub: 'A new chapter in this book', action: function () { addChapter(p.id, null); } },
+          { label: 'Part',    sub: 'A group of chapters (Part 1, Part 2…)', action: function () { addPart(p.id); } }
+        ]);
+      });
       del.addEventListener('click', function (e) { e.stopPropagation(); deleteProject(p.id); });
       node.appendChild(row);
       if (isOpen) {
-        var kids = el('div', 'children'); kids.dataset.group = 'chapters:' + p.id;
-        if (!p.chapters.length) { var em = el('div', 'tree-empty'); em.textContent = 'No chapters yet'; kids.appendChild(em); }
-        p.chapters.forEach(function (c) { kids.appendChild(chapterNode(c)); });
+        var kids = el('div', 'children'); kids.dataset.group = 'projectChildren:' + p.id;
+        // Top-level chapters first
+        if (!p.chapters.length && !(p.parts || []).length) { var em = el('div', 'tree-empty'); em.textContent = 'No chapters yet'; kids.appendChild(em); }
+        p.chapters.forEach(function (c) { kids.appendChild(chapterNode(c, p, null)); });
+        (p.parts || []).forEach(function (pt) { kids.appendChild(partNode(pt, p)); });
         node.appendChild(kids);
       }
       projectsPanel.appendChild(node);
     });
+  }
+  function partNode(pt, project) {
+    var node = el('div', 'node'); node.dataset.id = pt.id; node.draggable = true; wireDrag(node);
+    var isOpen = !!data.open[pt.id];
+    var row = el('div', 'row part-row' + (isOpen ? ' open' : ''));
+    var name = el('span', 'row-name'); name.textContent = pt.name || 'Untitled part';
+    var edit = editBtn('Rename part'); var add = addBtn('Add chapter'); var del = delBtn('Delete part');
+    row.append(caretEl(false), name, edit, add, del);
+    row.addEventListener('click', function (e) { if (e.target === add || e.target === del) return; toggleOpen(pt.id); });
+    name.addEventListener('dblclick', function (e) { e.stopPropagation(); startRename(name, node, pt, 'name'); });
+    edit.addEventListener('click', function (e) { e.stopPropagation(); startRename(name, node, pt, 'name'); });
+    add.addEventListener('click', function (e) { e.stopPropagation(); addChapter(project.id, pt.id); });
+    del.addEventListener('click', function (e) { e.stopPropagation(); deletePart(pt.id); });
+    node.appendChild(row);
+    if (isOpen) {
+      var kids = el('div', 'children'); kids.dataset.group = 'chapters:' + pt.id;
+      if (!pt.chapters.length) { var em = el('div', 'tree-empty'); em.textContent = 'No chapters yet'; kids.appendChild(em); }
+      pt.chapters.forEach(function (c) { kids.appendChild(chapterNode(c, project, pt)); });
+      node.appendChild(kids);
+    }
+    return node;
   }
 
   function chapterNode(c) {
@@ -271,15 +365,42 @@
     data.tab = 'projects'; data.sel.scene = scene.id;
     persist(); renderAll(); loadEditor(); docHeader.focus();
   }
-  function addChapter(projectId) {
+  function addChapter(projectId, partId) {
     flush();
     var p = findProject(projectId); if (!p) return;
+    var container = p.chapters;
+    var pt = null;
+    if (partId) {
+      pt = findPart(partId);
+      if (pt) container = pt.chapters;
+    }
+    // Number across ALL chapters in this project so chapter numbering stays sequential
+    var totalChapters = 0; walkChapters(p, function () { totalChapters++; });
     var scene = { id: newId(), header: '', subheader: '', body: '' };
-    var chap = { id: newId(), title: 'Chapter ' + (p.chapters.length + 1), scenes: [scene] };
-    p.chapters.push(chap);
-    data.open[p.id] = true; data.open[chap.id] = true;
+    var chap = { id: newId(), title: 'Chapter ' + (totalChapters + 1), scenes: [scene] };
+    container.push(chap);
+    data.open[p.id] = true;
+    if (pt) data.open[pt.id] = true;
+    data.open[chap.id] = true;
     data.tab = 'projects'; data.sel.scene = scene.id;
     persist(); renderAll(); loadEditor(); docHeader.focus();
+  }
+  function addPart(projectId) {
+    flush();
+    var p = findProject(projectId); if (!p) return;
+    if (!Array.isArray(p.parts)) p.parts = [];
+    var part = { id: newId(), name: 'Part ' + (p.parts.length + 1), chapters: [] };
+    p.parts.push(part);
+    data.open[p.id] = true; data.open[part.id] = true;
+    data.tab = 'projects';
+    persist(); renderAll();
+  }
+  function deletePart(id) {
+    var ctx = findPartCtx(id); if (!ctx) return;
+    var pt = ctx.part;
+    trashPush('part', pt.name, pt, { type: 'project', id: ctx.project.id });
+    ctx.project.parts = ctx.project.parts.filter(function (x) { return x.id !== id; });
+    afterDelete(); showUndoToast('Deleted "' + (pt.name || 'Untitled part') + '"');
   }
   function addScene(chapterId) {
     flush();
@@ -296,10 +417,181 @@
     if (data.sel.note && !findNote(data.sel.note)) { data.sel.note = data.notes.length ? data.notes[0].id : null; }
     persist(); renderAll(); loadEditor();
   }
-  function deleteNote(id) { confirmDanger('Delete this note?', 'This note will be removed — you can’t undo this yet.', function () { data.notes = data.notes.filter(function (n) { return n.id !== id; }); afterDelete(); }); }
-  function deleteProject(id) { confirmDanger('Delete this project?', 'The project and everything in it will be removed.', function () { data.projects = data.projects.filter(function (p) { return p.id !== id; }); afterDelete(); }); }
-  function deleteChapter(id) { confirmDanger('Delete this chapter?', 'The chapter and its scenes will be removed.', function () { data.projects.forEach(function (p) { p.chapters = p.chapters.filter(function (c) { return c.id !== id; }); }); afterDelete(); }); }
-  function deleteScene(id) { confirmDanger('Delete this scene?', 'This scene will be removed.', function () { data.projects.forEach(function (p) { p.chapters.forEach(function (c) { c.scenes = c.scenes.filter(function (s) { return s.id !== id; }); }); }); afterDelete(); }); }
+  // Soft-delete: move to trash with enough context to restore. Show undo toast.
+  function trashPush(kind, name, payload, where) {
+    data.trash.push({ id: newId(), kind: kind, name: name || 'Untitled', date: Date.now(), payload: payload, where: where || null });
+  }
+  function deleteNote(id) {
+    var n = findNote(id); if (!n) return;
+    trashPush('note', n.title, n, null);
+    data.notes = data.notes.filter(function (x) { return x.id !== id; });
+    afterDelete(); showUndoToast('Deleted "' + (n.title || 'Untitled note') + '"');
+  }
+  function deleteProject(id) {
+    var p = findProject(id); if (!p) return;
+    trashPush('project', p.name, p, null);
+    data.projects = data.projects.filter(function (x) { return x.id !== id; });
+    afterDelete(); showUndoToast('Deleted "' + (p.name || 'Untitled project') + '"');
+  }
+  function deleteChapter(id) {
+    var ctx = findChapterCtx(id); if (!ctx) return;
+    var container = ctx.part ? ctx.part.chapters : ctx.project.chapters;
+    var where = ctx.part ? { type: 'part', id: ctx.part.id, projectId: ctx.project.id } : { type: 'project', id: ctx.project.id };
+    trashPush('chapter', ctx.chapter.title, ctx.chapter, where);
+    var idx = container.indexOf(ctx.chapter);
+    if (idx >= 0) container.splice(idx, 1);
+    afterDelete(); showUndoToast('Deleted "' + (ctx.chapter.title || 'Untitled chapter') + '"');
+  }
+  function deleteScene(id) {
+    var ctx = findSceneCtx(id); if (!ctx) return;
+    var idx = ctx.chapter.scenes.indexOf(ctx.scene);
+    trashPush('scene', ctx.scene.header, ctx.scene, { type: 'chapter', id: ctx.chapter.id });
+    if (idx >= 0) ctx.chapter.scenes.splice(idx, 1);
+    afterDelete(); showUndoToast('Deleted "' + (ctx.scene.header || 'Untitled scene') + '"');
+  }
+
+  // ═══ Trash & undo ═══
+  var TRASH_ICONS = {
+    note:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>',
+    project: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+    chapter: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M4 16h16"/></svg>',
+    scene:   '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'
+  };
+  function renderTrash() {
+    if (!trashPanel) return;
+    trashPanel.innerHTML = '';
+    if (!data.trash.length) { trashPanel.innerHTML = '<div class="tree-empty">Nothing in the trash.<br>Deleted items wait here so you can put them back.</div>'; return; }
+    data.trash.slice().reverse().forEach(function (t) {
+      var node = el('div', 'node');
+      var row = el('div', 'row trash-row');
+      var kind = el('span', 'trash-kind'); kind.innerHTML = TRASH_ICONS[t.kind] || TRASH_ICONS.note;
+      var name = el('span', 'row-name'); name.textContent = t.name || 'Untitled';
+      var meta = el('span', 'trash-meta'); meta.textContent = dateStr(t.date);
+      var res = el('button', 'row-restore'); res.type = 'button'; res.title = 'Restore';
+      res.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>';
+      var del = delBtn('Delete forever');
+      row.append(kind, name, meta, res, del);
+      res.addEventListener('click', function (e) { e.stopPropagation(); restoreOne(t.id); });
+      del.addEventListener('click', function (e) { e.stopPropagation(); deleteForever(t); });
+      node.appendChild(row);
+      trashPanel.appendChild(node);
+    });
+  }
+  function restoreItem(t) {
+    if (!t) return;
+    if (t.kind === 'note') {
+      data.notes.push(t.payload);
+      data.sel.note = t.payload.id; data.tab = 'notes';
+    } else if (t.kind === 'project') {
+      data.projects.push(t.payload);
+      data.open[t.payload.id] = true;
+      var firstSc = (t.payload.chapters && t.payload.chapters[0] && t.payload.chapters[0].scenes && t.payload.chapters[0].scenes[0]) || null;
+      if (firstSc) data.sel.scene = firstSc.id;
+      data.tab = 'projects';
+    } else if (t.kind === 'chapter') {
+      // Chapter may have lived in a part or directly in a project
+      var container = null, project = null;
+      if (t.where && t.where.type === 'part') {
+        var pt = findPart(t.where.id);
+        if (pt) { container = pt.chapters; project = (findPartCtx(pt.id) || {}).project; data.open[pt.id] = true; }
+      } else if (t.where && t.where.type === 'project') {
+        var p = findProject(t.where.id);
+        if (p) { container = p.chapters; project = p; }
+      }
+      if (container && project) {
+        container.push(t.payload); data.open[project.id] = true; data.open[t.payload.id] = true;
+        var fs2 = t.payload.scenes && t.payload.scenes[0]; if (fs2) data.sel.scene = fs2.id;
+        data.tab = 'projects';
+      } else {
+        // Orphan: convert chapter to a note
+        var combined = (t.payload.scenes || []).map(function (s) { var bits = []; if (s.header) bits.push('<h3>' + esc(s.header) + '</h3>'); if (s.subheader) bits.push('<p><em>' + esc(s.subheader) + '</em></p>'); if (s.body) bits.push(s.body); return bits.join(''); }).join('<hr>');
+        var note = { id: newId(), title: (t.payload.title || 'Untitled chapter') + ' (restored)', body: combined };
+        data.notes.push(note); data.sel.note = note.id; data.tab = 'notes';
+      }
+    } else if (t.kind === 'part') {
+      var p2 = t.where && findProject(t.where.id);
+      if (p2) {
+        if (!Array.isArray(p2.parts)) p2.parts = [];
+        p2.parts.push(t.payload);
+        data.open[p2.id] = true; data.open[t.payload.id] = true;
+        var firstC = t.payload.chapters && t.payload.chapters[0];
+        if (firstC && firstC.scenes && firstC.scenes[0]) data.sel.scene = firstC.scenes[0].id;
+        data.tab = 'projects';
+      } else {
+        // Orphan: convert part to a note (flatten its chapters' scenes)
+        var combinedP = (t.payload.chapters || []).map(function (c) {
+          var chBits = ['<h2>' + esc(c.title || 'Untitled chapter') + '</h2>'];
+          (c.scenes || []).forEach(function (s) {
+            if (s.header) chBits.push('<h3>' + esc(s.header) + '</h3>');
+            if (s.subheader) chBits.push('<p><em>' + esc(s.subheader) + '</em></p>');
+            if (s.body) chBits.push(s.body);
+          });
+          return chBits.join('');
+        }).join('<hr>');
+        var pNote = { id: newId(), title: (t.payload.name || 'Untitled part') + ' (restored)', body: combinedP };
+        data.notes.push(pNote); data.sel.note = pNote.id; data.tab = 'notes';
+      }
+    } else if (t.kind === 'scene') {
+      var c = t.where && findChapter(t.where.id);
+      if (c) {
+        c.scenes.push(t.payload); data.open[c.id] = true;
+        data.sel.scene = t.payload.id; data.tab = 'projects';
+      } else {
+        var n2 = { id: newId(), title: (t.payload.header || 'Untitled scene') + ' (restored)', body: t.payload.body || '' };
+        data.notes.push(n2); data.sel.note = n2.id; data.tab = 'notes';
+      }
+    }
+    persist(); renderAll(); loadEditor();
+  }
+  function restoreOne(trashId) {
+    var i = -1;
+    for (var k = 0; k < data.trash.length; k++) if (data.trash[k].id === trashId) { i = k; break; }
+    if (i < 0) return;
+    var t = data.trash.splice(i, 1)[0];
+    restoreItem(t);
+  }
+  function deleteForever(t) {
+    confirmDanger('Delete this forever?', '"' + (t.name || 'Untitled') + '" will be gone for good — this can’t be undone.', function () {
+      data.trash = data.trash.filter(function (x) { return x.id !== t.id; });
+      persist(); renderAll();
+    });
+  }
+  function emptyTrash() {
+    confirmDanger('Empty the trash?', 'Everything in the trash will be gone for good — this can’t be undone.', function () {
+      data.trash = []; persist(); renderAll();
+    });
+  }
+
+  // Undo toast
+  var toastEl = null, toastTimer = null, toastFadeTimer = null;
+  function clearToastTimers() {
+    if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+    if (toastFadeTimer) { clearTimeout(toastFadeTimer); toastFadeTimer = null; }
+  }
+  function showUndoToast(msg) {
+    clearToastTimers();
+    if (toastEl) { toastEl.remove(); toastEl = null; }
+    toastEl = el('div', 'undo-toast');
+    var span = el('span', 'undo-msg'); span.textContent = msg;
+    var btn = el('button', 'undo-btn'); btn.type = 'button'; btn.textContent = 'Undo';
+    toastEl.append(span, btn);
+    document.body.appendChild(toastEl);
+    btn.addEventListener('click', function () {
+      if (!data.trash.length) { hideToast(); return; }
+      var t = data.trash.pop();
+      restoreItem(t);
+      hideToast();
+    });
+    toastTimer = setTimeout(function () {
+      if (!toastEl) return;
+      toastEl.classList.add('fade');
+      toastFadeTimer = setTimeout(function () { if (toastEl) { toastEl.remove(); toastEl = null; } }, 220);
+    }, 6000);
+  }
+  function hideToast() {
+    clearToastTimers();
+    if (toastEl) { toastEl.remove(); toastEl = null; }
+  }
 
   function selectNote(id) { flush(); data.sel.note = id; data.tab = 'notes'; persist(); renderAll(); loadEditor(); }
   function selectScene(id) {
@@ -355,13 +647,37 @@
     var ids = [].slice.call(group.children).filter(function (c) { return c.classList && c.classList.contains('node'); }).map(function (c) { return c.dataset.id; });
     if (key === 'notes') data.notes = reorder(data.notes, ids);
     else if (key === 'projects') data.projects = reorder(data.projects, ids);
-    else if (key.indexOf('chapters:') === 0) { var p = findProject(key.slice(9)); if (p) p.chapters = reorder(p.chapters, ids); }
-    else if (key.indexOf('scenes:') === 0) { var c = findChapter(key.slice(7)); if (c) c.scenes = reorder(c.scenes, ids); }
+    else if (key.indexOf('projectChildren:') === 0) {
+      // Project's mixed children: top-level chapters + parts. Split back into the two arrays.
+      var pp = findProject(key.slice('projectChildren:'.length));
+      if (pp) {
+        var newChapters = [], newParts = [];
+        var oldChapters = pp.chapters || [], oldParts = pp.parts || [];
+        ids.forEach(function (id) {
+          for (var i = 0; i < oldChapters.length; i++) if (oldChapters[i].id === id) { newChapters.push(oldChapters[i]); return; }
+          for (var j = 0; j < oldParts.length; j++) if (oldParts[j].id === id) { newParts.push(oldParts[j]); return; }
+        });
+        pp.chapters = newChapters; pp.parts = newParts;
+      }
+    }
+    else if (key.indexOf('chapters:') === 0) {
+      // Chapters inside a part
+      var pt = findPart(key.slice('chapters:'.length));
+      if (pt) pt.chapters = reorder(pt.chapters, ids);
+    }
+    else if (key.indexOf('scenes:') === 0) { var c = findChapter(key.slice('scenes:'.length)); if (c) c.scenes = reorder(c.scenes, ids); }
     persist();
   }
 
   // ═══ Editor ═══
   function loadEditor() {
+    if (data.tab === 'trash') {
+      docEl.hidden = true; emptyState.hidden = false;
+      emptyText.textContent = data.trash.length ? 'Pick an item to restore — or empty the trash below.' : 'Trash is empty.';
+      document.body.classList.remove('mode-note');
+      updateWordCount();
+      return;
+    }
     var mode = data.tab === 'notes' ? 'note' : 'scene';
     document.body.classList.toggle('mode-note', mode === 'note');
     var obj = mode === 'note' ? findNote(data.sel.note) : findSceneObj(data.sel.scene);
@@ -482,6 +798,230 @@
   document.getElementById('collapseBtn').addEventListener('click', function () { setCollapsed(true); });
   document.getElementById('navQuill').addEventListener('click', function () { setCollapsed(false); });
 
+  // ═══ Download (RTF manuscript export) ═══
+  // Open the "where to save" dropdown
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (!dlMenu) return;
+      if (dlMenu.hidden) {
+        var r = downloadBtn.getBoundingClientRect();
+        dlMenu.style.top = (r.bottom + 6) + 'px';
+        dlMenu.style.left = Math.max(8, r.right - 240) + 'px';
+        dlMenu.hidden = false;
+        downloadBtn.classList.add('on');
+      } else {
+        dlMenu.hidden = true;
+        downloadBtn.classList.remove('on');
+      }
+    });
+  }
+  if (dlMenu) {
+    dlMenu.addEventListener('click', function (e) {
+      var btn = e.target.closest('.dl-item');
+      if (!btn) return;
+      dlMenu.hidden = true;
+      if (downloadBtn) downloadBtn.classList.remove('on');
+      var dest = btn.dataset.dest;
+      var p = currentProject(); if (!p) return;
+      flush(); persist();
+      if (dest === 'device') doDownloadDevice(p);
+      else if (dest === 'drive') doDownloadDrive(p);
+    });
+  }
+  document.addEventListener('click', function (e) {
+    if (!dlMenu || dlMenu.hidden) return;
+    if (e.target.closest('#dlMenu') || (downloadBtn && (e.target === downloadBtn || downloadBtn.contains(e.target)))) return;
+    dlMenu.hidden = true;
+    if (downloadBtn) downloadBtn.classList.remove('on');
+  });
+
+  // ── Tiny floating add-menu (used by + on a project to pick Chapter or Part) ──
+  function closeAddMenu() {
+    var m = document.querySelector('.popup-menu'); if (m) m.remove();
+    document.removeEventListener('click', _addMenuOutside, true);
+  }
+  function _addMenuOutside(e) {
+    var m = document.querySelector('.popup-menu');
+    if (!m) return;
+    if (m.contains(e.target)) return;
+    closeAddMenu();
+  }
+  function openAddMenu(anchorBtn, items) {
+    closeAddMenu();
+    var menu = el('div', 'popup-menu');
+    items.forEach(function (it) {
+      var b = el('button', 'popup-item'); b.type = 'button';
+      var line1 = el('span', 'popup-name'); line1.textContent = it.label;
+      b.appendChild(line1);
+      if (it.sub) { var line2 = el('span', 'popup-sub'); line2.textContent = it.sub; b.appendChild(line2); }
+      b.addEventListener('click', function (e) { e.stopPropagation(); closeAddMenu(); it.action(); });
+      menu.appendChild(b);
+    });
+    document.body.appendChild(menu);
+    var r = anchorBtn.getBoundingClientRect();
+    var mw = menu.offsetWidth || 200;
+    menu.style.top = (r.bottom + 4) + 'px';
+    menu.style.left = Math.max(8, Math.min(window.innerWidth - mw - 8, r.right - mw)) + 'px';
+    // Defer the outside-click listener so the click that opened the menu doesn't immediately close it
+    setTimeout(function () { document.addEventListener('click', _addMenuOutside, true); }, 0);
+  }
+
+  // ── RTF helpers ──
+  // Escape \ { } and convert non-ASCII to \uNNNN? form (Word reads this fine).
+  function rtfEscapeText(s) {
+    s = String(s || '');
+    var out = '';
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charAt(i);
+      var code = s.charCodeAt(i);
+      if (c === '\\' || c === '{' || c === '}') out += '\\' + c;
+      else if (code < 128) out += c;
+      else {
+        var v = code > 32767 ? code - 65536 : code;
+        out += '\\u' + v + '?';
+      }
+    }
+    return out;
+  }
+  // Walk a DOM node, emit RTF inline runs. Strips background colour (highlights).
+  function inlineToRtf(node) {
+    if (node.nodeType === 3) return rtfEscapeText(node.textContent);
+    if (node.nodeType !== 1) return '';
+    var tag = node.tagName.toLowerCase();
+    if (tag === 'br') return '\\line ';
+    var inner = '';
+    for (var i = 0; i < node.childNodes.length; i++) inner += inlineToRtf(node.childNodes[i]);
+    if (tag === 'b' || tag === 'strong') return '{\\b ' + inner + '}';
+    if (tag === 'i' || tag === 'em') return '{\\i ' + inner + '}';
+    if (tag === 'u') return '{\\ul ' + inner + '}';
+    if (tag === 's' || tag === 'strike' || tag === 'del') return '{\\strike ' + inner + '}';
+    // span/font/mark + everything else: keep content, drop formatting (so highlights vanish).
+    return inner;
+  }
+  // Convert HTML body to RTF paragraphs. First paragraph is flush (no indent),
+  // every subsequent paragraph indents 0.5".
+  function htmlBodyToRtfParagraphs(html) {
+    var div = document.createElement('div');
+    div.innerHTML = html || '';
+    var paragraphs = [];
+    var topLevelP = false;
+    for (var i = 0; i < div.childNodes.length; i++) {
+      var n = div.childNodes[i];
+      if (n.nodeType === 1 && n.tagName.toLowerCase() === 'p') { topLevelP = true; break; }
+    }
+    if (topLevelP) {
+      for (var j = 0; j < div.childNodes.length; j++) {
+        var nn = div.childNodes[j];
+        if (nn.nodeType === 1 && nn.tagName.toLowerCase() === 'p') paragraphs.push(inlineToRtf(nn));
+        else if (nn.nodeType === 3 && nn.textContent.trim()) paragraphs.push(rtfEscapeText(nn.textContent));
+        // bare <br> or whitespace between <p>s: ignore
+      }
+    } else {
+      // No top-level <p>: treat the whole lump as one paragraph
+      var lump = inlineToRtf(div);
+      if (lump) paragraphs.push(lump);
+    }
+    if (!paragraphs.length) return '';
+    var out = '';
+    paragraphs.forEach(function (p, idx) {
+      var indent = idx === 0 ? '\\fi0' : '\\fi720';
+      out += '\\pard' + indent + ' ' + p + '\\par\n';
+    });
+    return out;
+  }
+  // Build the full RTF for a project: title page, chapters on new pages, scenes inside.
+  // Parts (if any) get their own heading page between groups of chapters.
+  function emitChapterRtf(ch, isFirstInGroup) {
+    var s = '';
+    if (!isFirstInGroup) s += '\\page\n';
+    s += '\\pard\\qc\\sb720\\sa480\\fs32\\b ' + rtfEscapeText((ch.title || 'Untitled chapter').trim()) + '\\b0\\fs24\\par\n';
+    (ch.scenes || []).forEach(function (sc, si) {
+      var hasHeader = (sc.header && sc.header.trim());
+      var hasSub = (sc.subheader && sc.subheader.trim());
+      if (si > 0 && !hasHeader && !hasSub) s += '\\pard\\qc\\sb240\\sa240 #\\par\n';
+      if (hasHeader) s += '\\pard\\qc\\sb360\\sa120\\b ' + rtfEscapeText(sc.header) + '\\b0\\par\n';
+      if (hasSub)   s += '\\pard\\qc\\sa180\\i ' + rtfEscapeText(sc.subheader) + '\\i0\\par\n';
+      s += htmlBodyToRtfParagraphs(sc.body || '');
+    });
+    return s;
+  }
+  function generateProjectRtf(project) {
+    var name = project.name || 'Untitled project';
+    var s = '';
+    s += '{\\rtf1\\ansi\\ansicpg1252\\deff0\n';
+    s += '{\\fonttbl{\\f0 Times New Roman;}}\n';
+    s += '\\paperw12240\\paperh15840\\margl1440\\margr1440\\margt1440\\margb1440\n';
+    s += '\\sectd\\fs24\\sl480\\slmult1\n';
+    s += '\\pard\\qc\\sb2880\\fs48\\b ' + rtfEscapeText(name) + '\\b0\\fs24\\par\n';
+    s += '\\page\n';
+    var firstChapterEmitted = false;
+    // Top-level chapters first
+    (project.chapters || []).forEach(function (ch) {
+      s += emitChapterRtf(ch, !firstChapterEmitted);
+      firstChapterEmitted = true;
+    });
+    // Then parts (each one gets its own heading page)
+    (project.parts || []).forEach(function (pt) {
+      if (firstChapterEmitted) s += '\\page\n';
+      s += '\\pard\\qc\\sb2880\\fs44\\b ' + rtfEscapeText(pt.name || 'Part') + '\\b0\\fs24\\par\n';
+      s += '\\page\n';
+      var firstInPart = true;
+      (pt.chapters || []).forEach(function (ch) {
+        s += emitChapterRtf(ch, firstInPart);
+        firstInPart = false; firstChapterEmitted = true;
+      });
+    });
+    s += '}\n';
+    return s;
+  }
+  // Trigger a browser download AND save a copy into Files → Documents.
+  function doDownloadDevice(project) {
+    var rtf = generateProjectRtf(project);
+    var base = (project.name || 'manuscript').replace(/[\/\\:*?"<>|]+/g, '_').trim() || 'manuscript';
+    var blob = new Blob([rtf], { type: 'application/rtf' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = base + '.rtf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    saveToFilesDocuments(base, rtf);
+  }
+  function saveToFilesDocuments(name, content) {
+    var files;
+    try { files = JSON.parse(localStorage.getItem('qh-files')) || {}; } catch (e) { files = {}; }
+    if (!Array.isArray(files.documents)) files.documents = [];
+    if (!Array.isArray(files.pictures)) files.pictures = [];
+    if (!Array.isArray(files.trash)) files.trash = [];
+    files.documents.push({
+      id: 'f' + Math.random().toString(36).slice(2, 9),
+      name: name,
+      date: Date.now(),
+      format: 'rtf',
+      content: content
+    });
+    try { localStorage.setItem('qh-files', JSON.stringify(files)); }
+    catch (e) {
+      // Out of room — pop and warn
+      files.documents.pop();
+      if (window.qhConfirm) window.qhConfirm({
+        title: 'Not enough room',
+        message: 'The download worked, but there wasn’t space to also save a copy in Files. Free up some pictures first.',
+        confirmText: 'OK'
+      });
+    }
+  }
+  function doDownloadDrive(project) {
+    // Until Drive is wired up properly (Task #5), be honest about needing setup.
+    if (window.qhConfirm) {
+      window.qhConfirm({
+        title: 'Connect Google Drive first',
+        message: 'Saving to Drive needs a one-time Google sign-in. We’ll add a Connect button to Settings soon — until then, use "This device".',
+        confirmText: 'OK'
+      });
+    }
+  }
+
   // ── Tabs ──
   document.querySelectorAll('.tab').forEach(function (t) {
     t.addEventListener('click', function () {
@@ -492,6 +1032,9 @@
       persist(); renderAll(); loadEditor();
     });
   });
+
+  // ── Cleanup toast on page leave ──
+  window.addEventListener('beforeunload', hideToast);
 
   // ── Theme sync + leave ──
   applyTheme();
