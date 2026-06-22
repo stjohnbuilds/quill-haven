@@ -70,6 +70,10 @@ Run all of these and report pass / fail with evidence:
 - Links `shared/theme.css` and reads the saved theme (`qh-theme` / `qh-night`)
   so it always matches the home screen. It listens for theme changes so it
   updates live while open.
-- Saves manuscripts to the device (localStorage). Offline-first.
-- v1 stays simple: editor + small toolbar + chapters + autosave + word count.
-  Notes/Projects tabs and the AI spell-checker come later.
+- Saves to the device (localStorage, key `qh-writing2`). Offline-first.
+- **v2 (current):** two tabs (Notes / Projects); a side panel that collapses to
+  a faded quill; Projects → Chapters → Scenes (each scene has a header +
+  sub-header + body); drag to reorder; double-click to rename; a centred pill
+  toolbar (bold / italic / underline / strikethrough / highlight); autosave;
+  word count. Old single-list chapters migrate into Notes on first load.
+- The AI spell-checker is still a future idea.

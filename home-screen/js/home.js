@@ -43,6 +43,83 @@ function updateClock() {
 }
 updateClock(); setInterval(updateClock, 1000);
 
+// ── Custom background (picture set from the Files app, tuned in Settings) ──
+function applyBg() {
+  var bg = '', fit = 'cover', dim = '0';
+  try { bg = localStorage.getItem('qh-bg') || ''; } catch (e) {}
+  try { fit = localStorage.getItem('qh-bg-fit') || 'cover'; } catch (e) {}
+  try { var d = localStorage.getItem('qh-bg-dim'); if (d !== null) dim = d; } catch (e) {}
+  var el = document.getElementById('customBg');
+  if (!el) { el = document.createElement('div'); el.id = 'customBg'; document.body.insertBefore(el, document.body.firstChild); }
+  document.documentElement.style.setProperty('--bg-dim', dim);
+  if (bg) {
+    el.style.backgroundImage = 'url("' + bg + '")';
+    el.style.backgroundSize = (fit === 'contain' ? 'contain' : 'cover');
+    document.body.classList.add('has-bg');
+  } else {
+    el.style.backgroundImage = '';
+    document.body.classList.remove('has-bg');
+  }
+  syncBgRow();
+}
+// Pick a background here in Settings, from the pictures in the Files app.
+function setBg(dataUrl) {
+  try { if (dataUrl) localStorage.setItem('qh-bg', dataUrl); else localStorage.removeItem('qh-bg'); } catch (e) {}
+  applyBg();
+}
+function renderBgGallery() {
+  var g = document.getElementById('bgGallery'); if (!g) return;
+  var bg = ''; try { bg = localStorage.getItem('qh-bg') || ''; } catch (e) {}
+  var pics = [];
+  try { var f = JSON.parse(localStorage.getItem('qh-files') || '{}'); if (f && Array.isArray(f.pictures)) pics = f.pictures; } catch (e) {}
+  g.innerHTML = '';
+  // "Default" tile — tap it to clear the picture and go back to the pastel background.
+  var def = document.createElement('button');
+  def.type = 'button';
+  def.className = 'bg-tile bg-default' + (!bg ? ' active' : '');
+  def.title = 'Default background';
+  def.setAttribute('aria-label', 'Default background');
+  def.onclick = function () { setBg(''); };
+  g.appendChild(def);
+  // One tile per picture saved in the Files app.
+  pics.slice().reverse().forEach(function (p) {
+    var t = document.createElement('button');
+    t.type = 'button';
+    t.className = 'bg-tile' + (bg && bg === p.data ? ' active' : '');
+    t.style.backgroundImage = 'url("' + p.data + '")';
+    t.title = p.name || 'Picture';
+    t.setAttribute('aria-label', p.name || 'Picture');
+    t.onclick = function () { setBg(p.data); };
+    g.appendChild(t);
+  });
+  if (!pics.length) {
+    var hint = document.createElement('span');
+    hint.className = 'bg-hint';
+    hint.textContent = 'Add pictures in the Files app';
+    g.appendChild(hint);
+  }
+}
+function syncBgRow() {
+  var row = document.getElementById('bgRow'); if (!row) return;
+  var bg = ''; try { bg = localStorage.getItem('qh-bg') || ''; } catch (e) {}
+  renderBgGallery();
+  // Fill/Fit + Dim only make sense once a picture is chosen.
+  var fitToggle = document.getElementById('bgFitToggle'); if (fitToggle) fitToggle.hidden = !bg;
+  var dimWrap = document.getElementById('bgDimWrap'); if (dimWrap) dimWrap.hidden = !bg;
+  if (!bg) return;
+  var fit = 'cover'; try { fit = localStorage.getItem('qh-bg-fit') || 'cover'; } catch (e) {}
+  row.querySelectorAll('.mode-btn[data-fit]').forEach(function (b) { b.classList.toggle('active', b.dataset.fit === fit); });
+  var dim = '0'; try { var d = localStorage.getItem('qh-bg-dim'); if (d !== null) dim = d; } catch (e) {}
+  var sl = document.getElementById('bgDimSlider'); if (sl) sl.value = Math.round(parseFloat(dim) * 100);
+}
+function setBgFit(fit) { try { localStorage.setItem('qh-bg-fit', fit); } catch (e) {} applyBg(); }
+function setBgDim(v) { var dim = (Math.max(0, Math.min(70, +v)) / 100).toFixed(2); try { localStorage.setItem('qh-bg-dim', dim); } catch (e) {} applyBg(); }
+window.addEventListener('storage', function (e) {
+  if (e.key === 'qh-bg' || e.key === 'qh-bg-fit' || e.key === 'qh-bg-dim') applyBg();
+  else if (e.key === 'qh-files') renderBgGallery();
+});
+applyBg();
+
 // ═══════════════════════════════════════════════
 //  APPS — defined once here, rendered everywhere
 //  (dock, top bar, app windows, settings list)
@@ -51,31 +128,51 @@ updateClock(); setInterval(updateClock, 1000);
 // Built-in apps: always present, can't be removed.
 var BUILTIN_APPS = [
   { id:'docs', name:'Google Docs', kind:'site', url:'https://docs.google.com',
-    c1:'#f5d0e5', c2:'#ebbad0', vb:'0 0 28 28',
+    c1:'#f7cfe6', c2:'#eeb1cf', vb:'0 0 28 28',
     icon:'<rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.4" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>' },
-  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=7',
-    c1:'#bfe3c4', c2:'#9ed0a8', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
-    icon:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/><path d="M16 8 2 22" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/><path d="M17.5 15H9" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>' }
+  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=17',
+    c1:'#c2e8c9', c2:'#97d6a4', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
+    icon:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/><path d="M16 8 2 22" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/><path d="M17.5 15H9" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>' },
+  { id:'files', name:'Files', kind:'local', src:'apps/files/index.html?v=4',
+    c1:'#c4d4f7', c2:'#a0bcee', vb:'0 0 24 24', sub:'Documents, pictures, USB',
+    icon:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="white" stroke-width="1.5" stroke-linejoin="round" opacity="0.92"/>' }
 ];
 
 // Add-ons ship by default but can be removed (and the user can add their own).
 var DEFAULT_ADDONS = [
   { id:'dabble', name:'Dabble Writer', kind:'site', url:'https://app.dabblewriter.com',
-    c1:'#ddd0f0', c2:'#ccbbe5', vb:'0 0 28 28',
+    c1:'#ddcff7', c2:'#c6b2ec', vb:'0 0 28 28',
     icon:'<path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/><line x1="14" y1="7" x2="14" y2="23" stroke="white" stroke-width="1.4" opacity="0.65"/>' }
 ];
 
 function loadAddons() {
   var a = null;
   try { a = JSON.parse(localStorage.getItem('qh-addons')); } catch(e) {}
-  if (!Array.isArray(a)) { a = DEFAULT_ADDONS.slice(); saveAddons(a); }   // seed Dabble on first run
-  return a;
+  if (!Array.isArray(a)) { a = DEFAULT_ADDONS.slice(); saveAddons(a); return a; }   // seed Dabble on first run
+  // keep default add-ons (e.g. Dabble) showing their latest colour / icon / name
+  var byId = {}; DEFAULT_ADDONS.forEach(function(d){ byId[d.id] = d; });
+  return a.map(function(app){ return byId[app.id] || app; });
 }
 function saveAddons(a) { try { localStorage.setItem('qh-addons', JSON.stringify(a)); } catch(e) {} }
 
 var addons = loadAddons();
 function allApps() { return BUILTIN_APPS.concat(addons); }
 function isBuiltin(id) { return BUILTIN_APPS.some(function(a){ return a.id === id; }); }
+
+// Custom display order (set by dragging rows in Settings). Stored as a list of
+// app ids; any app not listed keeps its natural place at the end.
+function loadOrder() { try { var o = JSON.parse(localStorage.getItem('qh-order')); return Array.isArray(o) ? o : []; } catch(e) { return []; } }
+function saveOrder(ids) { try { localStorage.setItem('qh-order', JSON.stringify(ids)); } catch(e) {} }
+function orderedApps() {
+  var apps = allApps();
+  var order = loadOrder();
+  var pos = {}; order.forEach(function(id, i) { pos[id] = i; });
+  return apps.slice().sort(function(a, b) {
+    var pa = (a.id in pos) ? pos[a.id] : order.length + apps.indexOf(a);
+    var pb = (b.id in pos) ? pos[b.id] : order.length + apps.indexOf(b);
+    return pa - pb;
+  });
+}
 // Per-theme colours for the APP icons. The default (Purple) theme uses each
 // app's own colour; Wood/Slate shift the known apps toward the theme palette.
 var currentTheme = 'purple';
@@ -83,11 +180,13 @@ var THEME_APP_COLORS = {
   wood: {
     docs:    ['#c7c3bd', '#aea89e'],
     writing: ['#c2c2ba', '#a9a99d'],
+    files:   ['#c3c0b9', '#a8a399'],
     dabble:  ['#c5c0ba', '#aaa49b']
   },
   grey: {
     docs:    ['#c0d4ee', '#9fbce4'],
     writing: ['#c2ccc6', '#a4b1aa'],
+    files:   ['#bfceea', '#9fb3d6'],
     dabble:  ['#c6cad6', '#abb1c0']
   }
 };
@@ -124,6 +223,7 @@ function openApp(name) {
   if (nm) nm.textContent = app ? app.name : '';
   var tag = document.getElementById('openAppTag');
   if (tag) tag.classList.add('show');
+  document.body.classList.add('app-open');
   currentApp = name;
 }
 
@@ -132,6 +232,7 @@ function goHome() {
   document.getElementById('homeScreen').style.display = 'flex';
   document.querySelectorAll('[data-app]').forEach(function(a) { a.classList.remove('active'); });
   var tag = document.getElementById('openAppTag'); if (tag) tag.classList.remove('show');
+  document.body.classList.remove('app-open');
   currentApp = null;
 }
 
@@ -193,9 +294,11 @@ function buildView(app) {
 // Build one row in the Settings → Apps list.
 function buildSettingsRow(app) {
   var row = document.createElement('div');
-  row.className = 'settings-row';
+  row.className = 'settings-row app-row';
+  row.dataset.appid = app.id;
   row.innerHTML =
-    '<div class="app-mini-icon" data-appicon="' + app.id + '" style="background:' + gradOf(app) + ';">' + iconHtml(app, 14) + '</div>'
+    '<span class="drag-grip" title="Drag to reorder" aria-label="Drag to reorder"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.6"/><circle cx="15" cy="5" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="19" r="1.6"/><circle cx="15" cy="19" r="1.6"/></svg></span>'
+    + '<div class="app-mini-icon" data-appicon="' + app.id + '" style="background:' + gradOf(app) + ';">' + iconHtml(app, 14) + '</div>'
     + '<div class="settings-row-text"><div class="settings-row-label">' + esc(app.name) + '</div>'
     + (app.sub ? '<div class="settings-row-sub">' + esc(app.sub) + '</div>' : '') + '</div>'
     + (isBuiltin(app.id) ? '' : '<button class="app-remove" title="Remove this app">&#x2715;</button>')
@@ -205,7 +308,49 @@ function buildSettingsRow(app) {
   cb.addEventListener('change', function() { toggleAppVis(app.id, cb.checked); });
   var rb = row.querySelector('.app-remove');
   if (rb) rb.addEventListener('click', function() { removeApp(app.id); });
+  // Drag to reorder — only starts when you grab the grip handle
+  var grip = row.querySelector('.drag-grip');
+  grip.addEventListener('mousedown', function() { row.draggable = true; });
+  grip.addEventListener('touchstart', function() { row.draggable = true; }, { passive: true });
+  row.addEventListener('dragstart', onRowDragStart);
+  row.addEventListener('dragover', onRowDragOver);
+  row.addEventListener('dragend', onRowDragEnd);
   return row;
+}
+
+// ── Drag-to-reorder helpers (Settings → Apps) ──
+var _dragRow = null;
+function onRowDragStart(e) {
+  _dragRow = this;
+  this.classList.add('dragging');
+  if (e.dataTransfer) { e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', this.dataset.appid || ''); } catch(_) {} }
+}
+function rowAfterPoint(list, y) {
+  var rows = [].slice.call(list.querySelectorAll('.app-row:not(.dragging)'));
+  var closest = { offset: -Infinity, el: null };
+  rows.forEach(function(r) {
+    var box = r.getBoundingClientRect();
+    var offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) closest = { offset: offset, el: r };
+  });
+  return closest.el;
+}
+function onRowDragOver(e) {
+  e.preventDefault();
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+  if (!_dragRow) return;
+  var list = document.getElementById('appsList');
+  var after = rowAfterPoint(list, e.clientY);
+  if (after == null) list.appendChild(_dragRow);
+  else list.insertBefore(_dragRow, after);
+}
+function onRowDragEnd() {
+  this.classList.remove('dragging');
+  this.draggable = false;
+  _dragRow = null;
+  var ids = [].slice.call(document.querySelectorAll('#appsList .app-row')).map(function(r) { return r.dataset.appid; }).filter(Boolean);
+  saveOrder(ids);
+  renderApps();
 }
 
 // Render the whole app list into the dock, top bar, windows, and settings.
@@ -219,7 +364,7 @@ function renderApps() {
   views.innerHTML = '';
   list.innerHTML = '';
 
-  allApps().forEach(function(app) {
+  orderedApps().forEach(function(app) {
     var hidden = !isVisible(app.id);
 
     var d = document.createElement('a');
@@ -310,73 +455,144 @@ function removeApp(id) {
 }
 
 // Small confirmation popup (used before removing an app)
+// Uses the shared confirm dialog (shared/confirm.js) so there's one popup everywhere.
 function showConfirm(title, msg, onYes) {
-  var ov = document.createElement('div');
-  ov.className = 'confirm-overlay';
-  ov.innerHTML = '<div class="confirm-box"><div class="confirm-title"></div><div class="confirm-msg"></div>'
-    + '<div class="confirm-actions"><button type="button" class="confirm-cancel">Cancel</button><button type="button" class="confirm-yes">Remove</button></div></div>';
-  ov.querySelector('.confirm-title').textContent = title;
-  ov.querySelector('.confirm-msg').textContent = msg;
-  function close() { ov.remove(); }
-  ov.addEventListener('click', function(e) { if (e.target === ov) close(); });
-  ov.querySelector('.confirm-cancel').addEventListener('click', close);
-  ov.querySelector('.confirm-yes').addEventListener('click', function() { close(); onYes(); });
-  document.body.appendChild(ov);
+  if (window.qhConfirm) { window.qhConfirm({ title: title, message: msg, confirmText: 'Remove', danger: true, onConfirm: onYes }); return; }
+  if (window.confirm(title + (msg ? '\n' + msg : ''))) onYes();
 }
 
 // ── Add-app form ──
-var APP_COLORS = [
-  ['#f5d0e5','#ebbad0'], ['#cdbfe6','#b6a3da'], ['#bfe3c4','#9ed0a8'],
-  ['#bcd6f0','#9ec0e6'], ['#f3d9b8','#e6c191'], ['#cfd4da','#aeb6c0']
-];
-var pickedColor = APP_COLORS[1];
+// Colour choices for a new app — theme-aware (pastels by default, muted browns
+// in Wood, cool slates/blues in Slate). About a dozen options each.
+var PICKER_COLORS = {
+  purple: [
+    ['#f5d0e5','#ebbad0'], ['#f1c6d4','#e4adbd'], ['#f7c1c1','#ec9f9f'], ['#f9c9b0','#eeb08c'],
+    ['#f0cbbf','#e3aa9c'], ['#f3d9b8','#e6c191'], ['#f3e3b0','#e6cf8e'], ['#f6e6a8','#e8d27e'],
+    ['#e7edba','#d2da98'], ['#d6ecb0','#bcd98e'], ['#bfe3c4','#9ed0a8'], ['#aee6cf','#8fd6b6'],
+    ['#bde6df','#9cd3ca'], ['#a9dbe9','#88c4d8'], ['#bcd6f0','#9ec0e6'], ['#b0c4f0','#90a8e4'],
+    ['#c4caef','#a8b1e0'], ['#cdbfe6','#b6a3da'], ['#d9bff0','#c29fe2'], ['#e8c9ef','#d4a9e0']
+  ],
+  wood: [
+    ['#d6c4ac','#bda584'], ['#cda883','#b88e63'], ['#cbb083','#b39563'], ['#cbb59b','#b09a7d'],
+    ['#c79a72','#b07f55'], ['#c3ad95','#a68d72'], ['#c2a596','#a8846f'], ['#bba488','#9e8568'],
+    ['#b89a78','#9c7e5c'], ['#b3a294','#968172'], ['#c8bbab','#ab9c89'], ['#bfb3a3','#a2937f'],
+    ['#c9bcb2','#ac9c90'], ['#bdb0a6','#9f9085'], ['#b6b083','#988f5f'], ['#a9b58f','#8a9970'],
+    ['#bdc0b2','#a0a48f'], ['#b6c0ba','#98a69e'], ['#c2bdb4','#a59f94'], ['#cabfb8','#ada199']
+  ],
+  grey: [
+    ['#cfd6df','#b3bdc9'], ['#c3cdd9','#a7b4c3'], ['#b7c4d4','#9aabc0'], ['#a9c0d8','#88a6c4'],
+    ['#c0d4ee','#9fbce4'], ['#b0bcd0','#90a0bb'], ['#aec6e6','#8facd6'], ['#9fb8cc','#7f9cb6'],
+    ['#aab6c4','#8b9bac'], ['#b4c4cf','#96abb8'], ['#b6c2d0','#98a8ba'], ['#a6c2c4','#86aaad'],
+    ['#bccac8','#9eb1ad'], ['#bfc8c2','#a1ada6'], ['#c0c4c2','#a2a8a5'], ['#bcc0c9','#9ea4b1'],
+    ['#c2c0bb','#a4a199'], ['#c8c6d2','#aaa8bc'], ['#ccccd5','#aeaebc'], ['#b9c6cd','#9bb0bb']
+  ]
+};
+PICKER_COLORS.dark = PICKER_COLORS.purple;   // Dark shares the pastel set
+function pickerColors() { return PICKER_COLORS[currentTheme] || PICKER_COLORS.purple; }
+function defaultColor() { var l = pickerColors(); return l[Math.min(3, l.length - 1)]; }
+var pickedColor = defaultColor();
 
 // Icon choices for a user-added app (or a letter if none picked).
 var ICON_CHOICES = [
-  { id:'quill',  vb:'0 0 24 24', paths:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/>' },
-  { id:'book',   vb:'0 0 24 24', paths:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' },
-  { id:'heart',  vb:'0 0 24 24', paths:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1.1-1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>' },
-  { id:'star',   vb:'0 0 24 24', paths:'<path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>' },
-  { id:'pencil', vb:'0 0 24 24', paths:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>' },
-  { id:'leaf',   vb:'0 0 24 24', paths:'<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/>' }
+  { id:'quill',    vb:'0 0 24 24', paths:'<path d="M20 4 C12 5 7 10 6 17 L12 17 C18 12 20 8 20 4 Z"/><path d="M20 4 L3 21"/><path d="M10 12 H15"/>' },
+  { id:'book',     vb:'0 0 24 24', paths:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>' },
+  { id:'heart',    vb:'0 0 24 24', paths:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1.1-1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>' },
+  { id:'star',     vb:'0 0 24 24', paths:'<path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>' },
+  { id:'pencil',   vb:'0 0 24 24', paths:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>' },
+  { id:'clover',   vb:'0 0 24 24', paths:'<g transform="translate(12 10.6)"><path d="M0 0 C -1 -1.6 -3.4 -2.4 -3.4 -4.3 C -3.4 -6 -1.4 -6.6 0 -5 C 1.4 -6.6 3.4 -6 3.4 -4.3 C 3.4 -2.4 1 -1.6 0 0 Z"/><path transform="rotate(120)" d="M0 0 C -1 -1.6 -3.4 -2.4 -3.4 -4.3 C -3.4 -6 -1.4 -6.6 0 -5 C 1.4 -6.6 3.4 -6 3.4 -4.3 C 3.4 -2.4 1 -1.6 0 0 Z"/><path transform="rotate(240)" d="M0 0 C -1 -1.6 -3.4 -2.4 -3.4 -4.3 C -3.4 -6 -1.4 -6.6 0 -5 C 1.4 -6.6 3.4 -6 3.4 -4.3 C 3.4 -2.4 1 -1.6 0 0 Z"/></g><path d="M12 11 C 12.5 14.5 11.5 18.5 12.8 21.6"/>' },
+  { id:'notebook', vb:'0 0 24 24', paths:'<rect x="7" y="3" width="13" height="18" rx="1.5"/><path d="M4.5 6H9"/><path d="M4.5 9.5H9"/><path d="M4.5 13H9"/><path d="M4.5 16.5H9"/><path d="M12 8H17"/><path d="M12 11.5H17"/><path d="M12 15H15"/>' }
 ];
 var pickedIcon = null;
 
 function renderColorSwatches() {
   var box = document.getElementById('addAppColors');
+  if (!box) return;
+  box.classList.add('picker');
+  var list = pickerColors();
+  if (list.indexOf(pickedColor) === -1) pickedColor = defaultColor();
   box.innerHTML = '';
-  APP_COLORS.forEach(function(pair) {
+
+  // The pill: shows the chosen colour; tap to open the dropdown
+  var pill = document.createElement('button');
+  pill.type = 'button';
+  pill.className = 'picker-pill';
+  pill.innerHTML = '<span class="pill-label">Colour</span>' +
+    '<span class="pill-swatch" style="background:linear-gradient(145deg,' + pickedColor[0] + ',' + pickedColor[1] + ')"></span>' +
+    '<svg class="pill-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+  pill.addEventListener('click', function(e) { e.stopPropagation(); closeIconMenu(); box.classList.toggle('open'); });
+  box.appendChild(pill);
+
+  // The dropdown grid of swatches
+  var menu = document.createElement('div');
+  menu.className = 'picker-menu';
+  list.forEach(function(pair) {
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'color-swatch' + (pair === pickedColor ? ' active' : '');
     b.style.background = 'linear-gradient(145deg,' + pair[0] + ',' + pair[1] + ')';
-    b.addEventListener('click', function() { pickedColor = pair; renderColorSwatches(); });
-    box.appendChild(b);
+    b.addEventListener('click', function(e) { e.stopPropagation(); pickedColor = pair; box.classList.remove('open'); renderColorSwatches(); });
+    menu.appendChild(b);
   });
+  box.appendChild(menu);
 }
+function closeColorMenu() { var b = document.getElementById('addAppColors'); if (b) b.classList.remove('open'); }
+function closeIconMenu() { var b = document.getElementById('addAppIcons'); if (b) b.classList.remove('open'); }
 
+// When no picture is picked, the app shows its own first letter — preview it live.
+function currentLetter() {
+  var el = document.getElementById('addAppName');
+  var n = el ? el.value.trim() : '';
+  return n ? n.charAt(0).toUpperCase() : '';
+}
+function letterHtml(px) {
+  var l = currentLetter();
+  return '<span class="pill-letter" style="font-size:' + Math.round(px * 0.95) + 'px;">' + (l ? esc(l) : '–') + '</span>';
+}
+function iconSvg(ch, px) {
+  return '<svg width="' + px + '" height="' + px + '" viewBox="' + ch.vb + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ch.paths + '</svg>';
+}
 function renderIconChoices() {
   var box = document.getElementById('addAppIcons');
   if (!box) return;
+  box.classList.add('picker');
   box.innerHTML = '';
+
+  // The pill: shows the chosen icon (or the letter A); tap to open the dropdown
+  var pill = document.createElement('button');
+  pill.type = 'button';
+  pill.className = 'picker-pill';
+  pill.innerHTML = '<span class="pill-label">Icon</span>' +
+    '<span class="pill-icon">' + (pickedIcon ? iconSvg(pickedIcon, 18) : letterHtml(18)) + '</span>' +
+    '<svg class="pill-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+  pill.addEventListener('click', function(e) { e.stopPropagation(); closeColorMenu(); box.classList.toggle('open'); });
+  box.appendChild(pill);
+
+  // The dropdown grid of icon choices
+  var menu = document.createElement('div');
+  menu.className = 'picker-menu icons';
+
   var none = document.createElement('button');
   none.type = 'button';
   none.className = 'icon-choice' + (pickedIcon === null ? ' active' : '');
-  none.title = 'Letter';
-  none.textContent = 'A';
-  none.addEventListener('click', function() { pickedIcon = null; renderIconChoices(); });
-  box.appendChild(none);
+  none.title = "Use the app's first letter";
+  none.innerHTML = letterHtml(16);
+  none.addEventListener('click', function(e) { e.stopPropagation(); pickedIcon = null; box.classList.remove('open'); renderIconChoices(); });
+  menu.appendChild(none);
+
   ICON_CHOICES.forEach(function(ch) {
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'icon-choice' + (pickedIcon === ch ? ' active' : '');
-    b.innerHTML = '<svg width="16" height="16" viewBox="' + ch.vb + '" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ch.paths + '</svg>';
-    b.addEventListener('click', function() { pickedIcon = ch; renderIconChoices(); });
-    box.appendChild(b);
+    b.innerHTML = iconSvg(ch, 16);
+    b.addEventListener('click', function(e) { e.stopPropagation(); pickedIcon = ch; box.classList.remove('open'); renderIconChoices(); });
+    menu.appendChild(b);
   });
+  box.appendChild(menu);
 }
 
 function openAddForm() {
+  pickedColor = defaultColor();          // match the current theme
+  renderColorSwatches();
   document.getElementById('addAppForm').classList.add('open');
   document.getElementById('addAppBtn').style.display = 'none';
   document.getElementById('addAppName').focus();
@@ -386,12 +602,21 @@ function closeAddForm() {
   document.getElementById('addAppBtn').style.display = '';
   document.getElementById('addAppName').value = '';
   document.getElementById('addAppUrl').value = '';
+  closeColorMenu();
   pickedIcon = null;
   renderIconChoices();
 }
+// Click anywhere else closes the open colour dropdown
+document.addEventListener('click', closeColorMenu);
 
 document.getElementById('addAppBtn').addEventListener('click', openAddForm);
 document.getElementById('addAppCancel').addEventListener('click', closeAddForm);
+// As you type the app name, the "letter" preview updates to your first letter
+document.getElementById('addAppName').addEventListener('input', function() {
+  document.querySelectorAll('#addAppIcons .pill-letter').forEach(function(el) {
+    el.textContent = currentLetter() || '–';
+  });
+});
 document.getElementById('addAppSave').addEventListener('click', function() {
   var ic = pickedIcon ? pickedIcon.paths : null;
   var vb = pickedIcon ? pickedIcon.vb : null;
@@ -405,8 +630,36 @@ renderColorSwatches();
 renderIconChoices();
 
 // ── Settings ──
-function toggleSettings() { document.getElementById('settingsOverlay').classList.toggle('open'); }
+function toggleSettings() {
+  var open = document.getElementById('settingsOverlay').classList.toggle('open');
+  if (open) { updateStorage(); syncBgRow(); }
+}
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') document.getElementById('settingsOverlay').classList.remove('open'); });
+
+// ── Storage indicator ──
+// Shows how much of this device's writing storage is used (saved docs, settings).
+function updateStorage() {
+  var fill = document.getElementById('storageFill');
+  var text = document.getElementById('storageText');
+  if (!fill || !text) return;
+  function fmt(bytes) {
+    if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(1) + ' GB';
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(0) + ' MB';
+    return Math.max(1, Math.round(bytes / 1024)) + ' KB';
+  }
+  if (navigator.storage && navigator.storage.estimate) {
+    navigator.storage.estimate().then(function(est) {
+      var used = est.usage || 0;
+      var quota = est.quota || 0;
+      var pct = quota ? Math.min(100, Math.max(2, Math.round(used / quota * 100))) : 2;
+      fill.style.width = pct + '%';
+      text.textContent = quota ? (fmt(used) + ' used of ' + fmt(quota)) : (fmt(used) + ' used');
+    }).catch(function() { fill.style.width = '2%'; text.textContent = 'Plenty of room'; });
+  } else {
+    fill.style.width = '2%';
+    text.textContent = 'Plenty of room';
+  }
+}
 
 // ── Display mode ──
 function setMode(mode) {
@@ -475,6 +728,7 @@ function setTheme(name) {
   if (name !== 'purple') document.body.classList.add('theme-' + name);
   currentTheme = name;
   recolorAppIcons();   // recolour app icons in place (no view/iframe rebuild)
+  renderColorSwatches();   // keep the Add-app colour choices matching the theme
   document.querySelectorAll('.theme-btn').forEach(function(b) {
     b.classList.toggle('active', b.dataset.theme === name);
   });

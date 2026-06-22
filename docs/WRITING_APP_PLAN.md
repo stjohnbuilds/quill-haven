@@ -1,19 +1,26 @@
 # Local Writing app — plan & feedback
 
-> **STATUS: waiting on Marie's detailed navigation plan.**
-> The repo only had a one-line note ("Sidebar with Notes tab and Projects tab,
-> chapters navigation") — NOT the detailed version Marie wrote. It was lost
-> between chats. When Marie shares it, paste it under "Navigation plan" below so
-> it is permanent.
+> **STATUS: plan confirmed by Marie 2026-06-21.** Ready to build once she says go.
 
-## Navigation plan (Marie's — TO BE FILLED IN)
+## Navigation plan (Marie's — confirmed 2026-06-21)
 
-_Known so far (one-liner only):_
-- Two tabs: **Notes** and **Projects**
-- Chapters navigation
-- Feel like the Typing & Tomes sidebar (collapses down into a little quill, faded)
+**Sidebar / nav**
+- Matches the **Typing & Tomes** sidebar feel: a quill nav that **pops out and
+  slides back in** (collapses to a little faded quill).
+- Two tabs inside it: **Notes** and **Projects**.
 
-_(Paste the full detailed plan here.)_
+**Projects structure (like Typing & Tomes)**
+- **Projects** contains projects.
+- A project opens into **Chapters**.
+- A chapter contains **Parts** (scenes).
+- Each scene has **one header + one sub-header**.
+- Everything **draggable** to reorder.
+
+**Editor**
+- **Simple formatting only:** bold, italic, underline, strikethrough, highlight.
+- **Pull the highlight logic** from Typing & Tomes (its pastel highlight colours).
+- Put the controls in **one centered pill panel** (all-in-one), with a **large
+  writing space** below.
 
 ## Feedback captured 2026-06-21 (action once the plan is confirmed)
 

@@ -3,6 +3,16 @@
    Colours come from shared/theme.css (the skins).
    This file is layout + components only.
 ─────────────────────────────────────────────── */
+
+/* Boot title font, bundled locally so it works with no Wi-Fi */
+@font-face {
+  font-family: 'Great Vibes';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/great-vibes-latin.woff2') format('woff2');
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 /* ── Boot splash ── */
@@ -29,11 +39,14 @@
 @keyframes bootFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
 .boot-quill {
-  position: absolute; right: -60px; bottom: 18px;
-  opacity: 0; stroke: var(--text-soft);
+  position: absolute; right: -82px; bottom: 2px;
+  width: 92px; height: 92px;
+  opacity: 0;
+  background: var(--text-soft);
+  -webkit-mask: url('../img/quill.png') center / contain no-repeat;
+  mask: url('../img/quill.png') center / contain no-repeat;
   animation: bootFade 0.9s ease forwards 1s;
 }
-.boot-quill circle { fill: var(--text-soft); }
 
 .boot-tagline {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -42,7 +55,7 @@
   display: inline-flex; align-items: center;
   animation: tagFade 0.4s ease forwards 2.5s;
 }
-@keyframes tagFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes tagFade { from { opacity: 0; } to { opacity: 1; } }
 .boot-cursor {
   display: inline-block; width: 2px; height: 14px; margin-left: 3px;
   background: var(--accent); animation: bootBlink 0.8s step-end infinite;
@@ -76,6 +89,16 @@ body {
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* ── Custom background picture (set from the Files app) ── */
+#customBg { position: fixed; inset: 0; z-index: -1; background-size: cover; background-position: center; background-repeat: no-repeat; background-color: var(--panel-bg); display: none; }
+body.has-bg #customBg { display: block; }
+/* the "dim" overlay fades the photo toward the current theme so text stays readable */
+body.has-bg #customBg::after { content: ''; position: absolute; inset: 0; background: var(--bg); opacity: var(--bg-dim, 0); }
+body.has-bg .orb { display: none; }
+/* the top bar + dock go solid over a photo so the icons are always visible */
+body.has-bg .top-bar { background: var(--bar-bg-strong); }
+body.has-bg .dock { background: var(--dock-bg-strong); }
+
 /* ── Background orbs ── */
 .orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
 .orb-1 { width: 420px; height: 420px; background: var(--orb1); top: -120px; right: -60px; animation: d1 20s ease-in-out infinite; }
@@ -108,7 +131,8 @@ body {
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 .top-datetime { font-weight: 500; font-size: 12px; }
 .top-right { display: flex; align-items: center; gap: 10px; }
-.top-icon { color: var(--bar-icon); opacity: 0.7; display: flex; align-items: center; }
+/* All three status icons are identical centred cells so the spacing is even */
+.top-icon { color: var(--bar-icon); opacity: 0.7; display: flex; align-items: center; justify-content: center; width: 28px; height: 24px; border-radius: 5px; }
 
 /* Top bar app icons (hidden in dock mode) — sit next to the status icons */
 .top-apps { display: none; gap: 5px; align-items: center; }
@@ -122,27 +146,7 @@ body.top-mode .top-apps { display: flex; }
 }
 .open-app-tag.show { display: block; }
 
-/* Confirmation popup (e.g. before removing an app) */
-.confirm-overlay {
-  position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center;
-  background: rgba(20,17,28,0.35); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
-  animation: fadeIn 0.15s ease;
-}
-.confirm-box {
-  width: 300px; max-width: calc(100% - 32px); padding: 20px;
-  background: var(--panel-bg); border: 1px solid var(--card-border); border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25); text-align: center;
-}
-.confirm-title { font-size: 15px; font-weight: 600; color: var(--text-strong); margin-bottom: 6px; }
-.confirm-msg { font-size: 12px; color: var(--sub); line-height: 1.45; margin-bottom: 16px; }
-.confirm-actions { display: flex; gap: 8px; }
-.confirm-cancel, .confirm-yes {
-  flex: 1; border: none; border-radius: 9px; padding: 9px; font-family: inherit;
-  font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.15s;
-}
-.confirm-cancel { background: var(--row-hover); color: var(--label); }
-.confirm-yes { background: #e0696e; color: #fff; }
-.confirm-cancel:hover, .confirm-yes:hover { opacity: 0.85; }
+/* The confirmation popup now lives in shared/confirm.js (one popup everywhere). */
 
 /* Right-click app menu (restart / close) */
 .app-menu {
@@ -180,8 +184,8 @@ body.top-mode .top-apps { display: flex; }
 
 .settings-btn {
   background: none; border: none; cursor: pointer; color: var(--bar-icon); opacity: 0.6;
-  transition: opacity 0.2s; display: flex; align-items: center;
-  padding: 3px; border-radius: 5px;
+  transition: opacity 0.2s; display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 24px; padding: 0; border-radius: 5px;
 }
 .settings-btn:hover { opacity: 1; background: var(--row-hover); }
 
@@ -269,6 +273,8 @@ body.top-mode .dock { display: none; }
   transition: opacity 0.12s, transform 0.12s; z-index: 20;
 }
 .dock .app:hover::before { opacity: 1; transform: translateX(-50%) scale(1); }
+/* While an app is open, don't float dock name-labels over the app (its name is in the top bar) */
+body.app-open .dock .app::before { display: none; }
 
 /* Active dot */
 .dock .app::after {
@@ -411,10 +417,25 @@ body.top-mode .dock { display: none; }
 }
 .add-app-form input:focus { border-color: var(--accent); }
 .add-app-form input::placeholder { color: var(--text-faint); }
-.add-app-colors { display: flex; gap: 8px; justify-content: center; padding: 2px 0; }
+.add-app-colors { padding: 2px 0; }
 .color-swatch { width: 26px; height: 26px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; padding: 0; transition: transform 0.15s; }
 .color-swatch:hover { transform: scale(1.1); }
 .color-swatch.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+
+/* Colour/Icon picker — a pill that opens a dropdown of choices */
+.picker-pill {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 7px 10px; border: 1px solid var(--card-border); border-radius: 8px;
+  background: var(--panel-bg); color: var(--label); font-family: inherit;
+  font-size: 12px; font-weight: 500; cursor: pointer; transition: border-color 0.15s;
+}
+.picker-pill:hover { border-color: var(--accent); }
+.picker-pill .pill-label { color: var(--text-muted); }
+.picker-pill .pill-swatch { width: 18px; height: 18px; border-radius: 5px; }
+.picker-pill .pill-chev { margin-left: auto; color: var(--text-muted); transition: transform 0.15s; }
+.picker.open .picker-pill .pill-chev { transform: rotate(180deg); }
+.picker-menu { display: none; margin-top: 8px; padding: 10px; border: 1px solid var(--card-border); border-radius: 8px; background: var(--card-bg); }
+.picker.open .picker-menu { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; justify-items: center; }
 .add-app-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 2px; }
 .add-app-cancel, .add-app-save {
   border: none; border-radius: 8px; padding: 7px 14px; font-family: inherit;
@@ -434,6 +455,36 @@ body.top-mode .dock { display: none; }
 }
 .icon-choice:hover { transform: scale(1.08); }
 .icon-choice.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.pill-letter { font-weight: 700; line-height: 1; color: inherit; }
+
+/* Drag-to-reorder grip on each app row */
+.drag-grip {
+  display: flex; align-items: center; justify-content: center;
+  width: 16px; flex: 0 0 auto; margin-right: 2px;
+  color: var(--text-faint); cursor: grab; opacity: 0.55; transition: opacity 0.15s;
+}
+.drag-grip:hover { opacity: 1; }
+.drag-grip:active { cursor: grabbing; }
+.app-row.dragging { opacity: 0.45; background: var(--row-hover); border-radius: 8px; }
+
+/* Storage indicator bar */
+.storage-bar { width: 100%; height: 6px; border-radius: 3px; background: var(--slider-track); overflow: hidden; }
+.storage-bar-fill { height: 100%; width: 2%; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-strong)); transition: width 0.4s ease; }
+
+/* Background picker — pick from your Pictures, right here in Settings */
+.bg-gallery { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 4px; }
+.bg-tile {
+  flex: 0 0 auto; width: 52px; height: 38px; padding: 0; border-radius: 7px;
+  border: 2px solid transparent; background-color: var(--panel-bg);
+  background-size: cover; background-position: center; cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.bg-tile:hover { border-color: var(--accent); }
+.bg-tile.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.bg-default { background: var(--bg); }
+.bg-hint { font-size: 11px; color: var(--text-muted); align-self: center; padding: 0 4px; }
+.bg-dim-row { display: flex; align-items: center; gap: 10px; padding-left: 2px; }
+#bgFitToggle[hidden], #bgDimWrap[hidden] { display: none; }
 
 /* Hue slider — only shown under the colour (Purple) theme */
 .hue-slider {

@@ -1,0 +1,19 @@
+{
+  "name": "Quill Haven",
+  "short_name": "Quill Haven",
+  "description": "Your distraction-free writing space",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#f5efe0",
+  "theme_color": "#8b7355",
+  "icons": [
+    {
+      "src": "img/quill.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
