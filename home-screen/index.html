@@ -131,6 +131,12 @@
           <div class="settings-row-sub" id="storageText" style="margin-top:6px;">Checking…</div>
         </div>
       </div>
+      <div class="settings-row clickable" id="restoreRow" onclick="openRestoreBackup()">
+        <div class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg></div>
+        <div class="settings-row-text"><div class="settings-row-label">Restore backup</div><div class="settings-row-sub">Load a quill-haven-backup file (.json or .zip)</div></div>
+        <span class="settings-row-arrow">&#x203A;</span>
+      </div>
+      <input type="file" id="restoreInput" accept=".json,.zip,application/json,application/zip" hidden>
       <div class="settings-row">
         <div class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/><path d="M2 12h20"/></svg></div>
         <div class="settings-row-text"><div class="settings-row-label">Region</div><div class="settings-row-sub">Time zone — keeps the clock right</div></div>
@@ -183,7 +189,7 @@
 <div class="clipboard-copied" id="clipToast">Copied to clipboard</div>
 
 <script src="shared/confirm.js?v=2"></script>
-<script src="js/home.js?v=25"></script>
+<script src="js/home.js?v=26"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

@@ -79,6 +79,43 @@ echo "Quill Haven will launch at next login. Reboot to start now."
 ENABLE
 sudo chmod +x /usr/local/bin/quill-haven-enable
 
+say "Installing Chromium managed policy — the real site allowlist"
+# Blocks every URL by default; only the whitelist below loads. This is what
+# turns Quill Haven into a true write-only device (no hunting around).
+sudo mkdir -p /etc/chromium/policies/managed
+sudo tee /etc/chromium/policies/managed/quill-haven.json >/dev/null <<'POLICY'
+{
+  "URLBlocklist": ["*"],
+  "URLAllowlist": [
+    "stjohnbuilds.github.io",
+    "raw.githubusercontent.com",
+    "accounts.google.com",
+    "docs.google.com",
+    "drive.google.com",
+    "www.google.com",
+    "ssl.google.com",
+    ".googleusercontent.com",
+    ".gstatic.com",
+    ".googleapis.com",
+    "fonts.googleapis.com",
+    "fonts.gstatic.com",
+    "app.dabblewriter.com",
+    "dabblewriter.com",
+    "typingandtomes.vercel.app",
+    "vercel-scripts.com",
+    "vercel.live"
+  ],
+  "DefaultBrowserSettingEnabled": false,
+  "IncognitoModeAvailability": 1,
+  "DeveloperToolsAvailability": 2,
+  "TranslateEnabled": false,
+  "PasswordManagerEnabled": false
+}
+POLICY
+# Same policy for chromium-browser package (older distros use that path)
+sudo mkdir -p /etc/chromium-browser/policies/managed
+sudo cp /etc/chromium/policies/managed/quill-haven.json /etc/chromium-browser/policies/managed/quill-haven.json
+
 say "Pre-warming Quill Haven so it works offline"
 # Visit the URL headlessly once so the service worker caches the shell
 timeout 20 chromium --headless --disable-gpu --no-sandbox "$QUILL_URL" >/dev/null 2>&1 || true

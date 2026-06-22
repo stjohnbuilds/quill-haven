@@ -119,6 +119,16 @@ app will pick them up by itself. If something looks stuck:
 
 ---
 
+## Want a real site wall?
+
+The setup above HIDES other sites but doesn't BLOCK them. For a true
+"Chrome physically cannot load anything else" wall, see
+**[FAMILY_LINK.md](FAMILY_LINK.md)** in this folder — it walks through
+the Google Family Link setup (slightly awkward but actually works on a
+non-formattable Chromebook).
+
+---
+
 ## If something goes wrong
 
 Tell Claude exactly which step you're on and what you're seeing on

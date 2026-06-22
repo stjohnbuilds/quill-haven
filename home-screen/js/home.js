@@ -903,6 +903,95 @@ function openDriveConnect() {
   });
 }
 
+// ── Backup restore ──
+// Reads a quill-haven-backup .json or pulls the .json out of a .zip we exported,
+// confirms before REPLACING everything, then reloads.
+function openRestoreBackup() {
+  var inp = document.getElementById('restoreInput'); if (inp) inp.click();
+}
+function _zipFindBackupJson(buf) {
+  var bytes = new Uint8Array(buf);
+  var view = new DataView(buf);
+  // Find EOCD signature 0x06054b50 by scanning backwards (zip comment may exist)
+  var end = -1;
+  var start = Math.max(0, bytes.length - 65557);
+  for (var i = bytes.length - 22; i >= start; i--) {
+    if (view.getUint32(i, true) === 0x06054b50) { end = i; break; }
+  }
+  if (end < 0) throw new Error('That doesn’t look like a .zip file.');
+  var entries = view.getUint16(end + 10, true);
+  var cdOffset = view.getUint32(end + 16, true);
+  var p = cdOffset;
+  for (var k = 0; k < entries; k++) {
+    if (view.getUint32(p, true) !== 0x02014b50) throw new Error('Couldn’t read the .zip directory.');
+    var method = view.getUint16(p + 10, true);
+    var size = view.getUint32(p + 20, true);
+    var nameLen = view.getUint16(p + 28, true);
+    var extraLen = view.getUint16(p + 30, true);
+    var commLen = view.getUint16(p + 32, true);
+    var lhOff = view.getUint32(p + 42, true);
+    var name = new TextDecoder().decode(bytes.slice(p + 46, p + 46 + nameLen));
+    if (name === 'quill-haven-backup.json') {
+      if (method !== 0) throw new Error('The .zip is compressed — please use the .json directly.');
+      var lhNameLen = view.getUint16(lhOff + 26, true);
+      var lhExtraLen = view.getUint16(lhOff + 28, true);
+      var dataStart = lhOff + 30 + lhNameLen + lhExtraLen;
+      return new TextDecoder().decode(bytes.slice(dataStart, dataStart + size));
+    }
+    p += 46 + nameLen + extraLen + commLen;
+  }
+  throw new Error('No quill-haven-backup.json inside that .zip — was it made by Quill Haven?');
+}
+function _applyRestore(parsed) {
+  if (parsed.writing) { try { localStorage.setItem('qh-writing2', JSON.stringify(parsed.writing)); } catch (e) {} }
+  if (parsed.files) { try { localStorage.setItem('qh-files', JSON.stringify(parsed.files)); } catch (e) {} }
+}
+(function wireRestore() {
+  var inp = document.getElementById('restoreInput'); if (!inp) return;
+  inp.addEventListener('change', function () {
+    var file = inp.files && inp.files[0]; inp.value = '';
+    if (!file) return;
+    var rd = new FileReader();
+    var isZip = /\.zip$/i.test(file.name) || file.type === 'application/zip';
+    rd.onload = function () {
+      var parsed;
+      try {
+        var text = isZip ? _zipFindBackupJson(rd.result) : rd.result;
+        parsed = JSON.parse(text);
+      } catch (e) {
+        return window.qhConfirm({ title: 'Couldn’t read that file', message: String(e && e.message || e), confirmText: 'OK' });
+      }
+      if (!parsed || parsed.format !== 'quill-haven-backup') {
+        return window.qhConfirm({ title: 'Not a Quill Haven backup', message: 'That file doesn’t look like a backup made by Quill Haven (no "quill-haven-backup" marker inside).', confirmText: 'OK' });
+      }
+      var bits = [];
+      var w = parsed.writing || {};
+      if (Array.isArray(w.projects)) bits.push(w.projects.length + ' project' + (w.projects.length === 1 ? '' : 's'));
+      if (Array.isArray(w.notes)) bits.push(w.notes.length + ' note' + (w.notes.length === 1 ? '' : 's'));
+      var f = parsed.files || {};
+      if (Array.isArray(f.documents)) bits.push(f.documents.length + ' document' + (f.documents.length === 1 ? '' : 's'));
+      if (Array.isArray(f.pictures)) bits.push(f.pictures.length + ' picture' + (f.pictures.length === 1 ? '' : 's'));
+      var when = parsed.exportedAt ? new Date(parsed.exportedAt).toLocaleString() : 'unknown date';
+      window.qhConfirm({
+        title: 'Replace everything with this backup?',
+        message: 'Backup from ' + when + ' — ' + (bits.join(', ') || 'no items') + '. This REPLACES all your current writing and files. It can’t be undone.',
+        confirmText: 'Replace everything',
+        danger: true,
+        onConfirm: function () {
+          _applyRestore(parsed);
+          window.qhConfirm({
+            title: 'Backup loaded',
+            message: 'The app needs to reload to show the restored writing.',
+            confirmText: 'Reload now',
+            onConfirm: function () { location.reload(); }
+          });
+        }
+      });
+    };
+    if (isZip) rd.readAsArrayBuffer(file); else rd.readAsText(file);
+  });
+})();
+
 // ── Display mode ──
 function setMode(mode) {
   document.body.classList.toggle('top-mode', mode === 'top');

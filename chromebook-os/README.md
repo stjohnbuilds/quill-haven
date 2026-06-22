@@ -5,8 +5,8 @@ Three install paths — pick the one that matches the device.
 ## `Windows/`  — for any Windows 10 or 11 laptop
 
 Install Quill Haven as a real installed app (PWA), run Microsoft Edge
-in fullscreen kiosk mode on every login. No USB needed, no firmware
-faff. ~10 minutes.
+in fullscreen kiosk mode on every login. ~10 minutes. **Real site wall
+optional** via an admin script (Step 8 in the guide).
 
 → Open `Windows/SETUP.md`.
 
@@ -14,7 +14,8 @@ faff. ~10 minutes.
 
 Chromebooks with **MediaTek / Rockchip / Qualcomm Snapdragon** chips
 can't have ChromeOS removed. This path locks ChromeOS down instead:
-install Quill Haven as the default app, hide everything else.
+install Quill Haven as the default app, hide everything else. **Real
+site wall optional** via Google Family Link — see `FAMILY_LINK.md`.
 
 → Open `Not Formattable/SETUP.md`.
 
@@ -23,7 +24,9 @@ install Quill Haven as the default app, hide everything else.
 Chromebooks with **Intel or AMD** chips can have ChromeOS wiped off
 completely and a custom OS installed in its place. The result boots
 directly into Quill Haven — no sign-in, no Chrome, no other OS
-underneath. Requires a **16GB USB stick** and about an hour.
+underneath. The setup script installs the Chromium URL allowlist
+automatically, so the site wall is on from day one. Requires a **16GB
+USB stick** and about an hour.
 
 → Open `Formattable/SETUP.md`.
 

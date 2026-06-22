@@ -97,14 +97,40 @@ stuck, open Quill Haven and press **Ctrl + Shift + R**.
 
 ---
 
+## Step 8 — Optional but recommended: real site wall
+
+The kiosk above hides Edge's UI, but if you leave kiosk mode (close the
+window, open Edge normally), Edge can still browse anywhere. For a TRUE
+write-only device — Edge physically can't load anything except Quill
+Haven + the 3 writing apps — run this **as Administrator**:
+
+1. Right-click **PowerShell** in your Start menu → **Run as
+   administrator**. (You'll see a UAC prompt — yes.)
+2. Paste:
+   ```
+   irm https://stjohnbuilds.github.io/quill-haven/setup-windows-lockdown.ps1 | iex
+   ```
+3. Press Enter. It writes the Edge URL allowlist into the Windows
+   registry. Done.
+
+After this, ANY URL outside the allowlist (Quill Haven, Google Docs,
+accounts.google.com, Dabble Writer, Typing & Tomes) shows Edge's "this
+site is blocked by your administrator" page. The lockdown survives
+reboots and Edge updates.
+
+To **undo** the lockdown later (still as admin):
+```
+irm https://stjohnbuilds.github.io/quill-haven/setup-windows-lockdown.ps1 -OutFile lock.ps1; .\lock.ps1 -Remove
+```
+
 ## What this CAN and CAN'T do
 
 - **It DOES** open straight into Quill Haven with no browser bar, no
   taskbar, on every login.
-- **It DOES NOT yet** block other websites — if you go hunting in
-  regular Edge you can still browse. For a true site wall, ask Claude
-  to set up **Microsoft Family Safety** — that gives you OS-level
-  allowlisting (only Quill Haven + the 3 writing apps load).
+- **WITHOUT Step 8:** other websites are hidden but reachable if you
+  hunt for Edge.
+- **WITH Step 8:** other websites are physically blocked at the browser
+  level. This is the real "writing-only device" mode.
 
 ---
 
