@@ -25,14 +25,15 @@ underneath. It IS the OS.
 
 ## What's going to happen (the big picture)
 
-You'll do four things, in order. Each one is its own section below.
+You'll do five things, in order. Each one is its own section below.
 
 1. **Make a USB installer** on another computer. (~15 min)
-2. **Unlock the Chromebook's firmware** so it stops being a Chromebook. (~10 min)
-3. **Install our new operating system** from the USB stick. (~20 min)
-4. **Run the Quill Haven setup script** to turn it into a writing device. (~10 min)
+2. **Turn on Developer Mode** on the Chromebook. (~15 min, mostly waiting)
+3. **Unlock the Chromebook's firmware** so it stops being a Chromebook. (~10 min)
+4. **Install our new operating system** from the USB stick. (~20 min)
+5. **Run the Quill Haven setup script** to turn it into a writing device. (~10 min)
 
-After step 4 you reboot, and you're done forever.
+After step 5 you reboot, and you're done forever.
 
 ---
 
@@ -68,7 +69,29 @@ operating system. It's free, friendly, and runs fast on cheap hardware.
 
 ---
 
-## Step 2 — Unlock the Chromebook's firmware
+## Step 2 — Turn on Developer Mode
+
+The next step needs the `shell` command in crosh, which ChromeOS hides
+unless Developer Mode is on. Turning it on **wipes the Chromebook** —
+that's fine because we're about to wipe it anyway, but save any files
+on it first if you haven't.
+
+1. Hold **Esc + Refresh (↻) + Power** all at once. The Chromebook
+   restarts to a recovery screen with a yellow warning triangle.
+2. Press **Ctrl + D**. A new screen asks to turn off OS verification —
+   press **Enter**.
+3. It wipes itself and restarts. Takes 5–15 minutes. Let it.
+4. After it reboots, you'll see a scary "OS verification is off" screen
+   every time it turns on. Just press **Ctrl + D** to skip past it.
+   (Step 3 below replaces this screen with normal PC firmware, so it
+   only matters for a short while.)
+5. Sign in with any Google account again to get to the desktop.
+
+✅ Developer Mode is on. `shell` will now work in crosh.
+
+---
+
+## Step 3 — Unlock the Chromebook's firmware
 
 The Chromebook has special firmware that only lets it run ChromeOS. We
 need to swap that for normal PC firmware first.
@@ -78,38 +101,37 @@ need to swap that for normal PC firmware first.
 > this step easily, so this is the point of no return. Make sure you
 > want to keep going before you start.
 
-1. **Turn the Chromebook on.** Sign in with any Google account
-   (doesn't matter which). Get to the desktop.
-2. Open the **Chrome browser** on the Chromebook.
-3. Press **Ctrl + Alt + T** at the same time. A black terminal window
+1. Open the **Chrome browser** on the Chromebook.
+2. Press **Ctrl + Alt + T** at the same time. A black terminal window
    opens called **crosh**.
-4. Type this and press Enter:
+3. Type this and press Enter:
 
    ```
    shell
    ```
 
-5. Then paste this whole line (right-click → Paste, or Ctrl+Shift+V):
+4. Then paste this whole line (right-click → Paste, or Ctrl+Shift+V):
 
    ```
    cd; curl -LO mrchromebox.tech/firmware-util.sh && sudo bash firmware-util.sh
    ```
 
-6. Press Enter. A menu appears (white text on dark background).
-7. Type the number for **Install/Update UEFI (Full ROM) Firmware** and
+5. Press Enter. A menu appears (white text on dark background).
+6. Type the number for **Install/Update UEFI (Full ROM) Firmware** and
    press Enter.
-8. It will warn you several times. Type **Y** and press Enter for each
+7. It will warn you several times. Type **Y** and press Enter for each
    warning, until it asks if you want a backup.
-9. **Say YES to the backup.** It saves a copy of the original firmware
-   to your USB stick — you'll never need it, but it's good to have.
-10. Wait. The screen will print lots of text. When it finishes, the
-    Chromebook will turn off.
+8. **Say YES to the backup.** It saves a copy of the original firmware
+   to your USB stick — keep it somewhere safe forever (it's the only
+   way to put ChromeOS back exactly as it was).
+9. Wait. The screen will print lots of text. When it finishes, the
+   Chromebook will turn off.
 
 ✅ The Chromebook is no longer a Chromebook. Don't turn it on yet.
 
 ---
 
-## Step 3 — Install our new operating system
+## Step 4 — Install our new operating system
 
 1. Plug the **USB stick** into the Chromebook.
 2. Press the **power button**. A new screen appears (might say "boot
@@ -142,7 +164,7 @@ need to swap that for normal PC firmware first.
 
 ---
 
-## Step 4 — Turn it into Quill Haven
+## Step 5 — Turn it into Quill Haven
 
 This is the magic step. You'll run **one command** that installs Quill
 Haven, sets it to open on power-on, and hides everything else.
@@ -157,7 +179,7 @@ Haven, sets it to open on power-on, and hides everything else.
    curl -L https://stjohnbuilds.github.io/quill-haven/setup.sh | bash
    ```
 
-4. It will ask for your password (the one you wrote down in Step 3).
+4. It will ask for your password (the one you wrote down in Step 4).
    Type it and press Enter. (You won't see the dots — that's normal.)
 5. The script will install Chromium browser, set Quill Haven to launch
    on startup, and hide all the desktop bits. Takes about 5 minutes.
