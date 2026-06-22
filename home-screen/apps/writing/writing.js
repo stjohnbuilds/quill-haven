@@ -192,7 +192,17 @@
   }
   function syncDownloadBtn() {
     if (!downloadBtn) return;
-    downloadBtn.hidden = !(data.tab === 'projects' && currentProject());
+    // Visible on Notes (download current note OR backup) and Projects (download current book OR backup).
+    downloadBtn.hidden = data.tab === 'trash';
+    var nameEl = document.getElementById('dlNameThis');
+    var subEl = document.getElementById('dlSubThis');
+    if (data.tab === 'notes') {
+      if (nameEl) nameEl.textContent = 'This note';
+      if (subEl) subEl.textContent = 'Word file (.rtf) of the current note';
+    } else {
+      if (nameEl) nameEl.textContent = 'This book';
+      if (subEl) subEl.textContent = 'Word file (.rtf) — also saved to Files';
+    }
   }
 
   function renderFoot() {
@@ -823,10 +833,19 @@
       dlMenu.hidden = true;
       if (downloadBtn) downloadBtn.classList.remove('on');
       var dest = btn.dataset.dest;
-      var p = currentProject(); if (!p) return;
       flush(); persist();
-      if (dest === 'device') doDownloadDevice(p);
-      else if (dest === 'drive') doDownloadDrive(p);
+      if (dest === 'backup') { doDownloadBackup(); return; }
+      if (dest === 'drive')  { doDownloadDrive(); return; }
+      // 'device' — depends on what's selected
+      if (data.tab === 'notes') {
+        var n = findNote(data.sel.note);
+        if (n) doDownloadNote(n);
+        else doDownloadBackup();
+      } else {
+        var p = currentProject();
+        if (p) doDownloadDevice(p);
+        else doDownloadBackup();
+      }
     });
   }
   document.addEventListener('click', function (e) {
@@ -1011,15 +1030,186 @@
       });
     }
   }
-  function doDownloadDrive(project) {
-    // Until Drive is wired up properly (Task #5), be honest about needing setup.
+  function doDownloadDrive() {
     if (window.qhConfirm) {
       window.qhConfirm({
         title: 'Connect Google Drive first',
-        message: 'Saving to Drive needs a one-time Google sign-in. We’ll add a Connect button to Settings soon — until then, use "This device".',
+        message: 'Saving to Drive needs a one-time Google sign-in. Set it up in Settings > Google Drive when ready. Until then, use "This book" or "Full backup".',
         confirmText: 'OK'
       });
     }
+  }
+  // Export a single note as its own .rtf manuscript
+  function generateNoteRtf(note) {
+    var s = '';
+    s += '{\\rtf1\\ansi\\ansicpg1252\\deff0\n';
+    s += '{\\fonttbl{\\f0 Times New Roman;}}\n';
+    s += '\\paperw12240\\paperh15840\\margl1440\\margr1440\\margt1440\\margb1440\n';
+    s += '\\sectd\\fs24\\sl480\\slmult1\n';
+    s += '\\pard\\qc\\sb720\\sa360\\fs36\\b ' + rtfEscapeText(note.title || 'Untitled note') + '\\b0\\fs24\\par\n';
+    s += htmlBodyToRtfParagraphs(note.body || '');
+    s += '}\n';
+    return s;
+  }
+  function doDownloadNote(note) {
+    var rtf = generateNoteRtf(note);
+    var base = (note.title || 'Untitled note').replace(/[\/\\:*?"<>|]+/g, '_').trim() || 'Untitled note';
+    var blob = new Blob([rtf], { type: 'application/rtf' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = base + '.rtf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    saveToFilesDocuments(base, rtf);
+  }
+
+  // ═══ Zip generator — store-only (no compression), pure JS, no library ═══
+  // Builds a single Blob from a list of { name, data: Uint8Array } files.
+  var ZIP_CRC_TABLE = (function () {
+    var t = new Uint32Array(256);
+    for (var i = 0; i < 256; i++) {
+      var c = i;
+      for (var k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[i] = c >>> 0;
+    }
+    return t;
+  })();
+  function zipCrc32(bytes) {
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < bytes.length; i++) c = ZIP_CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  function zipUtf8(s) { return new TextEncoder().encode(s); }
+  function zipBuild(files, when) {
+    when = when || new Date();
+    var dt = ((when.getHours() & 0x1F) << 11) | ((when.getMinutes() & 0x3F) << 5) | ((when.getSeconds() >> 1) & 0x1F);
+    var dd = (((when.getFullYear() - 1980) & 0x7F) << 9) | (((when.getMonth() + 1) & 0xF) << 5) | (when.getDate() & 0x1F);
+    var parts = [], central = [], offset = 0;
+    files.forEach(function (f) {
+      var nameBytes = zipUtf8(f.name);
+      var crc = zipCrc32(f.data);
+      var size = f.data.length;
+      var lfh = new ArrayBuffer(30 + nameBytes.length);
+      var v = new DataView(lfh);
+      v.setUint32(0, 0x04034b50, true);
+      v.setUint16(4, 20, true);      // version needed
+      v.setUint16(6, 0x0800, true);  // flags (UTF-8)
+      v.setUint16(8, 0, true);       // method = stored
+      v.setUint16(10, dt, true);
+      v.setUint16(12, dd, true);
+      v.setUint32(14, crc, true);
+      v.setUint32(18, size, true);
+      v.setUint32(22, size, true);
+      v.setUint16(26, nameBytes.length, true);
+      v.setUint16(28, 0, true);
+      new Uint8Array(lfh, 30).set(nameBytes);
+      parts.push(new Uint8Array(lfh));
+      parts.push(f.data);
+      var cdh = new ArrayBuffer(46 + nameBytes.length);
+      var cv = new DataView(cdh);
+      cv.setUint32(0, 0x02014b50, true);
+      cv.setUint16(4, 20, true);
+      cv.setUint16(6, 20, true);
+      cv.setUint16(8, 0x0800, true);
+      cv.setUint16(10, 0, true);
+      cv.setUint16(12, dt, true);
+      cv.setUint16(14, dd, true);
+      cv.setUint32(16, crc, true);
+      cv.setUint32(20, size, true);
+      cv.setUint32(24, size, true);
+      cv.setUint16(28, nameBytes.length, true);
+      cv.setUint16(30, 0, true);
+      cv.setUint16(32, 0, true);
+      cv.setUint16(34, 0, true);
+      cv.setUint16(36, 0, true);
+      cv.setUint32(38, 0, true);
+      cv.setUint32(42, offset, true);
+      new Uint8Array(cdh, 46).set(nameBytes);
+      central.push(new Uint8Array(cdh));
+      offset += 30 + nameBytes.length + size;
+    });
+    var cdOffset = offset, cdSize = 0;
+    central.forEach(function (p) { parts.push(p); cdSize += p.length; });
+    var eocd = new ArrayBuffer(22);
+    var ev = new DataView(eocd);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(4, 0, true);
+    ev.setUint16(6, 0, true);
+    ev.setUint16(8, files.length, true);
+    ev.setUint16(10, files.length, true);
+    ev.setUint32(12, cdSize, true);
+    ev.setUint32(16, cdOffset, true);
+    ev.setUint16(20, 0, true);
+    parts.push(new Uint8Array(eocd));
+    return new Blob(parts, { type: 'application/zip' });
+  }
+
+  // Build the full-backup zip — every project as a Word file, every note too,
+  // plus the raw .json so the whole thing can be restored to a new device.
+  function generateFullBackupZip() {
+    var enc = new TextEncoder();
+    var files = [];
+    var when = new Date();
+    var dateStrShort = when.getFullYear() + '-' + String(when.getMonth() + 1).padStart(2, '0') + '-' + String(when.getDate()).padStart(2, '0');
+    var readme = [
+      'Quill Haven backup — ' + dateStrShort,
+      '',
+      'This .zip is a full copy of your Quill Haven writing app.',
+      '',
+      'Projects/  — every book, one Word file (.rtf) per book',
+      'Notes/     — every note, one Word file (.rtf) per note',
+      'quill-haven-backup.json  — the raw data for restoring everything onto a',
+      '                          new Quill Haven device (you can ignore this file,',
+      '                          but keep it safe)',
+      '',
+      'To READ a book or a note: open the .rtf file in Microsoft Word, Google Docs,',
+      '                          Pages, LibreOffice — anything that opens Word docs.',
+      '',
+      'To RESTORE on a fresh Quill Haven: drag quill-haven-backup.json into the',
+      '                                   writing app (import button coming soon).',
+      ''
+    ].join('\n');
+    files.push({ name: 'README.txt', data: enc.encode(readme) });
+    var usedNames = {};
+    function uniqueName(base, ext) {
+      var safe = (base || 'Untitled').replace(/[\/\\:*?"<>|]+/g, '_').trim() || 'Untitled';
+      var n = safe + ext, i = 2;
+      while (usedNames[n]) { n = safe + ' (' + i + ')' + ext; i++; }
+      usedNames[n] = true;
+      return n;
+    }
+    (data.projects || []).forEach(function (p) {
+      var name = uniqueName(p.name || 'Untitled project', '.rtf');
+      files.push({ name: 'Projects/' + name, data: enc.encode(generateProjectRtf(p)) });
+    });
+    var usedNoteNames = {};
+    function uniqueNoteName(base, ext) {
+      var safe = (base || 'Untitled note').replace(/[\/\\:*?"<>|]+/g, '_').trim() || 'Untitled note';
+      var n = safe + ext, i = 2;
+      while (usedNoteNames[n]) { n = safe + ' (' + i + ')' + ext; i++; }
+      usedNoteNames[n] = true;
+      return n;
+    }
+    (data.notes || []).forEach(function (n) {
+      var name = uniqueNoteName(n.title || 'Untitled note', '.rtf');
+      files.push({ name: 'Notes/' + name, data: enc.encode(generateNoteRtf(n)) });
+    });
+    // Raw backup for restore. Include the writing data, plus a snapshot of qh-files
+    // so pictures/documents are recoverable too.
+    var raw = { format: 'quill-haven-backup', version: 1, exportedAt: when.toISOString(), writing: data };
+    try { var f = JSON.parse(localStorage.getItem('qh-files') || 'null'); if (f) raw.files = f; } catch (e) {}
+    files.push({ name: 'quill-haven-backup.json', data: enc.encode(JSON.stringify(raw, null, 2)) });
+    return zipBuild(files, when);
+  }
+  function doDownloadBackup() {
+    var blob = generateFullBackupZip();
+    var when = new Date();
+    var stamp = when.getFullYear() + '-' + String(when.getMonth() + 1).padStart(2, '0') + '-' + String(when.getDate()).padStart(2, '0');
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'quill-haven-backup-' + stamp + '.zip';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
   // ── Tabs ──

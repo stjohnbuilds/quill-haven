@@ -107,6 +107,18 @@ body {
 /* Inline rename for cards */
 .card-name.renaming { outline: 1px solid var(--accent); border-radius: 4px; padding: 0 3px; cursor: text; white-space: normal; }
 
+/* USB section */
+.usb-grid.drop-into-zone {
+  outline: 2px dashed var(--accent);
+  outline-offset: -8px;
+  background: var(--row-hover);
+}
+.usb-loading, .usb-empty {
+  grid-column: 1 / -1; padding: 24px; text-align: center;
+  font-size: 13px; color: var(--text-muted); line-height: 1.6;
+}
+.usb-entry .card-thumb { background: linear-gradient(135deg, var(--row-hover), var(--card-bg)); color: var(--accent-strong); }
+
 /* ── Empty state ── */
 .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--text-faint); text-align: center; padding-bottom: 8vh; }
 .empty-icon { width: 54px; height: 54px; opacity: 0.5; color: var(--text-muted); }

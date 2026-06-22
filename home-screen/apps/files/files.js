@@ -410,12 +410,206 @@
     persist(); render();
   }
 
-  // ── Device folders (real once installed) ──
+  // ── Device folders ──
   function renderDevice(f) {
-    showEmpty(f.id, f.id === 'usb'
-      ? 'Plug in a USB stick on your Quill Haven device and it shows up right here — drag manuscripts across to take them with you.'
-      : 'Files you download appear here once Quill Haven is running on your device.');
+    if (f.id === 'usb') return renderUsb();
+    showEmpty(f.id, 'Files you download appear here once Quill Haven is running on your device.');
   }
+
+  // ═══ USB section — uses the File System Access API on installed Chromium/Edge ═══
+  // The user picks the USB folder once; we save the DirectoryHandle in IndexedDB
+  // so it sticks. Then they can drag files from Documents/Pictures onto USB to copy
+  // them across, or open files that are on the USB.
+  var usbHandle = null;     // current DirectoryHandle (in memory)
+  var usbReady = false;     // have we loaded the saved handle from IDB?
+  function idbOpen() {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open('qh-files-idb', 1);
+      req.onupgradeneeded = function () { req.result.createObjectStore('handles'); };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+  }
+  function idbGet(key) {
+    return idbOpen().then(function (db) { return new Promise(function (resolve, reject) {
+      var tx = db.transaction('handles', 'readonly');
+      var req = tx.objectStore('handles').get(key);
+      req.onsuccess = function () { resolve(req.result); }; req.onerror = function () { reject(req.error); };
+    }); });
+  }
+  function idbPut(key, value) {
+    return idbOpen().then(function (db) { return new Promise(function (resolve, reject) {
+      var tx = db.transaction('handles', 'readwrite');
+      tx.objectStore('handles').put(value, key);
+      tx.oncomplete = function () { resolve(); }; tx.onerror = function () { reject(tx.error); };
+    }); });
+  }
+  function idbDel(key) {
+    return idbOpen().then(function (db) { return new Promise(function (resolve, reject) {
+      var tx = db.transaction('handles', 'readwrite');
+      tx.objectStore('handles').delete(key);
+      tx.oncomplete = function () { resolve(); }; tx.onerror = function () { reject(tx.error); };
+    }); });
+  }
+  function fsAccessSupported() { return typeof window.showDirectoryPicker === 'function'; }
+  function loadUsbHandle() {
+    if (usbReady) return Promise.resolve();
+    if (!window.indexedDB) { usbReady = true; return Promise.resolve(); }
+    return idbGet('usbDir').then(function (h) { usbHandle = h || null; usbReady = true; }).catch(function () { usbReady = true; });
+  }
+  function pickUsb() {
+    if (!fsAccessSupported()) return;
+    window.showDirectoryPicker({ id: 'qh-usb', mode: 'readwrite', startIn: 'desktop' }).then(function (h) {
+      usbHandle = h;
+      idbPut('usbDir', h).catch(function () {});
+      renderUsb();
+    }).catch(function () { /* user cancelled */ });
+  }
+  function forgetUsb() {
+    usbHandle = null;
+    idbDel('usbDir').catch(function () {});
+    renderUsb();
+  }
+  // Async permission check + re-request if the browser dropped it
+  function ensureUsbPermission() {
+    if (!usbHandle || typeof usbHandle.queryPermission !== 'function') return Promise.resolve(true);
+    return usbHandle.queryPermission({ mode: 'readwrite' }).then(function (state) {
+      if (state === 'granted') return true;
+      return usbHandle.requestPermission({ mode: 'readwrite' }).then(function (s) { return s === 'granted'; });
+    }).catch(function () { return false; });
+  }
+  function listUsb() {
+    if (!usbHandle) return Promise.resolve([]);
+    var items = [];
+    return ensureUsbPermission().then(function (ok) {
+      if (!ok) return [];
+      return (async function () {
+        try {
+          for await (var entry of usbHandle.values()) items.push(entry);
+        } catch (e) { /* unplugged or revoked */ }
+        return items;
+      })();
+    });
+  }
+
+  function renderUsb() {
+    if (!usbReady) { loadUsbHandle().then(renderUsb); return; }
+    barTitle.textContent = 'USB';
+    barAction.hidden = true; if (barHint) { barHint.hidden = true; }
+    gridEl.innerHTML = '';
+    if (!fsAccessSupported()) {
+      return showEmpty('usb', 'This browser can\'t reach USB drives. On the installed Quill Haven device (Linux or Windows kiosk), USB drag-and-drop works here properly.');
+    }
+    if (!usbHandle) {
+      showEmpty('usb', 'Plug in a USB stick, then pick it once — Quill Haven will remember it.', 'Pick USB folder', pickUsb);
+      return;
+    }
+    showGrid();
+    if (barHint) { barHint.hidden = false; barHint.textContent = 'On USB: ' + (usbHandle.name || 'folder'); }
+    barAction.hidden = false; barAction.className = 'bar-action ghost'; barAction.textContent = 'Forget USB folder';
+    barAction.onclick = forgetUsb;
+    // Drop zone wrapper: lets users drag a file card from Documents/Pictures onto the grid to copy it across
+    gridEl.classList.add('usb-grid');
+    wireUsbDropZone(gridEl);
+    var loading = el('div', 'usb-loading'); loading.textContent = 'Reading USB…'; gridEl.appendChild(loading);
+    listUsb().then(function (entries) {
+      gridEl.innerHTML = ''; wireUsbDropZone(gridEl);
+      if (!entries.length) {
+        var empty = el('div', 'usb-empty'); empty.textContent = 'USB is empty. Drag a file from Documents or Pictures onto this area to copy it across.';
+        gridEl.appendChild(empty); return;
+      }
+      entries.forEach(function (entry) { gridEl.appendChild(usbEntryCard(entry)); });
+    });
+  }
+  function usbEntryCard(entry) {
+    var isDir = entry.kind === 'directory';
+    var card = el('div', 'card usb-entry');
+    card.innerHTML =
+      '<div class="card-thumb">' + (isDir ? '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + FOLDER_OPEN_ICON + '</svg>' : svg('documents', 30)) + '</div>' +
+      '<div class="card-body"><div class="card-name">' + esc(entry.name) + '</div><div class="card-meta">' + (isDir ? 'Folder on USB' : 'File on USB') + '</div></div>' +
+      '<div class="card-actions"></div>';
+    if (!isDir) {
+      var acts = card.querySelector('.card-actions');
+      var copy = el('button', 'card-btn primary'); copy.textContent = 'Copy in'; copy.addEventListener('click', function () { copyFromUsb(entry); });
+      acts.appendChild(copy);
+    }
+    return card;
+  }
+  function wireUsbDropZone(zone) {
+    zone.addEventListener('dragover', function (e) {
+      if (!document.querySelector('.file-card.dragging')) return;
+      e.preventDefault(); zone.classList.add('drop-into-zone');
+    });
+    zone.addEventListener('dragleave', function (e) { if (e.target === zone) zone.classList.remove('drop-into-zone'); });
+    zone.addEventListener('drop', function (e) {
+      zone.classList.remove('drop-into-zone');
+      var raw = e.dataTransfer && e.dataTransfer.getData('text/plain'); if (!raw) return;
+      var info; try { info = JSON.parse(raw); } catch (_) { return; }
+      e.preventDefault();
+      copyToUsb(info);
+    });
+  }
+  function copyToUsb(info) {
+    if (!usbHandle || !info) return;
+    var arr = info.section === 'documents' ? data.documents : info.section === 'pictures' ? data.pictures : null;
+    if (!arr) return;
+    var item = arr.filter(function (x) { return x.id === info.id; })[0]; if (!item) return;
+    ensureUsbPermission().then(function (ok) {
+      if (!ok) return;
+      var fileName, blob;
+      if (info.section === 'documents') {
+        fileName = item.name + '.' + (item.format || 'rtf');
+        blob = new Blob([item.content || ''], { type: 'application/rtf' });
+      } else {
+        // Picture — data is a data: URL; decode to bytes
+        var match = (item.data || '').match(/^data:([^;]+);base64,(.+)$/);
+        if (!match) return;
+        var mime = match[1];
+        var bin = atob(match[2]);
+        var bytes = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        var ext = mime === 'image/png' ? '.png' : mime === 'image/webp' ? '.webp' : '.jpg';
+        fileName = item.name + ext;
+        blob = new Blob([bytes], { type: mime });
+      }
+      usbHandle.getFileHandle(fileName, { create: true }).then(function (fh) {
+        return fh.createWritable().then(function (w) { return w.write(blob).then(function () { return w.close(); }); });
+      }).then(function () {
+        renderUsb();
+        if (window.qhConfirm) window.qhConfirm({ title: 'Saved to USB', message: '"' + fileName + '" copied to ' + (usbHandle.name || 'USB') + '.', confirmText: 'OK' });
+      }).catch(function (err) {
+        if (window.qhConfirm) window.qhConfirm({ title: 'Couldn’t save to USB', message: String(err && err.message || err), confirmText: 'OK' });
+      });
+    });
+  }
+  function copyFromUsb(entry) {
+    if (!entry || entry.kind !== 'file') return;
+    ensureUsbPermission().then(function (ok) {
+      if (!ok) return;
+      entry.getFile().then(function (file) {
+        var lower = (file.name || '').toLowerCase();
+        var isImg = /^image\//.test(file.type) || /\.(png|jpe?g|webp|gif)$/i.test(lower);
+        if (isImg) {
+          var rd = new FileReader();
+          rd.onload = function () {
+            data.pictures.push({ id: newId(), name: file.name.replace(/\.[^.]+$/, ''), date: Date.now(), data: rd.result });
+            if (!persist()) { data.pictures.pop(); if (window.qhConfirm) window.qhConfirm({ title: 'Not enough room', message: 'Not enough space on the device to copy that picture in.', confirmText: 'OK' }); return; }
+            if (window.qhConfirm) window.qhConfirm({ title: 'Copied to Pictures', message: '"' + file.name + '" is now in Pictures.', confirmText: 'OK' });
+          };
+          rd.readAsDataURL(file);
+        } else {
+          file.text().then(function (text) {
+            var base = file.name.replace(/\.[^.]+$/, '');
+            data.documents.push({ id: newId(), name: base, date: Date.now(), format: 'rtf', content: text });
+            if (!persist()) { data.documents.pop(); if (window.qhConfirm) window.qhConfirm({ title: 'Not enough room', message: 'Not enough space on the device to copy that file in.', confirmText: 'OK' }); return; }
+            if (window.qhConfirm) window.qhConfirm({ title: 'Copied to Documents', message: '"' + file.name + '" is now in Documents.', confirmText: 'OK' });
+          });
+        }
+      });
+    });
+  }
+  // Kick off the initial handle load so the USB section can render immediately when clicked
+  loadUsbHandle();
 
   // ── Init ──
   applyTheme();
