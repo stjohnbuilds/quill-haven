@@ -1,24 +1,27 @@
 # Chromebook setup
 
-Two folders, one for each Chromebook:
+Two install paths for Quill Haven, one per Chromebook chip family.
 
-## `Setup This Chromebook/`
+## `Not Formattable/`
 
-For the Chromebook you have **right now**. No USB needed — everything
-happens through Chrome on the Chromebook itself. Sign in → Quill Haven
-opens. As close to "its own operating system" as we can get without
-reformatting.
+For Chromebooks with **ARM chips** (MediaTek, Rockchip, Qualcomm). These
+can't have ChromeOS removed, so this path locks ChromeOS down instead:
+install Quill Haven as the default app, hide everything else. No USB
+needed. ~10 minutes.
 
-→ Open `Setup This Chromebook/SETUP.md` and follow the steps.
+→ Open `Not Formattable/SETUP.md`.
 
-## `Reformat OS/`
+## `Formattable/`
 
-For the **other Chromebook** (the one being delivered). That one we CAN
-reformat — wipe ChromeOS off completely, install a real custom operating
-system that boots straight into Quill Haven. No sign-in screen, no
-Chrome underneath, the real thing.
+For Chromebooks with **Intel or AMD chips**. These can have ChromeOS
+wiped off completely and a custom OS installed in its place. The result
+boots directly into Quill Haven — no sign-in, no Chrome, no other OS
+underneath. Requires a **16GB USB stick** and about an hour.
 
-You'll need a **16GB USB stick** and about an hour. Don't try it alone
-— open a chat with Claude and walk through it together.
+→ Open `Formattable/SETUP.md`.
 
-→ Open `Reformat OS/SETUP.md` and follow the steps.
+## How to tell which Chromebook is which
+
+Look up the model on [mrchromebox.tech](https://docs.mrchromebox.tech/docs/supported-devices.html).
+If the board name appears with "Full ROM" support, it's **formattable**.
+If it doesn't appear, it's **not formattable**.

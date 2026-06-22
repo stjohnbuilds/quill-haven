@@ -1,15 +1,14 @@
-# Set up Quill Haven on your Chromebook
+# Quill Haven — set up on a non-formattable Chromebook
 
-This is for the Chromebook you have **right now**. Because of the chip
-inside it, we can't put a brand-new operating system on it — but we can
-make it pretend really well. Turn it on, sign in, and Quill Haven opens
-straight away. No browser, no other apps in sight.
+Use this guide on any Chromebook with an **ARM chip** (MediaTek,
+Rockchip, or Qualcomm Snapdragon) — these can't have ChromeOS removed.
+This installs Quill Haven as the default app, hides everything else, and
+makes the device feel like it boots straight into the writing OS.
 
-> **You do NOT need a USB stick for this.** Everything happens through
-> Chrome on the Chromebook itself. (The USB stick is only for the OTHER
-> Chromebook — the one we're going to fully reformat.)
+> **No USB stick needed for this path.** Everything happens through
+> Chrome on the Chromebook itself.
 
-Takes about 10 minutes. Do it once and you're done.
+Takes about 10 minutes. Done once per device.
 
 ---
 

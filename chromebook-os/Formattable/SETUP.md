@@ -1,13 +1,14 @@
-# Reformat OS — full Quill Haven device
+# Quill Haven — full reformat install
 
-This is for the **other Chromebook** (the one being delivered).
-We're going to wipe ChromeOS off it completely and install our own
-operating system that boots straight into Quill Haven. No sign-in
-screen, no Chrome, nothing else. Press the power button → Quill Haven.
+Use this guide on any Chromebook with an **Intel or AMD chip** — these
+can have ChromeOS wiped off completely and a custom operating system
+installed in its place. The result: press the power button, Quill Haven
+opens. No sign-in screen, no Chrome browser, no other operating system
+underneath. It IS the OS.
 
-> **You'll need help for this one.** It's about an hour of work and has
-> a few technical steps. Don't try it alone — open a chat with Claude
-> first and go step by step together.
+> **Get help running this one.** It takes about an hour and has a few
+> technical steps (firmware flash, OS install). Best done with Claude on
+> the line, step by step.
 
 ---
 
@@ -175,7 +176,7 @@ Haven, sets it to open on power-on, and hides everything else.
 https://stjohnbuilds.github.io/quill-haven/
 ```
 
-This is the same URL the other Chromebook uses. The setup script above
+All Quill Haven installs point at this URL. The setup script above
 fetches everything from here. After the first time, it works offline.
 
 ---
