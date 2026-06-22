@@ -16,7 +16,7 @@ screen, no Chrome, nothing else. Press the power button → Quill Haven.
 - **The Chromebook**, plugged into its charger.
 - **A USB stick — 16GB or bigger.** (8GB technically works, but 16GB
   gives breathing room and they cost about the same. Any brand is fine.)
-- **A second computer** (your Mac is perfect) to prepare the USB stick.
+- **A second computer** (Mac, Windows, or Linux — any works) to prepare the USB stick.
 - **Wi-Fi**, on both machines.
 - **About 1 hour** of uninterrupted time.
 
@@ -26,7 +26,7 @@ screen, no Chrome, nothing else. Press the power button → Quill Haven.
 
 You'll do four things, in order. Each one is its own section below.
 
-1. **Make a USB installer** on your Mac. (~15 min)
+1. **Make a USB installer** on another computer. (~15 min)
 2. **Unlock the Chromebook's firmware** so it stops being a Chromebook. (~10 min)
 3. **Install our new operating system** from the USB stick. (~20 min)
 4. **Run the Quill Haven setup script** to turn it into a writing device. (~10 min)
@@ -35,12 +35,12 @@ After step 4 you reboot, and you're done forever.
 
 ---
 
-## Step 1 — Make the USB installer (on your Mac)
+## Step 1 — Make the USB installer (on another computer)
 
 We're putting **Linux Mint XFCE** on the USB stick. This is the new
 operating system. It's free, friendly, and runs fast on cheap hardware.
 
-1. On your Mac, open Safari and go to:
+1. On another computer, open a web browser and go to:
 
    ```
    https://linuxmint.com/edition.php?id=320
@@ -56,12 +56,12 @@ operating system. It's free, friendly, and runs fast on cheap hardware.
    ```
 
    Install it like a normal Mac app (drag into Applications).
-4. Plug the USB stick into your Mac.
+4. Plug the USB stick into another computer.
 5. Open **balenaEtcher**. Click **Flash from file** → pick the Linux
    Mint .iso. Click **Select target** → pick your USB stick (it'll
    show its size). Click **Flash!**.
 6. Wait 5–10 minutes. When it says "Flash Complete!", eject the USB
-   stick from your Mac.
+   stick from another computer.
 
 ✅ You now have a Linux installer USB.
 
@@ -126,9 +126,9 @@ need to swap that for normal PC firmware first.
      (this wipes ChromeOS forever)
    - **Time zone:** wherever you are
    - **Who are you?**
-     - Your name: **Marie** (or whatever you want)
+     - Your name: whatever you want
      - Your computer's name: **quillhaven**
-     - Pick a username: **marie** (all lowercase, no spaces)
+     - Pick a username: short, all lowercase, no spaces (e.g. **writer**)
      - **Pick a password and WRITE IT DOWN somewhere safe.** You'll need
        it later. (We'll make it stop asking for it once setup is done.)
      - Tick **Log in automatically** ✅
