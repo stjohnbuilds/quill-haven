@@ -31,6 +31,10 @@ This file does NOT duplicate the tree — it would go stale. Go there for
    `?v=N` in every page that links it AND in the iframe `src` in
    `home.js` (otherwise the app window keeps loading the old version).
    Current versions are listed in `HANDOVER_TO_NEW_CHAT.md`.
+   **Shared files = bump everywhere, to the SAME number.** `theme.css`
+   and `confirm.js` are linked by `index.html`, `apps/writing/index.html`
+   and `apps/files/index.html` — change one, bump all three to one new
+   value. They must never drift to different `?v=` numbers.
 7. **Keep files small and readable.** If a file grows too big, split it.
    No frameworks, no build step.
 
@@ -95,7 +99,7 @@ file paths + line numbers for evidence.
 - [ ] Writing app: `+` on a project opens Chapter / Part menu; Parts create a `Project → Part → Chapter → Scene` level.
 - [ ] Writing app: deleting anything (note / project / part / chapter / scene) moves it to `data.trash`, shows an undo toast, and the Trash tab appears.
 - [ ] Writing app: undo restores to original location; if the original container is gone (orphan), the item becomes a Note.
-- [ ] Writing app: Download → "This device" downloads an `.rtf`, AND saves a copy into Files → Documents.
+- [ ] Writing app: Download → "This device" downloads an `.rtf` (it does NOT auto-copy into Files → Documents — that behaviour was removed on purpose).
 - [ ] Writing app: Download → "Google Drive" shows the honest "Connect Drive first" popup (doesn't pretend to save).
 - [ ] Files app: "+ New folder" tile creates a folder with inline rename; drag a file card onto a folder card to move it in; click folder to navigate in; back tile returns to root.
 - [ ] Files app: folder delete soft-trashes the folder; files inside become root-level orphans until restore.

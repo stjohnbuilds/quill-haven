@@ -4,6 +4,11 @@
    This file is layout + components only.
 ─────────────────────────────────────────────── */
 
+/* Respect the hidden attribute everywhere. Without this, a later
+   `.settings-row { display:flex }` re-shows rows we marked hidden
+   (e.g. #autoBackupRow before Google Drive is connected). */
+[hidden] { display: none !important; }
+
 /* Boot title font, bundled locally so it works with no Wi-Fi */
 @font-face {
   font-family: 'Great Vibes';
@@ -140,7 +145,7 @@ body.has-bg .dock { background: var(--dock-bg-strong); }
 .top-datetime { font-weight: 500; font-size: 12px; }
 .top-right { display: flex; align-items: center; gap: 10px; }
 /* All three status icons are identical centred cells so the spacing is even */
-.top-icon { color: var(--bar-icon); opacity: 0.7; display: flex; align-items: center; justify-content: center; width: 28px; height: 24px; border-radius: 5px; }
+.top-icon { color: var(--bar-icon); opacity: 0.88; display: flex; align-items: center; justify-content: center; width: 28px; height: 24px; border-radius: 5px; }
 
 /* Top bar app icons (hidden in dock mode) — sit next to the status icons */
 .top-apps { display: none; gap: 5px; align-items: center; }
@@ -191,7 +196,7 @@ body.top-mode .top-apps { display: flex; }
 .top-app.hidden { display: none; }
 
 .settings-btn {
-  background: none; border: none; cursor: pointer; color: var(--bar-icon); opacity: 0.6;
+  background: none; border: none; cursor: pointer; color: var(--bar-icon); opacity: 0.85;
   transition: opacity 0.2s; display: flex; align-items: center; justify-content: center;
   width: 28px; height: 24px; padding: 0; border-radius: 5px;
 }

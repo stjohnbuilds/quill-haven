@@ -810,6 +810,11 @@
     if (e.key === 'Enter') { e.preventDefault(); editor.focus(); }
   });
 
+  // The home screen calls this before it tears this window down (toggling /
+  // reordering / removing an app rebuilds the iframes), so the last few
+  // seconds of typing are saved instead of lost. See home.js flushOpenApps().
+  window.flushAndPersist = function () { try { flush(); persist(); } catch (e) {} };
+
   // ── Toolbar (keep the selection when a button is pressed) ──
   toolbar.addEventListener('mousedown', function (e) { if (e.target.closest('button')) e.preventDefault(); });
   toolbar.addEventListener('click', function (e) {

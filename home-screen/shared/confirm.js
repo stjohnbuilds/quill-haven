@@ -51,7 +51,10 @@
     var acts = document.createElement('div'); acts.className = 'qhc-actions';
     var cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'qhc-cancel'; cancel.textContent = opts.cancelText || 'Cancel';
     var ok = document.createElement('button'); ok.type = 'button'; ok.className = 'qhc-confirm' + (opts.danger ? ' danger' : ''); ok.textContent = opts.confirmText || 'OK';
-    acts.appendChild(cancel); acts.appendChild(ok);
+    // Info-only popups (noCancel) get a single full-width OK — no pointless Cancel.
+    if (!opts.noCancel) acts.appendChild(cancel);
+    else ok.style.flex = '1';
+    acts.appendChild(ok);
     box.appendChild(acts); ov.appendChild(box);
 
     function close() { ov.remove(); document.removeEventListener('keydown', onKey); }
@@ -63,7 +66,8 @@
     ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
     document.addEventListener('keydown', onKey);
     document.body.appendChild(ov);
-    // For destructive prompts, focus Cancel so a stray Enter can't delete by accident.
-    setTimeout(function () { (opts.danger ? cancel : ok).focus(); }, 0);
+    // Destructive prompts focus Cancel so a stray Enter can't delete by accident.
+    // Info-only (noCancel) prompts focus OK.
+    setTimeout(function () { ((opts.danger && !opts.noCancel) ? cancel : ok).focus(); }, 0);
   };
 })();

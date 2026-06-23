@@ -65,7 +65,6 @@ Chromebooks (the ones that need a $30 specialist cable to unlock).
 | [`docs/HANDOVER_TO_NEW_CHAT.md`](docs/HANDOVER_TO_NEW_CHAT.md) | Bootstrap for a new AI chat working on the codebase |
 | [`docs/AI_ASSESSMENT_PROMPT.md`](docs/AI_ASSESSMENT_PROMPT.md) | Drop into a fresh AI chat for a full top-to-bottom audit |
 | [`docs/DRIVE_SETUP.md`](docs/DRIVE_SETUP.md) | The 10-minute Google Cloud setup for Drive sync |
-| [`docs/WRITING_APP_PLAN.md`](docs/WRITING_APP_PLAN.md) | Writing app spec |
 
 ## Tech
 

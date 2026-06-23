@@ -1,322 +1,318 @@
-# Quill Haven — Game Plan
+# Quill Haven — Game Plan (the brain)
 
-> **Source of truth for the whole project.** What it is, the code tree, and the
-> full feature list. Updated 2026-06-21.
+> **The single source of truth for the whole project.** Goal, who it's for, how
+> it's used, the real file tree, every feature, the ideas list, and version
+> history. If any other doc disagrees with this one, this one wins — fix the
+> other doc. Last updated 2026-06-22 (v2.0).
 
-## What This Is
+---
 
-Quill Haven is a **whole operating system for writing**. It runs on a cheap Acer
-Chromebook Spin 311, but the Chromebook is just the hardware — Quill Haven
-*replaces* what the device does. When it powers on, Marie sees a clean home
-screen with ONLY her writing apps. No ChromeOS, no browser to wander into, no
-system settings to fiddle with, no distractions. A ~$100 distraction-free
-writing machine.
+## 1. What this is
+
+Quill Haven is a **whole operating system for writing**. You take a cheap laptop,
+wipe it, and Quill Haven becomes the entire computer. When it powers on, it boots
+**straight into a clean home screen with only writing apps** — no Windows, no
+ChromeOS, no web browser to wander into, no app store, no settings to get lost
+in. A distraction-free writing machine.
 
 "Only the writing apps" is not a restriction bolted on top — it **is** the whole
 point: a device that can only write.
 
-## Who This Is For
+This is settled and not up for debate: Quill Haven IS the operating system. It is
+**not** "an app you install inside Windows/Mac" and **not** "a tablet in a locked
+kiosk mode." Those alternatives have been considered and deliberately rejected.
 
-Marie. Non-technical. Writes LitRPG romance novels. Uses Dabble Writer, Google
-Docs, the built-in Local Writing app, and (optionally) Typing & Tomes.
+## 2. Who this is for
 
-## Where We Are (status at a glance)
+Marie. Non-technical — every doc and every screen talks like she's ten, no
+jargon. She writes LitRPG romance novels and uses Dabble Writer, Google Docs, the
+built-in Local Writing app, and (optionally) Typing & Tomes.
 
-- ✅ **Home screen** — built and polished (the desktop you see on boot)
-- ✅ **Local Writing app v2** — built (Notes + Projects, chapters → scenes, drag,
-  highlight, autosave)
-- ✅ **Add App + settings** — built (colour/icon pickers, drag-reorder, storage bar)
-- ⏳ **The OS half** — boot-into-this, lockdown, USB installer, README — still to build
-- ⏳ **Home-screen polish pass** — a handful of small tweaks logged in TODO.md
+## 3. How it's used — devices & use cases
 
-**Install method:** a USB stick is needed **once** to put the OS on the device
-(you can't replace an OS from inside ChromeOS without external media). After
-that, updates come from GitHub — the in-app "Update available" button already
-pulls the latest home screen.
+The **same** Quill Haven is used three ways:
 
-## Core Boundary
+1. **Try it live in any browser** — the home screen is hosted at
+   `https://stjohnbuilds.github.io/quill-haven/`. Click around, themes, the
+   writing app, the files app — everything saves to that browser. This is the
+   demo / "what it looks like" link. No install, no account.
+2. **Installed as the whole OS on a wiped laptop** — the real product. One USB
+   stick wipes the laptop, installs Linux Mint, and runs `setup.sh`, which makes
+   the laptop boot straight into Quill Haven in fullscreen kiosk mode. (The kiosk
+   loads the home screen from the GitHub Pages URL above, with a baked-in
+   allowlist that blocks every other site.)
+3. **A Raspberry Pi build** *(future, not written yet)* — a Pi already *is* a
+   Linux computer, so there's nothing to wipe; it runs the same kiosk off an SD
+   card. Needs its own short instruction sheet because the "get the system on"
+   step differs (flash an SD card vs. boot a USB installer). Can be a tablet shape
+   (Pi + touchscreen, e.g. RasPad) or a keyboard-computer (Pi 400).
 
-The home screen is the ONLY interface. Everything Marie needs is reachable from
-it — apps, settings, clipboard. There is no desktop, no file manager, no
-terminal, no browser address bar. The browser runs in kiosk/fullscreen mode and
-can only load whitelisted URLs.
+**Marie's mix:** she sets these up on Mac sometimes and Windows laptops other
+times. After Linux is installed, the Quill Haven step is identical on every
+machine — only the "boot from USB" key differs (covered in the instruction sheet).
 
-### The Locked Door Rule (plain-English mental model)
+**Starting devices that work** (anything you can wipe and put your own Linux on):
 
-The Chromebook is a room with one door. The door opens to a hallway with a few
-doors (Google Docs, Local Writing, Dabble). More doors can be added through
-settings. But there is NO door to "the internet", NO door to "system settings",
-NO door to "app store". If it's not on the home screen, it doesn't exist.
+| Device | Works? | Note |
+|---|---|---|
+| Windows laptop (Intel/AMD) | ✅ | Easiest. Any maker, any age. |
+| Intel Mac (pre-2020) | ✅ | Boot the USB by holding **Option (⌥)**. |
+| Intel/AMD Chromebook | ✅ | One extra firmware-unlock step first. |
+| Raspberry Pi | ✅ (future sheet) | Already Linux — runs from an SD card. |
 
-## Product Shape
+**Will NOT work** (firmware refuses another OS — out of scope):
+Apple Silicon Macs (M1/M2/M3/M4, any 2020+ Mac), ARM Chromebooks (MediaTek /
+Rockchip / Snapdragon), iPads, Android tablets.
 
-- **Home screen** — `home-screen/`, static HTML/CSS/JS, no build step, no
-  framework. Split into a few small files (structure / styles / theme / logic)
-  so nothing is one giant blob. This is the actual desktop on boot.
-- **Boot scripts** *(to build)* — Linux auto-login + auto-launch of the home
-  screen in fullscreen Chromium.
-- **Lockdown config** *(to build)* — Chromium policy blocking every site except
-  the whitelisted writing apps.
-- **USB installer** *(to build)* — everything bundled for a fresh-device setup.
-- **GitHub repo:** `stjohnbuilds/quill-haven` (public)
+→ Step-by-step install: [`devices/SETUP.md`](../devices/SETUP.md).
+→ Buying a Chromebook for this: [`devices/BEFORE-YOU-BUY.md`](../devices/BEFORE-YOU-BUY.md).
 
-## The Apps
+## 4. Status at a glance
+
+- ✅ **Home screen** — built and polished (the desktop you see on boot).
+- ✅ **Local Writing app v2** — Notes + Projects → optional Parts → Chapters →
+  Scenes, drag, rename, highlight, soft-delete trash + undo, autosave, RTF export.
+- ✅ **Files app** — Documents / Pictures / Downloads / USB / Trash, sub-folders,
+  drag, rename; pictures → home-screen wallpaper; real USB via File System Access.
+- ✅ **Backup / restore** — Download → full `.zip` (Word files + restorable JSON);
+  Settings → Restore backup (all-or-nothing).
+- ✅ **Google Drive sync** — framework done; one-button upload once a Client ID is
+  pasted (see [`DRIVE_SETUP.md`](DRIVE_SETUP.md)).
+- ✅ **Settings** — Wi-Fi, Brightness, 4 themes + hue slider, Night Light, Google
+  account, Drive, App Bar, Storage bar, Region/timezone, Background picker, Apps
+  list (drag/on-off/remove), Add App (with distraction-site ban), Clipboard.
+- ✅ **OS install side** — `devices/SETUP.md` (one USB → wipe → Linux Mint → run
+  `setup.sh`) + `setup.sh` (Chromium kiosk, autostart, URL allowlist, recovery
+  escape hatch). Works on Windows / Intel Mac / Intel-AMD Chromebook.
+- ⏳ **Remaining device work** — a one-step custom USB ISO (install + kiosk in one
+  boot instead of two), and the Raspberry Pi instruction sheet.
+- ⏳ **Parked ideas** — see §9.
+
+**Updates:** the home screen reads `version.json` from GitHub and shows an
+"Update available" button; the service worker also auto-updates the device the
+next time it has Wi-Fi.
+
+## 5. Core boundary — the locked-door rule
+
+The home screen is the ONLY interface. Everything is reached from it — apps,
+settings, clipboard. There is no desktop, no file manager, no terminal, no
+browser address bar. The browser runs in kiosk/fullscreen and can only load
+allowlisted URLs.
+
+Mental model: the laptop is a room with one door, opening to a hallway with a few
+doors (Google Docs, Local Writing, Files, Dabble…). More doors can be added in
+settings. But there is NO door to "the internet", "system settings", or an "app
+store". If it's not on the home screen, it doesn't exist.
+
+## 6. The apps
 
 ### Built-in defaults (always present, can't be removed)
 
 | App | URL | Icon colour |
 |---|---|---|
-| Google Docs | https://docs.google.com | Pastel pink (#f5d0e5 / #ebbad0) |
-| Local Writing | built-in (`apps/writing/`) | Pastel green (#bfe3c4 / #9ed0a8) |
-| Files | built-in (`apps/files/`) | Soft blue (#bcd0ea / #9bb6dd) |
+| Google Docs | https://docs.google.com | Pastel pink |
+| Local Writing | built-in (`apps/writing/`) | Pastel green |
+| Files | built-in (`apps/files/`) | Soft blue |
 
 ### Add-ons (ship by default, removable; user can add more)
 
-| App | URL | Icon colour |
+| App | URL | Note |
 |---|---|---|
-| Dabble Writer | https://app.dabblewriter.com | Lavender (#ddd0f0 / #ccbbe5) |
-| Typing & Tomes | https://typingandtomes.vercel.app | (add via Add App) |
+| Dabble Writer | https://app.dabblewriter.com | Removable default add-on (lavender) |
+| Typing & Tomes | https://typingandtomes.vercel.app | Added manually via Add App |
 
-> Dabble ships as a removable default add-on. Google Docs and Local Writing are
-> the two true built-ins.
+### Always allowlisted (not shown as apps, needed behind the scenes)
 
-### Always whitelisted (not shown as apps, needed behind the scenes)
+- https://accounts.google.com — Google sign-in for Docs/Drive
+- https://raw.githubusercontent.com + the GitHub Pages host — update checker + the
+  home screen itself
+- Fonts are bundled locally — no font CDN needed.
 
-- https://accounts.google.com — Google sign-in for Docs
-- https://raw.githubusercontent.com — the update checker
-- *(Fonts are bundled locally now — no font CDN needed.)*
+### Banned by design
 
-### Banned by design *(to build)*
-
-The "Add App" button should refuse the obvious distraction sites (social media,
-Gmail, YouTube, etc.) so Marie can't sneak one in.
+Add App refuses obvious distraction sites (social media, Gmail, YouTube, etc.) so
+a distraction can't be sneaked in.
 
 ---
 
-## Internal App Tree
+## 7. Internal file tree (the real one)
 
 ```text
 QuillHaven/
+├── index.html                  GitHub Pages landing — redirects to home-screen/index.html
+├── setup.sh                    the kiosk installer the Linux Mint terminal runs
+├── version.json                version number for the in-app update checker (2.0)
+├── README.md                   public landing / "try it live" + install pointer
+├── LICENSE                     MIT
+├── CLAUDE.md                   project rules for AI sessions (incl. "this IS its own OS")
+├── TODO.md                     task tracking
+│
 ├── home-screen/                THE home screen (static HTML/CSS/JS, no build step)
 │   ├── index.html              structure — boot splash, top bar, clock, dock, settings
+│   ├── manifest.json           web-app manifest (icon/name for the kiosk)
+│   ├── service-worker.js       offline cache + auto-update (versioned cache, network-first shell)
 │   ├── shared/
-│   │   └── theme.css           the skins — colour variables, shared by EVERY page
+│   │   ├── theme.css           the 4 skins — colour variables, linked by EVERY page
+│   │   └── confirm.js          qhConfirm() — THE one styled popup used everywhere
 │   ├── css/
 │   │   └── home.css            home-screen styles (layout + components)
 │   ├── js/
-│   │   └── home.js             home-screen logic — apps (defined once), clock,
-│   │                             settings, themes, clipboard, Add App, drag-reorder,
-│   │                             storage bar, update check
-│   ├── img/
-│   │   └── quill.png           the master St John quill (boot splash + writing app)
-│   ├── fonts/                  bundled fonts so the OS needs no Wi-Fi for type
-│   │   ├── eb-garamond-*.woff2   writing-app body font (regular/500/600/italic)
-│   │   └── great-vibes-latin.woff2  the script font on the boot splash
+│   │   └── home.js             home logic — apps (defined once in BUILTIN_APPS/DEFAULT_ADDONS),
+│   │                             clock, settings, themes, background, clipboard, Add App,
+│   │                             drag-reorder, storage bar, backup/restore, Drive, update check
+│   ├── img/                    the St John quill (boot splash + writing app) + iconset
+│   ├── fonts/                  bundled EB Garamond + Great Vibes (offline-safe type)
 │   └── apps/
-│       ├── writing/            the built-in Local Writing app
-│       │   ├── index.html      panel (Notes/Projects) + pill toolbar + editor
+│       ├── writing/            built-in Local Writing app
+│       │   ├── index.html      panel (Notes/Projects/Trash) + pill toolbar + editor
 │       │   ├── writing.css     editor styles (uses shared/theme.css)
-│       │   └── writing.js      Notes/Projects, chapters → scenes, drag, rename,
-│       │                         highlight, autosave to device
-│       └── files/              the built-in Files app
+│       │   └── writing.js      notes/projects/parts/chapters/scenes, drag, rename, trash+undo,
+│       │                         highlight, autosave, RTF export
+│       └── files/              built-in Files app
 │           ├── index.html      folders (Documents/Pictures/Downloads/USB/Trash)
 │           ├── files.css       file-card styles (uses shared/theme.css)
-│           └── files.js        documents, pictures→background, trash; Downloads
-│                                 & USB are real once the OS helper exists
+│           └── files.js        documents, pictures→background, sub-folders, drag, rename,
+│                                 trash, real USB via File System Access API
 │
-├── boot/                        (TO BUILD) Linux boot sequence
-│   ├── autologin.conf           auto-login config
-│   ├── start-quillhaven.sh      launch Chromium kiosk pointing at the home screen
-│   └── quillhaven.service       systemd service file
-│
-├── config/                      (TO BUILD) browser lockdown
-│   └── lockdown.json            Chromium managed policy — whitelist only
-│
-├── installer/                   (TO BUILD) USB installer package
-│   ├── install.sh               setup script
-│   └── README-SETUP.md          step-by-step for Marie
+├── devices/                    install instructions (one USB path)
+│   ├── README.md               table / overview of the install
+│   ├── SETUP.md                the step-by-step (USB → wipe → Linux Mint → setup.sh)
+│   └── BEFORE-YOU-BUY.md       Chromebook write-protect check before buying one
 │
 ├── docs/
-│   ├── GAME_PLAN.md             (this file) source of truth for the whole project
-│   ├── CODE_HEALTH.md           file structure + code-health rules
-│   ├── WRITING_APP_PLAN.md      Local Writing app spec (confirmed)
-│   ├── HANDOVER_TO_NEW_CHAT.md  bootstrap for the next AI session
-│   ├── IDEAS.md                 parked nice-to-haves
-│   └── AI_ASSESSMENT_PROMPT.md  prompt for a fresh AI to audit everything
+│   ├── GAME_PLAN.md            (this file) the brain — source of truth
+│   ├── CODE_HEALTH.md          code rules + deep-dive audit checklist
+│   ├── HANDOVER_TO_NEW_CHAT.md bootstrap for the next AI session (gotchas, cache map)
+│   ├── AI_ASSESSMENT_PROMPT.md copy-paste prompt for a fresh AI to audit everything
+│   └── DRIVE_SETUP.md          the 10-minute Google Cloud setup for Drive sync
 │
-├── version.json                 version number for the update checker
-├── CLAUDE.md                    project rules for AI sessions
-├── TODO.md                      task tracking
-├── .gitignore
 └── .claude/
-    ├── launch.json              preview server config (port 8081)
-    ├── settings.json            Claude Code settings
-    └── hooks/                   safety + logging hooks
+    ├── launch.json             preview server config (port 8081)
+    ├── settings.json           Claude Code settings
+    └── hooks/                  safety + logging hooks (logs are gitignored)
 ```
 
 ---
 
-## Feature Breakdown
+## 8. Feature breakdown
 
-### 1. Home Screen — DONE
+### Home screen — DONE
+Boot splash (theme-tinted St John quill + script "Quill Haven" + tagline + a
+loading bar that tracks real load time); pastel gradient with slow frosted orbs;
+frosted top bar (update button, app icons in Top mode, live Wi-Fi + battery +
+settings cog, live date/time); big clock + time-of-day greeting; frosted dock
+(switchable to the top bar); settings panel (slides in; close via X / click-out /
+Escape). App windows open as fullscreen iframes with traffic-light close buttons;
+right-click an icon for Restart / Close. Everything persists across a reload.
 
-A real-OS-looking desktop, split across a few small files.
+### Local Writing app — DONE (v2)
+Built-in offline writing app (pastel-green icon), matches the home theme.
+- Three tabs — **Notes**, **Projects**, **Trash** — in a side panel that
+  collapses to a small faded quill and slides back out.
+- **Projects → optional Parts → Chapters → Scenes.** Each scene has a header +
+  sub-header + body. Chapters auto-number; a "Move to…" appears when Parts exist.
+- **Drag** to reorder; **pencil** to rename; delete with a confirm.
+- Centred pill toolbar: bold / italic / underline / strikethrough / highlight.
+- Large EB Garamond writing space; live word count; autosave to the device.
+- **Soft-delete trash + undo** (6-second toast; orphan restores become a Note).
+- **Download/export:** Save to device (.rtf), Save to Drive (.rtf), or a full
+  bundle .zip of every project + note as Word files plus a restorable JSON.
+- **Save hook:** exposes `window.flushAndPersist()` so the home screen can save
+  in-flight typing before it ever tears the window down.
 
-**Boot splash:**
-- The real St John **quill** (masked image, tinted to the current theme) next to
-  a script-font "QuillHaven", then a "Your writing sanctuary" tagline and a
-  loading bar; fades into the home screen.
-- Boot splash matches the saved theme (no colour flash).
+### Files app — DONE
+Real OS-style Files app (soft-blue icon). Folders: Documents, Pictures,
+Downloads, USB, Trash.
+- **Pictures:** upload an image → "Set as background" (downscaled, saved as
+  `qh-bg`); a "Default" card restores the pastel look.
+- **Sub-folders** inside Documents/Pictures, with drag-to-move and rename; folder
+  trash + restore.
+- **USB:** real drag-and-drop via the File System Access API on installed
+  Chromium/Edge (folder handle saved in IndexedDB so it sticks); friendly "not
+  supported" fallback elsewhere.
 
-**Background:** soft pastel gradient with slow frosted orbs; theme-aware.
+### Backup / restore — DONE
+- Download → **Full backup (.zip)** — every project + note as a Word file, plus a
+  restorable `quill-haven-backup.json`, plus a README. Pure-JS, no library.
+- Settings → **Restore backup** — pick a `.json` or `.zip`; danger-confirms with
+  the date + counts; all-or-nothing apply (rolls both keys back if either fails).
 
-**Top bar:** frosted strip — update button (only when a new version exists),
-app icons in "Top" mode, Wi-Fi / battery / settings cog, live date+time.
+### Google Drive sync — DONE (framework)
+`window.QHDrive` handles Client ID storage, Google sign-in, and multipart upload.
+Paste a Client ID (see DRIVE_SETUP.md) → Download → Drive uploads the .zip.
+Optional silent auto-backup every 30 min once connected.
 
-**Clock area:** big time, time-of-day greeting, full date.
+### Distraction wall — DONE
+Add App refuses obvious distraction domains. On the installed device, `setup.sh`
+bakes a Chromium managed policy (`URLBlocklist=["*"]` + a tight allowlist) so the
+browser physically can't reach anything outside the writing apps.
 
-**Dock:** frosted centred bar of app icons; hover animation; name tooltips
-(hidden while an app is open); switchable to the top bar.
-
-**Settings panel:** slides in; close via X / click-outside / Escape.
-- General card: Wi-Fi, Brightness, Theme picker (+ hue slider), Night Light,
-  Google Account link, App Bar (Dock/Top), **Storage** bar.
-- Apps section: each app has a **grip handle (drag to reorder)**, mini icon,
-  on/off toggle, and a remove × (add-ons only).
-- **Add App**: name + website + a **Colour** dropdown (20 theme-aware swatches)
-  + an **Icon** dropdown (quill, book, heart, star, pencil, clover, notebook, or
-  the app's own first letter). Saves the chosen colour + icon onto the new app.
-- Clipboard history: recent copies, click to re-copy (with a toast).
-
-**App windows:** fullscreen iframe with traffic-light close buttons; right-click
-an icon for Restart / Close.
-
-**Themes:** four skins in one shared file — Purple (default), Wood, Slate, Dark
-— plus a hue slider and a separate Night Light warm filter. (See Design Language.)
-
-**Persistence:** theme, Night Light, brightness, dock/top mode, app on/off,
-app order, and clipboard all survive a reload.
-
-**Update checker:** reads `version.json` from GitHub; shows "Update available"
-when newer; the in-app update pulls and loads the latest screen. *(Making an
-update "stick" across a device reboot is part of the OS setup, later.)*
-
-### 2. Local Writing App — DONE (v2)
-
-The built-in offline writing app (pastel-green icon), opened from the home
-screen. Matches the home-screen theme.
-
-- **Two tabs: Notes and Projects** in a side panel that **collapses to a small
-  faded quill** and slides back out.
-- **Projects → Chapters → Scenes.** Each scene has a **header + sub-header +
-  body**. New chapters auto-number ("Chapter 1, 2, 3…").
-- **Drag** to reorder projects / chapters / scenes / notes. **Double-click** a
-  name to rename. Delete with a confirm.
-- **Centred pill toolbar**, all-in-one: bold, italic, underline, strikethrough,
-  and **highlight** (Typing & Tomes pastel colours + remove).
-- Large EB Garamond writing space; live word count; autosaves to the device
-  (localStorage). Old single-list chapters were migrated into Notes.
-
-### 2.5 Files App — DONE (v1), in the dock
-
-A real OS-style Files app (soft-blue folder icon). Folders: **Documents**,
-**Pictures**, **Downloads**, **USB**, **Trash**.
-- **Pictures**: upload an image → "Set as background"; the home screen applies it
-  live (downscaled, saved as `qh-bg`). A "Default" card restores the pastel look.
-- **Documents**: ready to receive manuscripts downloaded from the writing app.
-- **Trash**: deleted files with restore / delete-forever.
-- **Downloads + USB**: placeholders today — they become real (browse real files,
-  see a plugged-in USB, drag manuscripts across) once the OS-side helper is built
-  with the boot/installer. The web page alone is sandboxed; the helper gives it
-  real file + USB access.
-
-### 3. Boot Sequence — TO BUILD
-
-Auto-login to a "writer" user, auto-launch Chromium in kiosk/fullscreen pointed
-at the local home screen. No window chrome, no address bar, no tabs.
-
-### 4. Browser Lockdown — TO BUILD
-
-Chromium managed policy: whitelist the writing-app domains + Google sign-in +
-the update host; block everything else, dev tools, and incognito.
-
-### 5. USB Installer — TO BUILD
-
-A script that lays everything down on a fresh Linux install and wires up
-auto-login, auto-launch, and lockdown. Plus a README: "what this is" + how to
-install and update.
-
-### 6. Home-screen polish — UPCOMING (logged in TODO)
-
-- Even spacing of the top-bar Wi-Fi / battery / cog
-- Make Wi-Fi + battery feel "live" (hover state; battery shows its level)
-- Loading bar that tracks the real boot time, not a fixed animation
-- A one-time Region/timezone setting so the clock is right
-- Ban the obvious distraction sites in Add App
-
-### 7. Future ideas
-
-- AI spell checker in the writing app (3-level slider + off)
-- A common-apps quick-add list was built then removed at Marie's request
+### Device install + update — DONE (one-step ISO outstanding)
+`devices/SETUP.md` + `setup.sh`: USB → wipe → Linux Mint → one terminal line →
+boots into Quill Haven, allowlist baked in, with `quill-haven-recovery` /
+`quill-haven-enable` escape hatches. Updates: versioned service-worker cache +
+network-first shell auto-update the device next time it has Wi-Fi; the in-app
+"Update available" button is the manual path.
 
 ---
 
-## Design Language
+## 9. Ideas / roadmap (parked — not built)
+
+- **One-step custom USB ISO** — bake install + kiosk into one boot instead of
+  two. Needs ISO-remaster tooling; skip until there's a real device to test on.
+- **Raspberry Pi instruction sheet** — the Pi runs the same kiosk off an SD card;
+  needs its own short "get the system on" guide.
+- **AI spell checker** in the writing app — a 3-level slider + off; would lean on
+  a paid API, so partly blocked on hosting.
+- **One-click "Restore from Drive"** — today you download the latest auto-backup
+  .json from Drive, then Settings → Restore backup.
+- **Icons** — Marie wants the real *St John Author Studio* logo on the boot splash
+  (needs the image file); the Dabble Writer icon could be nicer.
+- Removed on purpose (do not re-add without asking): a "quick-add common apps"
+  list; auto-copying downloads into Files → Documents.
+
+---
+
+## 10. Design language
 
 | Element | Value |
 |---|---|
 | Background | Light pastel gradient + frosted orbs (default); themes tint it, Dark repaints |
-| Glass | rgba(255,255,255,0.5) + backdrop blur |
+| Glass | translucent white + backdrop blur |
 | Radius | 16px cards, 10px icons, ~7px buttons |
 | Font | System stack for UI; EB Garamond for the writing app; Great Vibes on the boot splash |
 | Hover | scale + gentle lift, ~0.15–0.2s |
-| Animations | Slow, calm (20–25s orb drift) |
+| Animations | slow, calm (20–25s orb drift) |
 
-### Themes (4 skins)
+**Themes (4 skins, one file `shared/theme.css`):** Purple (default), Wood, Slate,
+Dark. A theme is mostly about the accent colour; Dark is the one full repaint.
+**Night Light** is separate — a warm filter you toggle on/off, not a skin. Every
+page links the one theme file so the home screen and both apps always match (via
+the `qh-theme` storage event).
 
-A theme is about the ACCENT colour, not repainting everything:
+## 11. Hardware
 
-- **Purple (default)** — soft pastel background, white panels, lavender accent.
-- **Wood** and **Slate** — same light background + white panels; a whisper of
-  tint and a different accent (toggles, slider, highlight, links, writing caret).
-- **Dark** — the one full dark mode (re-colours everything).
-- **Night Light** is separate: a warm filter you toggle on/off, not a skin.
+Quill Haven runs on anything you can wipe and put your own Linux on — see §3. No
+single "official" device; a cheap Intel/AMD laptop or 2-in-1 is the easy path, a
+Raspberry Pi is the from-scratch path. Avoid Apple Silicon Macs and ARM
+Chromebooks (firmware won't allow it).
 
-All skins live in one file — `home-screen/shared/theme.css` (CSS variables) —
-linked by the home screen and every app so they always match.
-
----
-
-## Hardware
-
-- **Device:** Acer Chromebook Spin 311 (11.6") · MediaTek MT8183 · 4 GB RAM · 64 GB eMMC
-- **Cost:** ~$100 used
-- **OS plan:** wipe ChromeOS, install lightweight Linux (Debian/Ubuntu minimal + Chromium)
-
----
-
-## Rules
+## 12. Rules
 
 1. **One source of truth per thing.** Apps are defined once and render everywhere.
 2. **No frameworks.** Static HTML/CSS/JS. No React, no build step, no npm.
 3. **Offline first.** Everything works without internet except the web apps.
-4. **Locked by design.** No escape hatches. If it's not on the home screen, it doesn't exist.
+4. **Locked by design.** No escape hatches. If it's not on the home screen, it
+   doesn't exist.
 5. **Pretty by default.** Modern, calm, pastel — not a chunky school-laptop UI.
 6. **Plan before building.** Plan, review, then build. One task at a time.
+7. **Data safety is sacred.** Marie's writing must never silently vanish.
 
 ---
 
-## Version History
+## 13. Version history
 
 | Version | Date | Changes |
 |---|---|---|
-| 1.0 | 2026-06-21 | Initial home screen: default apps, settings panel, clipboard, dock/top toggle, update checker |
-| 1.1 | 2026-06-21 | Boot splash + theme picker; themes reworked to 4 real skins; persistence + update-apply fixes |
-| 1.2 | 2026-06-21 | Code split into index.html + css/home.css + shared/theme.css + js/home.js; Local Writing app (v1) added as 2nd default |
-| 1.3 | 2026-06-21 | Apps data-driven; Add App + remove apps; Dabble becomes a removable default add-on |
-| 1.4 | 2026-06-21 | Fonts bundled locally (EB Garamond + Great Vibes); boot splash matches saved theme |
-| 1.5 | 2026-06-21 | Real St John quill on the boot splash (bigger, theme-tinted); tagline/loader no longer "lift" |
-| 1.6 | 2026-06-21 | Add App polish: colour dropdown (20 swatches), icon dropdown (incl. proper clover; "A" replaced by live first-letter), saves chosen colour/icon; drag-to-reorder apps; storage bar |
-| 1.7 | 2026-06-21 | **Local Writing v2** — Notes/Projects tabs, collapsing quill panel, chapters → scenes (header + sub-header), drag, rename, highlight, autosave; old chapters migrated to Notes |
-| 1.8 | 2026-06-21 | Writing-app review fixes (pen/line highlight icon, no-bracket placeholders, no tree lines, pencil rename, native typing undo confirmed); even top-bar icon spacing |
-| 1.9 | 2026-06-21 | **Files app** added to the dock — Documents, Pictures (→ set home-screen background), Trash; Downloads/USB are device-side placeholders. Next: Download button (This device / Google Drive) to fill Documents |
+| 1.0–1.9 | 2026-06-21 | Home screen, themes/boot splash, code split, data-driven apps, bundled fonts, Local Writing v2, Files app (full history in git) |
+| 2.0 | 2026-06-22 | Finishing batch (RTF/zip export, trash+undo, Parts, Files folders, Drive framework, backup/restore, home polish); one-USB device install + kiosk allowlist; audit fixes (service-worker auto-update, data-loss guards, hidden-row fix, contrast, qhConfirm noCancel); docs consolidated to this brain |

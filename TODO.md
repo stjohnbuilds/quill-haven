@@ -66,7 +66,7 @@ instead of two.
       header + sub-header + body); chapters auto-number ("Chapter N"); drag to
       reorder; centred pill toolbar (bold/italic/underline/strikethrough/highlight
       with T&T pastels); large writing space; autosaves; old chapters migrated to
-      Notes. Plan in docs/WRITING_APP_PLAN.md
+      Notes.
 
 ### Local Writing v2 — review fixes (Marie 2026-06-21)
 - [x] Highlighter icon — now the simple pen/line icon (from the add-app set),

@@ -231,10 +231,10 @@ var BUILTIN_APPS = [
   { id:'docs', name:'Google Docs', kind:'site', url:'https://docs.google.com',
     c1:'#f7cfe6', c2:'#eeb1cf', vb:'0 0 28 28',
     icon:'<rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.4" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>' },
-  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=23',
+  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=24',
     c1:'#c2e8c9', c2:'#97d6a4', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
     icon:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/><path d="M16 8 2 22" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/><path d="M17.5 15H9" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>' },
-  { id:'files', name:'Files', kind:'local', src:'apps/files/index.html?v=7',
+  { id:'files', name:'Files', kind:'local', src:'apps/files/index.html?v=8',
     c1:'#c4d4f7', c2:'#a0bcee', vb:'0 0 24 24', sub:'Documents, pictures, USB',
     icon:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="white" stroke-width="1.5" stroke-linejoin="round" opacity="0.92"/>' }
 ];
@@ -345,7 +345,13 @@ function hideAppMenu() {
 }
 function restartApp(id) {
   var view = document.getElementById('view-' + id);
-  if (view) { var ifr = view.querySelector('iframe'); if (ifr) ifr.src = ifr.src; }
+  if (view) {
+    var ifr = view.querySelector('iframe');
+    if (ifr) {
+      try { var w = ifr.contentWindow; if (w && typeof w.flushAndPersist === 'function') w.flushAndPersist(); } catch (e) {}
+      ifr.src = ifr.src;
+    }
+  }
   openApp(id);
 }
 function showAppMenu(e, id) {
@@ -454,8 +460,21 @@ function onRowDragEnd() {
   renderApps();
 }
 
+// Save any in-flight typing in the local apps BEFORE we tear their windows
+// down. Without this, toggling/reordering/removing an app mid-sentence (which
+// rebuilds the iframes) would drop the last few seconds of unsaved text.
+function flushOpenApps() {
+  document.querySelectorAll('#appViews iframe.app-frame').forEach(function(ifr) {
+    try {
+      var w = ifr.contentWindow;
+      if (w && typeof w.flushAndPersist === 'function') w.flushAndPersist();
+    } catch (e) {}
+  });
+}
+
 // Render the whole app list into the dock, top bar, windows, and settings.
 function renderApps() {
+  flushOpenApps();   // never lose in-flight typing when the windows rebuild
   var dock = document.getElementById('dock');
   var top = document.getElementById('topApps');
   var views = document.getElementById('appViews');
@@ -1005,9 +1024,27 @@ function _zipFindBackupJson(buf) {
   }
   throw new Error('No quill-haven-backup.json inside that .zip — was it made by Quill Haven?');
 }
+// Apply a restore as all-or-nothing: snapshot both keys first, and if either
+// write fails (e.g. no room), put the originals back so we never leave a
+// half-applied backup (new writing + old files, or vice versa).
 function _applyRestore(parsed) {
-  if (parsed.writing) { try { localStorage.setItem('qh-writing2', JSON.stringify(parsed.writing)); } catch (e) {} }
-  if (parsed.files) { try { localStorage.setItem('qh-files', JSON.stringify(parsed.files)); } catch (e) {} }
+  var oldW = localStorage.getItem('qh-writing2');
+  var oldF = localStorage.getItem('qh-files');
+  try {
+    if (parsed.writing) localStorage.setItem('qh-writing2', JSON.stringify(parsed.writing));
+    if (parsed.files) localStorage.setItem('qh-files', JSON.stringify(parsed.files));
+    return true;
+  } catch (e) {
+    try { if (oldW === null) localStorage.removeItem('qh-writing2'); else localStorage.setItem('qh-writing2', oldW); } catch (_) {}
+    try { if (oldF === null) localStorage.removeItem('qh-files'); else localStorage.setItem('qh-files', oldF); } catch (_) {}
+    if (window.qhConfirm) window.qhConfirm({
+      title: 'Backup didn’t fit',
+      message: 'There wasn’t enough room to load that backup, so nothing was changed. Try deleting some pictures first, then restore again.',
+      confirmText: 'OK',
+      noCancel: true
+    });
+    return false;
+  }
 }
 (function wireRestore() {
   var inp = document.getElementById('restoreInput'); if (!inp) return;
@@ -1041,11 +1078,12 @@ function _applyRestore(parsed) {
         confirmText: 'Replace everything',
         danger: true,
         onConfirm: function () {
-          _applyRestore(parsed);
+          if (!_applyRestore(parsed)) return;   // failed → originals kept, message already shown
           window.qhConfirm({
             title: 'Backup loaded',
             message: 'The app needs to reload to show the restored writing.',
             confirmText: 'Reload now',
+            noCancel: true,
             onConfirm: function () { location.reload(); }
           });
         }
@@ -1177,7 +1215,7 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '1.0';
+var LOCAL_VERSION = '2.0';
 function checkForUpdate() {
   fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json')
     .then(function(r) { return r.json(); })

@@ -1,14 +1,15 @@
-# Handover — Quill Haven (updated 2026-06-21)
+# Handover — Quill Haven (updated 2026-06-22, v2.0)
 
 ## COPY-PASTE THIS into a fresh Claude Code chat to bootstrap:
 
 You are continuing work on **Quill Haven** — a whole writing **operating system**.
-It runs on an Acer Chromebook Spin 311, but the Chromebook is just the hardware:
-on power-on the device boots straight into this home screen — no ChromeOS, no
-browser to wander off into. "Only the writing apps" isn't a restriction we add,
-it IS the point: a device that can only write. Today it's a static HTML/CSS/JS
-"OS" running in a fullscreen browser; the boot/lockdown/USB-installer half is the
-big remaining chunk.
+You take a cheap Intel/AMD laptop (Windows laptop, Intel Mac, or Intel/AMD
+Chromebook), wipe it, and Quill Haven becomes the entire computer: on power-on it
+boots straight into this home screen in a fullscreen kiosk — no Windows, no
+ChromeOS, no browser to wander off into. "Only the writing apps" isn't a
+restriction we add, it IS the point: a device that can only write. This is NOT an
+app inside another OS and NOT a locked tablet — do not suggest those (see
+CLAUDE.md).
 
 Marie is non-technical. Talk like she's 10. Short, no jargon. Plan before
 building, one task at a time. End every file-touching reply with a
@@ -18,15 +19,14 @@ it) — say plainly what you tested vs didn't.
 Project: /Users/mariemackay/Dev/QuillHaven/   GitHub: stjohnbuilds/quill-haven
 Preview: Claude Preview server (launch.json name "home-screen", port 8081).
 
-**YOUR FIRST JOB: build everything in `docs/FINISHING_BATCH.md`.** Marie wants
-that whole "finishing" batch done first, in one go (download/export, writing-app
-trash+undo, "+"→Chapter/Part, Files folders/drag/rename, Google Drive, home
-polish, + the background-picker-into-Settings). Two items need her input first —
-they're flagged at the top of that file. THEN the device half (boot/lockdown/USB).
+**STATUS: the app side and the one-USB device install are both DONE (v2.0).** The
+big "finishing" batch and the 2026-06-22 audit fixes have all shipped. What's
+left is small and optional — see "DO NEXT" at the bottom (the Raspberry Pi
+instruction sheet and a one-step custom USB ISO). Mostly the job now is keeping it
+clean and pushing releases.
 
-READ FIRST, in order: CLAUDE.md → docs/GAME_PLAN.md (source of truth) →
-**docs/FINISHING_BATCH.md** → docs/CODE_HEALTH.md → docs/WRITING_APP_PLAN.md →
-TODO.md → this file.
+READ FIRST, in order: CLAUDE.md → **docs/GAME_PLAN.md (the brain / source of
+truth)** → docs/CODE_HEALTH.md → TODO.md → this file → devices/SETUP.md.
 
 ---
 
@@ -34,10 +34,10 @@ TODO.md → this file.
 
 1. **CACHING — bump `?v=N` on EVERY CSS/JS change.** Marie's browser caches hard;
    "nothing happened" = stale cache. Locations and CURRENT versions (2026-06-22):
-   - `index.html`: theme.css **?v=21**, home.css **?v=24**, home.js **?v=28**, confirm.js **?v=2**
-   - `js/home.js` iframe srcs: `apps/writing/index.html?v=23`, `apps/files/index.html?v=7`
-   - `apps/writing/index.html`: theme **?v=16**, writing.css **?v=19**, writing.js **?v=23**, confirm.js **?v=2**
-   - `apps/files/index.html`: theme **?v=2**, files.css **?v=5**, files.js **?v=7**, confirm.js **?v=2**
+   - `index.html`: theme.css **?v=22**, home.css **?v=25**, home.js **?v=29**, confirm.js **?v=3**
+   - `js/home.js` iframe srcs: `apps/writing/index.html?v=24`, `apps/files/index.html?v=8`
+   - `apps/writing/index.html`: theme **?v=22**, writing.css **?v=19**, writing.js **?v=24**, confirm.js **?v=3**
+   - `apps/files/index.html`: theme **?v=22**, files.css **?v=5**, files.js **?v=7**, confirm.js **?v=3**
    When you change a shared file (theme.css or confirm.js), bump it in ALL pages
    that link it, and bump the iframe `src` in home.js so the app window reloads.
 2. **Preview throttles background timers** → the boot splash can "hang" in
