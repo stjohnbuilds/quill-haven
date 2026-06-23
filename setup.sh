@@ -4,28 +4,33 @@
 #
 #   curl -L https://stjohnbuilds.github.io/quill-haven/setup.sh | bash
 #
-# This single command sets up EVERYTHING, so a reinstall on any laptop is one
-# paste — never the long night again:
-#   - Chromium kiosk that boots straight into Quill Haven
-#   - Auto-login (no password every boot)
-#   - Site allowlist (write-only) INCLUDING the full Google sign-in flow
-#   - A tiny local "helper" so the on-screen Power / Restart / Sleep / Exit
-#     buttons actually do real things
-#   - Two-finger swipe-back to return to the home screen from any app
+# One command sets up EVERYTHING, so a reinstall on any laptop is one paste:
+#   - Chromium kiosk that boots straight into Quill Haven (no password)
+#   - A SELF-UPDATING helper so the Power/Restart/Sleep/Exit buttons work AND
+#     future helper fixes arrive from GitHub on their own (no re-run)
+#   - "Come home" key (Command+H) to leave any app from anywhere
+#   - Site allowlist (write-only) including the full Google sign-in flow
 #   - Recovery escape hatch (quill-haven-recovery / quill-haven-enable)
 
 set -euo pipefail
 
-QUILL_URL="https://stjohnbuilds.github.io/quill-haven/"
-HELPER_PORT=8137
+RAW="https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/helper"
 ME="$(whoami)"
+HELPER_DIR="$HOME/.local/share/quill-haven"
 
 say() { printf "\n\033[1;36m==> %s\033[0m\n" "$*"; }
 
 say "Updating packages"
 sudo apt-get update -y
 say "Installing Chromium + helpers"
-sudo apt-get install -y chromium unclutter xdotool python3
+sudo apt-get install -y chromium unclutter xdotool python3 curl
+
+# Chromium must be the APT build, not snap — snap ignores /etc/chromium policies.
+if snap list 2>/dev/null | grep -q '^chromium '; then
+  say "Switching Chromium from snap to apt (snap ignores the lockdown policy)"
+  sudo snap remove chromium || true
+  sudo apt-get install -y chromium || true
+fi
 
 # ---------------------------------------------------------------------------
 # Auto-login — no password every boot
@@ -41,68 +46,79 @@ sudo groupadd -f autologin
 sudo gpasswd -a "$ME" autologin >/dev/null 2>&1 || true
 
 # ---------------------------------------------------------------------------
-# The helper — lets the on-screen buttons run real OS actions
-# (a tiny web server on 127.0.0.1 the home screen can call)
+# Power buttons work without a password (polkit) — harmless if already allowed
 # ---------------------------------------------------------------------------
-say "Installing the helper (Power / Restart / Sleep / Exit buttons)"
-sudo tee /usr/local/bin/quill-haven-helper >/dev/null <<HELPER
-#!/usr/bin/env python3
-import http.server, subprocess
-PORT = $HELPER_PORT
-ACTIONS = {
-    "/poweroff": ["systemctl", "poweroff"],
-    "/reboot":   ["systemctl", "reboot"],
-    "/sleep":    ["systemctl", "suspend"],
-    "/desktop":  ["pkill", "-f", "chromium"],
-    "/ping":     None,
-}
-class H(http.server.BaseHTTPRequestHandler):
-    def _ok(self, code=200):
-        self.send_response(code)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Content-Type", "text/plain")
-        self.end_headers()
-    def do_OPTIONS(self):
-        self._ok(204)
-    def do_GET(self):
-        path = self.path.split("?")[0]
-        if path in ACTIONS:
-            self._ok()
-            self.wfile.write(b"ok")
-            cmd = ACTIONS[path]
-            if cmd:
-                subprocess.Popen(cmd)
-        else:
-            self._ok(404)
-    def log_message(self, *a):
-        pass
-http.server.HTTPServer(("127.0.0.1", PORT), H).serve_forever()
-HELPER
-sudo chmod +x /usr/local/bin/quill-haven-helper
+say "Allowing power / restart / sleep without a password"
+sudo tee /etc/polkit-1/rules.d/49-quillhaven.rules >/dev/null <<EOF
+polkit.addRule(function(action, subject) {
+    if (subject.user == "$ME" &&
+        (action.id == "org.freedesktop.login1.power-off" ||
+         action.id == "org.freedesktop.login1.reboot" ||
+         action.id == "org.freedesktop.login1.suspend" ||
+         action.id == "org.freedesktop.login1.power-off-multiple-sessions" ||
+         action.id == "org.freedesktop.login1.reboot-multiple-sessions" ||
+         action.id == "org.freedesktop.login1.suspend-multiple-sessions")) {
+        return polkit.Result.YES;
+    }
+});
+EOF
 
 # ---------------------------------------------------------------------------
-# Kiosk launcher
+# The SELF-UPDATING helper — pulls itself + future fixes from GitHub
+# ---------------------------------------------------------------------------
+say "Installing the self-updating helper"
+mkdir -p "$HELPER_DIR"
+fetch_to() {  # url dest  — only overwrites on a clean download
+  if curl -fsSL "$1" -o "$2.dl" 2>/dev/null; then mv "$2.dl" "$2"; fi
+}
+fetch_to "$RAW/helper.py"     "$HELPER_DIR/helper.py"
+fetch_to "$RAW/run-helper.sh" "$HELPER_DIR/run-helper.sh"
+# Seed the version file from the manifest so the first update check is honest.
+curl -fsSL "$RAW/helper-manifest.json" \
+  | python3 -c 'import sys,json; print(json.load(sys.stdin)["version"])' > "$HELPER_DIR/helper-version.txt" 2>/dev/null \
+  || echo "0" > "$HELPER_DIR/helper-version.txt"
+cp "$HELPER_DIR/helper.py" "$HELPER_DIR/helper.py.bak" 2>/dev/null || true
+chmod +x "$HELPER_DIR/run-helper.sh" "$HELPER_DIR/helper.py" 2>/dev/null || true
+
+# ---------------------------------------------------------------------------
+# Kiosk launcher — opens Quill Haven, starts the helper, allows the localhost call
 # ---------------------------------------------------------------------------
 say "Creating the Quill Haven launcher"
-sudo tee /usr/local/bin/quill-haven-launch >/dev/null <<'LAUNCH'
+cat > "$HELPER_DIR/launch-home.sh" <<'LAUNCH'
 #!/usr/bin/env bash
 xset s off || true; xset -dpms || true; xset s noblank || true
-unclutter -idle 1 -root &
-# start the helper so Power/Restart/Sleep/Exit work
-pgrep -f quill-haven-helper >/dev/null || /usr/local/bin/quill-haven-helper &
+pgrep -f unclutter   >/dev/null || unclutter -idle 2 -root &
+pgrep -f run-helper.sh >/dev/null || "$HOME/.local/share/quill-haven/run-helper.sh" &
 exec chromium \
   --kiosk \
-  --no-first-run \
-  --noerrdialogs \
-  --disable-translate \
-  --disable-infobars \
-  --disable-features=TranslateUI \
-  --check-for-update-interval=604800 \
+  --user-data-dir="$HOME/.quill-profile" \
+  --no-first-run --noerrdialogs --disable-infobars \
+  --disable-session-crashed-bubble \
+  --disable-features=TranslateUI,LocalNetworkAccessChecks \
   --overscroll-history-navigation=1 \
-  --start-fullscreen \
   "https://stjohnbuilds.github.io/quill-haven/"
 LAUNCH
-sudo chmod +x /usr/local/bin/quill-haven-launch
+chmod +x "$HELPER_DIR/launch-home.sh"
+sudo ln -sf "$HELPER_DIR/launch-home.sh" /usr/local/bin/quill-haven-launch
+
+# ---------------------------------------------------------------------------
+# "Come home" — leave any app from anywhere
+# ---------------------------------------------------------------------------
+say "Adding the Come-home key (Command+H)"
+sudo tee /usr/local/bin/quill-home >/dev/null <<'HOME'
+#!/usr/bin/env bash
+# Ask the helper to go home; if the helper is down, do it directly.
+curl -fsS -X POST http://127.0.0.1:8137/go-home >/dev/null 2>&1 && exit 0
+pkill -x chromium 2>/dev/null; pkill -x chromium-browser 2>/dev/null
+sleep 1
+exec /usr/local/bin/quill-haven-launch
+HOME
+sudo chmod +x /usr/local/bin/quill-home
+# Bind a few combos so at least one works on a Mac keyboard.
+for combo in "<Super>h" "<Primary><Alt>h" "<Super>Escape"; do
+  xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/$combo" -n -t string -s "/usr/local/bin/quill-home" 2>/dev/null \
+  || xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/$combo" -s "/usr/local/bin/quill-home" 2>/dev/null || true
+done
 
 # ---------------------------------------------------------------------------
 # Open at login
@@ -124,6 +140,7 @@ say "Installing the recovery escape hatch"
 sudo tee /usr/local/bin/quill-haven-recovery >/dev/null <<'RECOVERY'
 #!/usr/bin/env bash
 pkill -f chromium 2>/dev/null || true
+pkill -f run-helper.sh 2>/dev/null || true
 if [ -f "$HOME/.config/autostart/quillhaven.desktop" ]; then
   mv "$HOME/.config/autostart/quillhaven.desktop" "$HOME/.config/autostart/quillhaven.desktop.disabled"
 fi
@@ -140,8 +157,7 @@ ENABLE
 sudo chmod +x /usr/local/bin/quill-haven-enable
 
 # ---------------------------------------------------------------------------
-# Chromium allowlist — write-only, but Google sign-in actually works
-# (a host like "google.com" matches all of its subdomains)
+# Chromium allowlist + Local-Network opt-in (so the power button can reach the helper)
 # ---------------------------------------------------------------------------
 say "Locking the browser to the writing sites (with working Google sign-in)"
 write_policy() {
@@ -153,6 +169,8 @@ write_policy() {
     "stjohnbuilds.github.io",
     "raw.githubusercontent.com",
     "google.com",
+    "accounts.google.com",
+    "accounts.youtube.com",
     "googleusercontent.com",
     "gstatic.com",
     "googleapis.com",
@@ -165,6 +183,8 @@ write_policy() {
     "vercel.live"
   ],
   "URLBlocklist": ["*"],
+  "LocalNetworkAccessAllowedForUrls": ["https://stjohnbuilds.github.io"],
+  "LocalNetworkAccessRestrictionsTemporaryOptOut": true,
   "DefaultBrowserSettingEnabled": false,
   "IncognitoModeAvailability": 1,
   "DeveloperToolsAvailability": 2,

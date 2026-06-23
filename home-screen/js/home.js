@@ -1222,7 +1222,7 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '2.1';
+var LOCAL_VERSION = '2.2';
 function checkForUpdate() {
   fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json')
     .then(function(r) { return r.json(); })
@@ -1270,7 +1270,7 @@ function qhSystem(action) {
     });
   }
   var t = setTimeout(fail, 1500);   // helper not answering (no device) → say so, don't hang
-  fetch(QH_HELPER + '/' + action, { mode: 'cors' })
+  fetch(QH_HELPER + '/' + action, { method: 'POST', mode: 'cors' })
     .then(function() { done = true; clearTimeout(t); })
     .catch(function() { clearTimeout(t); fail(); });
 }
