@@ -146,23 +146,135 @@ TODO.md → this file.
 - `docs/AI_ASSESSMENT_PROMPT.md` and `docs/CODE_HEALTH.md` refreshed for
   outside review.
 
-## DO NEXT — what's left
+## DO NEXT — fixes from the 2026-06-22 outside audit
 
-- **One-step custom USB ISO** — today: install Linux Mint from a
-  generic Mint USB, then run `setup.sh`. Goal: a single custom Quill
-  Haven ISO that boots straight into the kiosk with no script step.
-  Needs ISO remaster tooling (Cubic on Linux or Docker-based remaster).
-  Skipped because it can't be safely built without a real device to
-  test on.
-- **Auto-backup to Drive** when signed in (a small QoL on top of the
-  framework). 30-min silent upload, keep last 10. Off by default.
-- **AI spell checker** (Future). 3-level slider + off; would lean on a
-  paid API so partially blocked on the question of who hosts it.
+These are the audit findings that **still apply** after the
+browser-install demolition (Windows/Mac PWA + Family Link were already
+deleted, so any audit point about `setup-windows.ps1` / FAMILY_LINK.md
+is N/A). Work them in this order — top items are highest impact.
 
-Rough status: **~92% overall.** App side ~99% (only AI spellcheck
-remains as Future). Device-install side ~80% (the one USB install path
-is shipped with a real URL allowlist baked in; only the one-step custom
-ISO is left).
+### Marie's restructure ask (do alongside the fixes)
+- Rename `devices/` → `instructions/`.
+- Inside, write **three product-named guides** (instead of the one
+  universal SETUP.md): `Mac Instructions.md`, `Windows Instructions.md`,
+  `Chromebook Instructions.md`. Each tailored to that product only — no
+  cross-references, drop sections that don't apply (e.g. no firmware-
+  unlock step in the Mac/Windows guides). Keep
+  `instructions/BEFORE-YOU-BUY.md` (it's Chromebook-specific) and
+  `instructions/README.md` (table of all three). Update every doc that
+  links to the old `devices/` paths (`README.md`, `HANDOVER`,
+  `AI_ASSESSMENT_PROMPT`, `CODE_HEALTH`, `TODO`).
+
+### CRITICAL bugs from the audit
+
+1. **Service worker serves stale shell.** `home-screen/service-worker.js`
+   uses a constant cache name (`quill-haven-v1`) that never changes +
+   cache-first for `./index.html`. Once a device has the SW installed,
+   it serves the OLD index.html forever — auditor proved it (cached
+   shell referenced `home.js?v=23` while disk was `v=28`, hiding the
+   Region + Restore-backup rows from the live UI). Defeats the whole
+   GitHub-update story. **Fix:**
+   - Make cache name versioned (e.g. `quill-haven-${VERSION}`); read
+     `VERSION` from version.json or hardcode and bump per release.
+   - Use **network-first for `index.html`** (other assets are
+     cache-busted via `?v=` already and can stay cache-first).
+   - Add `self.skipWaiting()` + `clients.claim()` so the new SW takes
+     over immediately.
+   - On `activate`, delete every cache that isn't the current one.
+   - Also: `setup.sh`'s headless pre-warm step bakes the stale SW shell
+     onto the device. Either drop the pre-warm OR confirm the new SW
+     auto-updates correctly so the bake doesn't permanently stick.
+
+2. **#autoBackupRow shows when Drive isn't connected.** `home.css:326`
+   `.settings-row { display: flex }` overrides the HTML `hidden`
+   attribute, so the toggle renders even though `hidden` is set.
+   **Fix:** add a global `[hidden] { display: none !important; }` to
+   `home.css` (and the same to writing.css/files.css for safety).
+
+3. **Two data-loss windows in `home-screen/js/home.js`:**
+   a. `renderApps()` (~line 465) blasts the writing iframe via
+      `innerHTML = ''` WITHOUT first flushing the in-flight edits.
+      Toggling/reordering/removing an app while mid-sentence drops the
+      last typed text. **Fix:** writing app exposes
+      `window.flushAndPersist = function() { flush(); persist(); }` on
+      its iframe window. home.js, before any iframe tear-down, calls
+      `iframe.contentWindow.flushAndPersist?.()`. Wrap in try/catch.
+   b. `_applyRestore` writes `qh-writing2` then `qh-files` in two
+      separate try/catch — second can fail silently after the first
+      succeeded, leaving a half-applied restore. **Fix:** snapshot the
+      OLD values of both keys first, then attempt both writes; if
+      either throws, restore both snapshots.
+
+4. **`version.json` frozen at 1.0** despite 1.9 worth of history. The
+   "Update available" button never fires. **Fix:** bump to `2.0`, bump
+   the matching `LOCAL_VERSION` constant in `home.js`, bump the footer
+   `Quill Haven v1.0 🌸` in `index.html`. Going forward, bump on every
+   release (when ready, document in HANDOVER's "version bump"
+   discipline).
+
+5. **Typing & Tomes is named in `CLAUDE.md` + `README.md` as a
+   shipping app but is NOT in `DEFAULT_ADDONS` in `home.js`.** So the
+   icon never appears — user has to Add App it manually. **Fix:** add
+   to `DEFAULT_ADDONS` alongside Dabble Writer. Sensible pastel
+   colour (sage/mint to avoid clashing with Local Writing's green).
+   URL: `https://typingandtomes.vercel.app`.
+
+### MEDIUM bugs
+
+6. **`theme.css` linked at three different cache versions** — `?v=21`
+   in `home-screen/index.html`, `?v=16` in `apps/writing/index.html`,
+   `?v=2` in `apps/files/index.html`. A shared file should be bumped
+   in all three at once. **Fix:** sync all three to the current actual
+   highest (probably `?v=22`), and write a one-line rule in
+   `CODE_HEALTH.md` saying "shared files = bump everywhere".
+
+7. **`qhConfirm` always shows a Cancel button** — info-only popups
+   ("Saved to Drive", etc.) have a pointless Cancel next to OK.
+   **Fix:** add `noCancel: true` option to `qhConfirm` in
+   `shared/confirm.js`; when set, hide the Cancel button and make OK
+   full-width + focused. Update callers that are info-only (Drive
+   success messages, the "needs setup" popups, the storage-full
+   warnings).
+
+8. **Files → Documents never auto-populated.** The writing app used
+   to copy downloads here but doesn't anymore (Marie asked for that to
+   be removed). `CODE_HEALTH.md:96` still claims the auto-copy
+   happens. **Fix:** delete that checklist item in CODE_HEALTH (the
+   feature isn't coming back; the doc is wrong).
+
+### LOW / polish
+
+9. **Low contrast** — top-bar `#topWifi`, `#topBattery`, settings cog
+   are very pale on the light background. Files app sidebar labels
+   ("Pictures", folder names) washed-out grey. Bump opacity / colour
+   via the theme variables (don't hardcode).
+
+10. **GAME_PLAN.md is significantly stale.** Lists `boot/`, `config/`,
+    `installer/` directories that don't exist; marks the OS-install
+    half "to build" even though setup.sh ships; omits `instructions/`
+    (or `devices/`), the service worker, manifest, confirm.js, the
+    Mac/Windows paths, the backup/restore/Drive feature set. **Fix:**
+    rewrite. Tree section should reflect the actual repo (run
+    `find . -maxdepth 3 -type d -not -path '*/.*'` for the truth).
+    Feature breakdown should reflect what shipped.
+
+### Future / not blocking
+
+- **One-step custom USB ISO** — bake everything into one ISO so the
+  install + kiosk step is one boot instead of two. Needs ISO remaster
+  tooling (Cubic on Linux or Docker-based remaster). Skip until there's
+  a real device to test on.
+- **AI spell checker** — 3-level slider + off. Would lean on a paid
+  API so partly blocked on hosting.
+- **Restore from Drive in one click** (today: download the latest
+  auto-backup .json from Drive, then Settings → Restore backup).
+- **Address remaining audit items** marked ⚠ minor that we triaged out
+  (full list in the 2026-06-22 audit report — search the chat for
+  "QUILL HAVEN ASSESSMENT").
+
+Rough status when this list was written: **~92% overall.** App side
+~99%. Device-install side ~80% (one-USB install + URL allowlist
+shipped; one-step custom ISO is the only outstanding piece).
 
 ## MARIE'S STYLE / WATCH-OUTS
 
