@@ -49,9 +49,11 @@ Split achieved end-to-end:
   for type.
 - Apps are fully data-driven (one source of truth in `home.js`).
 
-The OS-install half is partially built: written guides + a setup.sh
-(Linux) and a setup-windows.ps1 (Windows) live at the repo root and in
-`devices/`. A one-step USB image is still to do.
+The OS-install side is shipped: `devices/SETUP.md` is the one install
+guide (USB → wipe → Linux Mint → run setup.sh), and `setup.sh` at the
+repo root is the installer the Linux Mint terminal runs. The only
+remaining device-install work is a one-step custom USB ISO so the
+install + kiosk step is one boot instead of two.
 
 ## Deep-dive / full-scan checklist (for a tester or the next AI)
 

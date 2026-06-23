@@ -13,18 +13,19 @@ No social. Just writing.
 
 ## Get it on a device
 
-Four install paths, all in [`devices/`](devices/):
+**One install path: one USB stick wipes the laptop and installs Quill
+Haven as the operating system.** Same process for any Intel/AMD laptop
+— Windows, Intel Mac, or Intel/AMD Chromebook (extra firmware-unlock
+step).
 
-| Device | What you get | Time | Read |
-|---|---|---|---|
-| **Windows 10/11 laptop** | Edge in fullscreen kiosk + (optional) real URL allowlist | ~10 min | [`devices/Windows/SETUP.md`](devices/Windows/SETUP.md) |
-| **Mac** (macOS 12+) | Chrome/Edge as fullscreen PWA + (optional) Screen Time site wall | ~15 min | [`devices/Mac/SETUP.md`](devices/Mac/SETUP.md) |
-| **ARM Chromebook** (MediaTek/Rockchip/Snapdragon) | ChromeOS locked down via PWA + (optional) Google Family Link site wall | ~10 min | [`devices/Chromebook/Not Formattable/SETUP.md`](devices/Chromebook/Not%20Formattable/SETUP.md) |
-| **Intel/AMD Chromebook** | ChromeOS wiped, custom Linux Mint kiosk with real Chromium URL allowlist baked in | ~1 hour | [`devices/Chromebook/Formattable/SETUP.md`](devices/Chromebook/Formattable/SETUP.md) |
+→ Read [`devices/SETUP.md`](devices/SETUP.md) for the step-by-step.
 
-**Buying a Chromebook?** [`devices/Chromebook/BEFORE-YOU-BUY.md`](devices/Chromebook/BEFORE-YOU-BUY.md)
+**Won't work on:** Apple Silicon Macs (M1/M2/M3+) or ARM Chromebooks
+— Apple and Google's firmware refuses to install another OS.
+
+**Buying a Chromebook for this?** [`devices/BEFORE-YOU-BUY.md`](devices/BEFORE-YOU-BUY.md)
 covers the write-protect-method check that ruins a lot of "supported"
-Chromebooks (cost-of-cable, etc).
+Chromebooks (the ones that need a $30 specialist cable to unlock).
 
 ## What's in it
 
@@ -70,10 +71,10 @@ Chromebooks (cost-of-cable, etc).
 
 Static HTML/CSS/JS. No framework, no build step, no npm. Three files for
 the home screen (HTML/CSS/JS), three more per sub-app, one shared
-theme.css for colours, one shared confirm.js for popups. PWA manifest +
-service worker for offline use. The "Full backup" zip generator and the
-"Restore" zip reader are both hand-written (no library, no dependencies)
-to keep that promise.
+theme.css for colours, one shared confirm.js for popups. A service worker
+caches everything for offline use. The "Full backup" zip generator and
+the "Restore" zip reader are both hand-written (no library, no
+dependencies) to keep that promise.
 
 The deeper story is in [`docs/GAME_PLAN.md`](docs/GAME_PLAN.md).
 

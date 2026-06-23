@@ -1,36 +1,24 @@
-# Device setup for Quill Haven
+# Installing Quill Haven on a laptop
 
-Quill Haven runs on any of these:
+One install path, one USB stick, one process. Wipes the laptop and
+makes Quill Haven the operating system.
 
-| Folder | For | Real site wall? | Time |
-|---|---|---|---|
-| **[`Windows/`](Windows/SETUP.md)** | Any Windows 10 or 11 laptop | Yes (via admin script) | ~10 min |
-| **[`Mac/`](Mac/SETUP.md)** | Any Mac running macOS 12+ | Yes (via Screen Time) | ~15 min |
-| **[`Chromebook/Formattable/`](Chromebook/Formattable/SETUP.md)** | Intel / AMD Chromebooks | Yes (baked into setup.sh) | ~1 hour |
-| **[`Chromebook/Not Formattable/`](Chromebook/Not%20Formattable/SETUP.md)** | ARM Chromebooks (MediaTek / Rockchip / Snapdragon) | Yes (via Google Family Link) | ~10 min |
+→ **[SETUP.md](SETUP.md)** — the step-by-step guide.
 
-## Picking a path
+## Will it work on my laptop?
 
-- **Got a Mac or Windows laptop already?** Use it — those paths are
-  shorter and the real-wall step is straightforward (Screen Time on
-  Mac, registry script on Windows).
-- **Buying a Chromebook?** Read [`Chromebook/BEFORE-YOU-BUY.md`](Chromebook/BEFORE-YOU-BUY.md)
-  first — "supported" alone isn't enough; you also need the
-  write-protect method to be one you can do without a specialist cable.
-- **Already have a Chromebook?** Look up the model on
-  [mrchromebox.tech](https://docs.mrchromebox.tech/docs/supported-devices.html).
-  If it's Intel/AMD and the WP method is "screw" or "battery", use
-  `Chromebook/Formattable/`. Otherwise use `Chromebook/Not Formattable/`.
+Quill Haven needs an **Intel or AMD** chip:
+- ✅ Any Windows laptop (any age, any maker)
+- ✅ Intel Macs (pre-Apple Silicon — anything 2019 or older roughly)
+- ✅ Intel / AMD Chromebooks (need an extra firmware-unlock step first)
 
-## What "real site wall" means
+Quill Haven **can't** be installed on:
+- ❌ Apple Silicon Macs (M1/M2/M3 etc) — Apple's firmware refuses
+- ❌ ARM Chromebooks (MediaTek / Rockchip / Snapdragon) — Google's
+  firmware refuses
 
-Without the wall: Quill Haven opens fullscreen on login, but if a user
-quits and opens the underlying browser they can still browse anywhere.
+## Buying a Chromebook for this?
 
-With the wall: the browser itself refuses to load anything outside the
-Quill Haven allowlist (Quill Haven, Google sign-in, Google Docs/Drive,
-Dabble Writer, Typing & Tomes). Pasting `facebook.com` shows a
-"blocked" page. Survives reboots, browser updates, app updates.
-
-Pick the wall path when you actually want a write-only device, not just
-a write-mostly one.
+Read **[BEFORE-YOU-BUY.md](BEFORE-YOU-BUY.md)** first. Some Chromebooks
+that are technically supported need a $30 specialist cable to unlock —
+worth knowing before you pay.

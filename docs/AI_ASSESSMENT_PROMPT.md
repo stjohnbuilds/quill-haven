@@ -21,10 +21,11 @@ Find every bug, gap, and rough edge. **Do not fix anything.** Just report.
 
 Quill Haven is a writing-only operating system. It ships as a static
 HTML/CSS/JS "home screen" + two built-in apps (Local Writing, Files) that
-together feel like a real OS. The device side wraps that home screen in a
-fullscreen browser (Chromium kiosk on Linux, Edge kiosk on Windows, or PWA
-on locked-down ChromeOS) so the device, on power-on, opens straight into
-the home screen and nothing else.
+together feel like a real OS. The device-install side wipes a laptop and
+puts Linux Mint on it with Chromium in kiosk mode pointed at the home
+screen — so on power-on the laptop opens straight into Quill Haven, with
+the URL allowlist baked in. There is no "install in your existing
+browser" path: Quill Haven IS the OS.
 
 ---
 
@@ -40,8 +41,10 @@ You MUST read these before doing the checklist below.
 4. `TODO.md` — what's done and what's left, with status.
 5. `docs/HANDOVER_TO_NEW_CHAT.md` — gotchas, cache-version map, current
    state notes.
-6. `devices/README.md` — the four device-install paths
-   (Windows / Mac / Chromebook-Formattable / Chromebook-Not-Formattable).
+6. `devices/README.md` + `devices/SETUP.md` — the one install path
+   (USB stick wipes an Intel/AMD laptop, installs Linux + Quill Haven
+   kiosk). `devices/BEFORE-YOU-BUY.md` covers Chromebook write-protect
+   checks.
 7. `home-screen/index.html`, `home-screen/js/home.js`,
    `home-screen/apps/writing/writing.js`, `home-screen/apps/files/files.js`
    — read each one fully. They're small enough.
@@ -143,10 +146,9 @@ Compare what's actually built against `docs/GAME_PLAN.md` and `TODO.md`.
 - **Partially done:** anything that exists but is broken, incomplete, or
   has rough edges.
 - **Not started:** anything from GAME_PLAN that hasn't been built. (The
-  OS-install half — boot kiosk script, lockdown policy, USB installer —
-  is partial: written guides exist in `devices/` + `setup.sh` +
-  `setup-windows.ps1` at the repo root, but a one-step USB image
-  doesn't.)
+  OS-install half — boot kiosk script, lockdown policy — is shipped via
+  `devices/SETUP.md` + `setup.sh` at the repo root; the one-step custom
+  USB ISO is the only outstanding piece.)
 - **Undocumented:** anything built that ISN'T described in GAME_PLAN.
 
 ### D. Project Health
@@ -167,14 +169,12 @@ Compare what's actually built against `docs/GAME_PLAN.md` and `TODO.md`.
 - **Boot kiosk readiness.** Does `setup.sh` install Chromium and write a
   working autostart launcher? Does the recovery escape hatch
   (`quill-haven-recovery`) actually drop the user to the desktop?
-- **Windows kiosk readiness.** Does `setup-windows.ps1` write a Startup
-  `.cmd` that launches Edge in `--kiosk` with the right URL? Does the
-  guide cover auto-login + taskbar autohide?
-- **Lockdown readiness.** A true URL allowlist (block all sites except
-  Quill Haven + the 3 writing apps) is NOT in place yet for any device.
-  For Linux it's a Chromium managed policy in `/etc/chromium/policies/`.
-  For Windows it's an Edge managed policy via registry. For ChromeOS it's
-  Family Link or enrollment. Flag the gap.
+- **Lockdown readiness.** `setup.sh` already drops a Chromium managed
+  policy in `/etc/chromium/policies/managed/quill-haven.json` with
+  URLBlocklist=["*"] + a tight URLAllowlist (Quill Haven + Google
+  sign-in/Docs/Drive + Dabble + Typing & Tomes). Verify the JSON is
+  syntactically valid and the allowlist is complete enough that the
+  writing apps actually work end-to-end.
 - **Data safety.** All writing lives in `localStorage` (`qh-writing2`,
   `qh-files`). One device wipe = total loss. Real Google Drive sync is
   the safety net but actual OAuth isn't wired (UI is honest about this).

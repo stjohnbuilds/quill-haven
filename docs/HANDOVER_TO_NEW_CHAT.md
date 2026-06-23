@@ -127,13 +127,15 @@ TODO.md → this file.
   the device.
 
 **Device install side — three paths, real walls on each:**
-- Windows: `devices/Windows/SETUP.md` + `setup-windows.ps1` (basic
-  kiosk launcher) + `setup-windows-lockdown.ps1` (admin: writes Edge URL
-  allowlist via registry, the real wall, with `-Remove` to undo).
-- Not Formattable (ARM Chromebooks): `devices/Chromebook/Not Formattable/
-  SETUP.md` (PWA install + shelf autohide) + `FAMILY_LINK.md` (the real
-  wall via Google Family Link managed account).
-- Formattable (Intel/AMD Chromebooks): `devices/Chromebook/Formattable/
+- **One install path only:** `devices/SETUP.md` covers wiping any
+  Intel/AMD laptop (Windows / Intel Mac / Intel-AMD Chromebook —
+  Chromebook needs a firmware unlock first) and installing Linux Mint +
+  the Quill Haven kiosk. The repo-root `setup.sh` is the one-line
+  installer the Linux Mint terminal runs. Browser-install / PWA paths
+  were removed — Quill Haven IS the OS, not a thing inside another OS.
+- ARM Chromebooks + Apple Silicon Macs can't run this path because
+  their firmware refuses to install another OS. They're out of scope.
+- Old reference (since deleted): `devices/SETUP.md` (Intel/AMD Chromebooks)
   SETUP.md` (firmware unlock, Linux Mint install) + `setup.sh` at the
   repo root (Chromium kiosk launcher + bakes the URL allowlist into
   `/etc/chromium/policies/managed/` automatically).
@@ -146,20 +148,21 @@ TODO.md → this file.
 
 ## DO NEXT — what's left
 
-- **One-step custom USB ISO** for the Formattable path. Today: install
-  Linux Mint from a generic Mint USB, then run `setup.sh`. Goal: a
-  single custom Quill Haven ISO that boots straight into the kiosk with
-  no script step. Needs ISO remaster tooling (Cubic on Linux or Docker-
-  based remaster). Skipped this session because it can't be safely
-  built without a real device to test on.
+- **One-step custom USB ISO** — today: install Linux Mint from a
+  generic Mint USB, then run `setup.sh`. Goal: a single custom Quill
+  Haven ISO that boots straight into the kiosk with no script step.
+  Needs ISO remaster tooling (Cubic on Linux or Docker-based remaster).
+  Skipped because it can't be safely built without a real device to
+  test on.
 - **Auto-backup to Drive** when signed in (a small QoL on top of the
   framework). 30-min silent upload, keep last 10. Off by default.
 - **AI spell checker** (Future). 3-level slider + off; would lean on a
   paid API so partially blocked on the question of who hosts it.
 
-Rough status: **~90% overall.** App side ~99% (only AI spellcheck and
-auto-backup-to-Drive remain). Device-install side ~75% (all three paths
-shipped with real walls; only the one-step ISO for Formattable is left).
+Rough status: **~92% overall.** App side ~99% (only AI spellcheck
+remains as Future). Device-install side ~80% (the one USB install path
+is shipped with a real URL allowlist baked in; only the one-step custom
+ISO is left).
 
 ## MARIE'S STYLE / WATCH-OUTS
 

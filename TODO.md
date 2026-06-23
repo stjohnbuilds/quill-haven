@@ -3,20 +3,21 @@
 ## Status at a glance (2026-06-22)
 
 The finishing batch is shipped. The app side is ~99% done. The device-
-install side is ~70% done — guides + setup scripts for all three paths
-(Windows / Not Formattable / Formattable) with real site walls baked
-into each. The only remaining device-side item is a one-step custom
-USB ISO; today the Formattable path is "install Linux Mint, then run
-our setup.sh" which works fine but isn't one-step.
+install side is ~80% done — **one** install path now (USB → wipe →
+Linux Mint → run `setup.sh`) covering any Intel/AMD laptop. Browser /
+PWA install paths were removed in favour of this — Quill Haven IS the
+OS, not a thing inside another OS. The only remaining device-side item
+is a one-step custom USB ISO so the install + kiosk step is one boot
+instead of two.
 
 ## What's left
 
 ### Device side
-- [ ] **One-step USB ISO** for the Formattable path. Today: install
-      Linux Mint from a normal Mint USB, then run `setup.sh`. Goal: a
-      single custom ISO that boots straight into Quill Haven post-
-      install with no script step. Needs ISO remaster tooling — non-
-      trivial.
+- [ ] **One-step custom USB ISO.** Today: install Linux Mint from a
+      generic Mint USB, then run `setup.sh`. Goal: a single Quill Haven
+      ISO that boots straight into the kiosk with no script step.
+      Needs ISO remaster tooling (Cubic on Linux or Docker-based
+      remaster).
 
 ### App side (nice-to-have, not blocking)
 - [ ] **Restore from inside the writing app** — currently lives in the
@@ -187,24 +188,21 @@ our setup.sh" which works fine but isn't one-step.
       "not supported" message on Firefox/Safari. (Shipped 2026-06-22.)
 
 ## For the device (the OS install side)
-> Quill Haven is the whole OS. Three install paths shipped:
-> - **Windows** (any 10/11 laptop): `devices/Windows/SETUP.md` +
->   `setup-windows.ps1` + optional `setup-windows-lockdown.ps1` for the
->   real URL allowlist via Edge registry policy.
-> - **Not Formattable** (ARM Chromebooks): PWA install + optional Google
->   Family Link for the real wall (`devices/Chromebook/Not Formattable/`).
-> - **Formattable** (Intel/AMD Chromebooks): wipe ChromeOS, install
->   Linux Mint, run `setup.sh` which now bakes the Chromium URL allowlist
->   right into `/etc/chromium/policies/managed/` (`devices/Chromebook/Formattable/`).
-- [x] Boot sequence — kiosk launcher script ships in `setup.sh` (Linux)
-      and `setup-windows.ps1` (Windows). (Shipped 2026-06-22.)
-- [x] Lockdown — true URL allowlist on Linux (managed policy in setup.sh),
-      Windows (registry via setup-windows-lockdown.ps1), and ChromeOS
-      (Family Link doc). (Shipped 2026-06-22.)
-- [x] Install guides for all three paths. (Shipped 2026-06-22.)
+> Quill Haven IS the OS. One install path: `devices/SETUP.md` walks
+> through wiping any Intel/AMD laptop (Windows / Intel Mac /
+> Intel-AMD Chromebook), installing Linux Mint, and running
+> `setup.sh` to drop into the Quill Haven kiosk. Browser/PWA install
+> paths were deleted — they didn't match the vision.
+- [x] Boot sequence — Chromium kiosk launcher via `setup.sh`.
+      (Shipped 2026-06-22.)
+- [x] Lockdown — true URL allowlist baked into setup.sh as a Chromium
+      managed policy in `/etc/chromium/policies/managed/`. (Shipped
+      2026-06-22.)
+- [x] One install guide that covers Windows / Intel Mac / Intel
+      Chromebook in one document. (Shipped 2026-06-22.)
 - [x] Top-level README on GitHub. (Shipped 2026-06-22.)
-- [ ] One-step custom USB ISO (Formattable path) — current path is
-      "Linux Mint install then setup.sh". Bake everything into one ISO.
+- [ ] One-step custom USB ISO — current path is "Linux Mint install
+      then setup.sh". Bake everything into one ISO.
 
 ## Future
 - [ ] AI spell checker in the writing app (3-level slider + off).
