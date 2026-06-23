@@ -127,13 +127,13 @@ TODO.md → this file.
   the device.
 
 **Device install side — three paths, real walls on each:**
-- Windows: `chromebook-os/Windows/SETUP.md` + `setup-windows.ps1` (basic
+- Windows: `devices/Windows/SETUP.md` + `setup-windows.ps1` (basic
   kiosk launcher) + `setup-windows-lockdown.ps1` (admin: writes Edge URL
   allowlist via registry, the real wall, with `-Remove` to undo).
-- Not Formattable (ARM Chromebooks): `chromebook-os/Not Formattable/
+- Not Formattable (ARM Chromebooks): `devices/Chromebook/Not Formattable/
   SETUP.md` (PWA install + shelf autohide) + `FAMILY_LINK.md` (the real
   wall via Google Family Link managed account).
-- Formattable (Intel/AMD Chromebooks): `chromebook-os/Formattable/
+- Formattable (Intel/AMD Chromebooks): `devices/Chromebook/Formattable/
   SETUP.md` (firmware unlock, Linux Mint install) + `setup.sh` at the
   repo root (Chromium kiosk launcher + bakes the URL allowlist into
   `/etc/chromium/policies/managed/` automatically).

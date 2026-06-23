@@ -13,15 +13,16 @@ No social. Just writing.
 
 ## Get it on a device
 
-Three install paths, all in `chromebook-os/`:
+Four install paths, all in [`devices/`](devices/):
 
 | Device | What you get | Time | Read |
 |---|---|---|---|
-| **Windows 10/11 laptop** | Edge in fullscreen kiosk + (optional) real URL allowlist | ~10 min | [`chromebook-os/Windows/SETUP.md`](chromebook-os/Windows/SETUP.md) |
-| **ARM Chromebook** (MediaTek/Rockchip/Snapdragon) | ChromeOS locked down via PWA + (optional) Google Family Link site wall | ~10 min | [`chromebook-os/Not Formattable/SETUP.md`](chromebook-os/Not%20Formattable/SETUP.md) |
-| **Intel/AMD Chromebook** | ChromeOS wiped, custom Linux Mint kiosk with real Chromium URL allowlist baked in | ~1 hour | [`chromebook-os/Formattable/SETUP.md`](chromebook-os/Formattable/SETUP.md) |
+| **Windows 10/11 laptop** | Edge in fullscreen kiosk + (optional) real URL allowlist | ~10 min | [`devices/Windows/SETUP.md`](devices/Windows/SETUP.md) |
+| **Mac** (macOS 12+) | Chrome/Edge as fullscreen PWA + (optional) Screen Time site wall | ~15 min | [`devices/Mac/SETUP.md`](devices/Mac/SETUP.md) |
+| **ARM Chromebook** (MediaTek/Rockchip/Snapdragon) | ChromeOS locked down via PWA + (optional) Google Family Link site wall | ~10 min | [`devices/Chromebook/Not Formattable/SETUP.md`](devices/Chromebook/Not%20Formattable/SETUP.md) |
+| **Intel/AMD Chromebook** | ChromeOS wiped, custom Linux Mint kiosk with real Chromium URL allowlist baked in | ~1 hour | [`devices/Chromebook/Formattable/SETUP.md`](devices/Chromebook/Formattable/SETUP.md) |
 
-**Buying a Chromebook?** [`chromebook-os/BEFORE-YOU-BUY.md`](chromebook-os/BEFORE-YOU-BUY.md)
+**Buying a Chromebook?** [`devices/Chromebook/BEFORE-YOU-BUY.md`](devices/Chromebook/BEFORE-YOU-BUY.md)
 covers the write-protect-method check that ruins a lot of "supported"
 Chromebooks (cost-of-cable, etc).
 

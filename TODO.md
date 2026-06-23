@@ -188,14 +188,14 @@ our setup.sh" which works fine but isn't one-step.
 
 ## For the device (the OS install side)
 > Quill Haven is the whole OS. Three install paths shipped:
-> - **Windows** (any 10/11 laptop): `chromebook-os/Windows/SETUP.md` +
+> - **Windows** (any 10/11 laptop): `devices/Windows/SETUP.md` +
 >   `setup-windows.ps1` + optional `setup-windows-lockdown.ps1` for the
 >   real URL allowlist via Edge registry policy.
 > - **Not Formattable** (ARM Chromebooks): PWA install + optional Google
->   Family Link for the real wall (`chromebook-os/Not Formattable/`).
+>   Family Link for the real wall (`devices/Chromebook/Not Formattable/`).
 > - **Formattable** (Intel/AMD Chromebooks): wipe ChromeOS, install
 >   Linux Mint, run `setup.sh` which now bakes the Chromium URL allowlist
->   right into `/etc/chromium/policies/managed/` (`chromebook-os/Formattable/`).
+>   right into `/etc/chromium/policies/managed/` (`devices/Chromebook/Formattable/`).
 - [x] Boot sequence — kiosk launcher script ships in `setup.sh` (Linux)
       and `setup-windows.ps1` (Windows). (Shipped 2026-06-22.)
 - [x] Lockdown — true URL allowlist on Linux (managed policy in setup.sh),

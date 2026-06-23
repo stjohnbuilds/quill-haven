@@ -51,7 +51,7 @@ Split achieved end-to-end:
 
 The OS-install half is partially built: written guides + a setup.sh
 (Linux) and a setup-windows.ps1 (Windows) live at the repo root and in
-`chromebook-os/`. A one-step USB image is still to do.
+`devices/`. A one-step USB image is still to do.
 
 ## Deep-dive / full-scan checklist (for a tester or the next AI)
 

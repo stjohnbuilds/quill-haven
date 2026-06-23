@@ -40,8 +40,8 @@ You MUST read these before doing the checklist below.
 4. `TODO.md` — what's done and what's left, with status.
 5. `docs/HANDOVER_TO_NEW_CHAT.md` — gotchas, cache-version map, current
    state notes.
-6. `chromebook-os/README.md` — the three device-install paths
-   (Windows / Not Formattable / Formattable).
+6. `devices/README.md` — the four device-install paths
+   (Windows / Mac / Chromebook-Formattable / Chromebook-Not-Formattable).
 7. `home-screen/index.html`, `home-screen/js/home.js`,
    `home-screen/apps/writing/writing.js`, `home-screen/apps/files/files.js`
    — read each one fully. They're small enough.
@@ -144,7 +144,7 @@ Compare what's actually built against `docs/GAME_PLAN.md` and `TODO.md`.
   has rough edges.
 - **Not started:** anything from GAME_PLAN that hasn't been built. (The
   OS-install half — boot kiosk script, lockdown policy, USB installer —
-  is partial: written guides exist in `chromebook-os/` + `setup.sh` +
+  is partial: written guides exist in `devices/` + `setup.sh` +
   `setup-windows.ps1` at the repo root, but a one-step USB image
   doesn't.)
 - **Undocumented:** anything built that ISN'T described in GAME_PLAN.
@@ -152,7 +152,7 @@ Compare what's actually built against `docs/GAME_PLAN.md` and `TODO.md`.
 ### D. Project Health
 
 - **Files** — anything orphaned or unnecessary. List each top-level file
-  in `home-screen/` and `chromebook-os/` with: what it does, needed yes/no.
+  in `home-screen/` and `devices/` with: what it does, needed yes/no.
 - **Git** — `git log --oneline -20` and `git status`. Are commits clean
   and descriptive? Any uncommitted changes?
 - **GitHub** — does the README exist and make sense? Is `version.json`
