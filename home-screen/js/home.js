@@ -13,13 +13,17 @@
     return;
   }
   var i = 0;
+  var pageStart = Date.now();
+  var TYPE_DELAY = 600;                                  // small pause so quill + title render first
+  var TYPE_DURATION = 62 * full.length + 250;            // ~1550ms to finish typing
+  var MIN_SPLASH_MS = TYPE_DELAY + TYPE_DURATION + 500;  // ~2650ms — fade no earlier than this
   setTimeout(function startTyping() {
     var iv = setInterval(function() {
       i++;
       if (typeEl) typeEl.textContent = full.slice(0, i);
       if (i >= full.length) clearInterval(iv);
     }, 62);
-  }, 2700);
+  }, TYPE_DELAY);
   function setLoader(pct) { var f = document.querySelector('.boot-loader-fill'); if (f) f.style.width = pct + '%'; }
   setLoader(15);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setLoader(35); });
@@ -27,11 +31,14 @@
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { setLoader(75); });
   function finishLoad() {
     setLoader(100);
-    // Min splash time so the typing animation finishes; then fade
+    // Wait for window.load AND for the typing animation to actually finish
+    // (otherwise on a fast preview the splash fades before the tagline starts).
+    var elapsed = Date.now() - pageStart;
+    var wait = Math.max(400, MIN_SPLASH_MS - elapsed);
     setTimeout(function () {
       var splash = document.getElementById('bootSplash');
       if (splash) { splash.classList.add('fade-out'); setTimeout(function () { splash.remove(); }, 900); }
-    }, 1300);
+    }, wait);
   }
   if (document.readyState === 'complete') finishLoad();
   else window.addEventListener('load', finishLoad);

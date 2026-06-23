@@ -34,10 +34,10 @@ TODO.md → this file.
 
 1. **CACHING — bump `?v=N` on EVERY CSS/JS change.** Marie's browser caches hard;
    "nothing happened" = stale cache. Locations and CURRENT versions (2026-06-22):
-   - `index.html`: theme.css **?v=21**, home.css **?v=24**, home.js **?v=24**, confirm.js **?v=2**
-   - `js/home.js` iframe srcs: `apps/writing/index.html?v=18`, `apps/files/index.html?v=5`
-   - `apps/writing/index.html`: theme **?v=16**, writing.css **?v=18**, writing.js **?v=18**, confirm.js **?v=2**
-   - `apps/files/index.html`: theme **?v=2**, files.css **?v=4**, files.js **?v=5**, confirm.js **?v=2**
+   - `index.html`: theme.css **?v=21**, home.css **?v=24**, home.js **?v=28**, confirm.js **?v=2**
+   - `js/home.js` iframe srcs: `apps/writing/index.html?v=21`, `apps/files/index.html?v=7`
+   - `apps/writing/index.html`: theme **?v=16**, writing.css **?v=18**, writing.js **?v=21**, confirm.js **?v=2**
+   - `apps/files/index.html`: theme **?v=2**, files.css **?v=5**, files.js **?v=7**, confirm.js **?v=2**
    When you change a shared file (theme.css or confirm.js), bump it in ALL pages
    that link it, and bump the iframe `src` in home.js so the app window reloads.
 2. **Preview throttles background timers** → the boot splash can "hang" in
