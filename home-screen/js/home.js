@@ -880,7 +880,63 @@ function syncDriveRow() {
   if (st === 'connected') sub.textContent = 'Connected as ' + (QHDrive.email() || 'Google') + ' — back up your writing';
   else if (st === 'signed-out') sub.textContent = 'Ready — tap to sign in to Google';
   else sub.textContent = 'Not connected — back up your writing';
+  // Auto-backup row is only meaningful when connected
+  var ab = document.getElementById('autoBackupRow');
+  if (ab) {
+    ab.hidden = st !== 'connected';
+    var t = document.getElementById('autoBackupToggle');
+    if (t) t.checked = autoBackupEnabled();
+    var s = document.getElementById('autoBackupSub');
+    if (s) {
+      var last = lastAutoBackupAt();
+      s.textContent = autoBackupEnabled()
+        ? ('On — every 30 minutes' + (last ? ' · last: ' + new Date(last).toLocaleString() : ''))
+        : 'Off — turn on for a silent backup every 30 min';
+    }
+  }
 }
+// ── Auto-backup to Drive (silent every 30 min when signed in) ──
+var AUTO_BACKUP_KEY = 'qh-drive-autobackup';
+var LAST_BACKUP_KEY = 'qh-drive-autobackup-last';
+var AUTO_BACKUP_MS = 30 * 60 * 1000;
+function autoBackupEnabled() { try { return localStorage.getItem(AUTO_BACKUP_KEY) === '1'; } catch(e) { return false; } }
+function lastAutoBackupAt() { try { return parseInt(localStorage.getItem(LAST_BACKUP_KEY), 10) || 0; } catch(e) { return 0; } }
+function setAutoBackup(v) {
+  try { localStorage.setItem(AUTO_BACKUP_KEY, v ? '1' : '0'); } catch(e) {}
+  syncDriveRow();
+  if (v) scheduleAutoBackup();
+  else if (autoBackupTimer) { clearTimeout(autoBackupTimer); autoBackupTimer = null; }
+}
+var autoBackupTimer = null;
+function scheduleAutoBackup() {
+  if (autoBackupTimer) clearTimeout(autoBackupTimer);
+  if (!autoBackupEnabled() || !window.QHDrive || !QHDrive.isSignedIn()) return;
+  var since = Date.now() - lastAutoBackupAt();
+  var wait = Math.max(60 * 1000, AUTO_BACKUP_MS - since); // at least 1 minute after load
+  autoBackupTimer = setTimeout(runAutoBackup, wait);
+}
+function buildAutoBackupBlob() {
+  // The lean version of the .zip Marie's manual backup makes: just the raw
+  // restorable JSON. Manuscripts can be regenerated from it on restore.
+  var payload = { format: 'quill-haven-backup', version: 1, exportedAt: new Date().toISOString(), auto: true };
+  try { var w = JSON.parse(localStorage.getItem('qh-writing2') || 'null'); if (w) payload.writing = w; } catch(e) {}
+  try { var f = JSON.parse(localStorage.getItem('qh-files') || 'null'); if (f) payload.files = f; } catch(e) {}
+  return new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+}
+function runAutoBackup() {
+  if (!autoBackupEnabled() || !window.QHDrive || !QHDrive.isSignedIn()) { scheduleAutoBackup(); return; }
+  var when = new Date();
+  var stamp = when.getFullYear() + '-' + String(when.getMonth() + 1).padStart(2, '0') + '-' + String(when.getDate()).padStart(2, '0') + '_' + String(when.getHours()).padStart(2, '0') + String(when.getMinutes()).padStart(2, '0');
+  var name = 'quill-haven-autobackup-' + stamp + '.json';
+  QHDrive.uploadFile(name, buildAutoBackupBlob(), 'application/json').then(function () {
+    try { localStorage.setItem(LAST_BACKUP_KEY, String(Date.now())); } catch(e) {}
+    syncDriveRow();
+  }).catch(function () {
+    // Silent failure — next tick will retry. Don't pop a dialog mid-typing.
+  }).then(function () { scheduleAutoBackup(); });
+}
+// Kick off the timer on page load if conditions are met
+setTimeout(scheduleAutoBackup, 2000);
 function openDriveConnect() {
   if (!window.qhConfirm) return;
   var st = driveState();

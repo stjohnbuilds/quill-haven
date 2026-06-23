@@ -1,24 +1,51 @@
 # TODO — Quill Haven
 
-## ⭐ NEXT (Marie's instruction): do `docs/FINISHING_BATCH.md` first, in one go
-The "finishing" batch — download/export, writing-app trash+undo, "+"→Chapter/Part,
-Files folders/drag/rename, Google Drive backup, home-screen polish, and the
-background-picker-into-Settings. Full specs + the two items that need Marie's input
-are in **docs/FINISHING_BATCH.md**. The device half (boot/lockdown/USB) comes after.
+## Status at a glance (2026-06-22)
+
+The finishing batch is shipped. The app side is ~99% done. The device-
+install side is ~70% done — guides + setup scripts for all three paths
+(Windows / Not Formattable / Formattable) with real site walls baked
+into each. The only remaining device-side item is a one-step custom
+USB ISO; today the Formattable path is "install Linux Mint, then run
+our setup.sh" which works fine but isn't one-step.
+
+## What's left
+
+### Device side
+- [ ] **One-step USB ISO** for the Formattable path. Today: install
+      Linux Mint from a normal Mint USB, then run `setup.sh`. Goal: a
+      single custom ISO that boots straight into Quill Haven post-
+      install with no script step. Needs ISO remaster tooling — non-
+      trivial.
+
+### App side (small)
+- [ ] **Auto-backup to Drive** when signed in — periodic (e.g. every
+      30 minutes) silent upload of the full backup .zip. Setting in
+      Settings → Google Drive to turn it on. Leverages QHDrive that's
+      already built.
+- [ ] **Restore from inside the writing app** (currently restore lives
+      in the home-screen Settings panel, which is correct, but a "load
+      from backup" link inside Local Writing → empty state might
+      reduce confusion).
+
+### Future / nice-to-have
+- [ ] AI spell checker in the writing app (3-level slider + off).
 
 ## Home-screen polish (from Marie's boot walkthrough 2026-06-21)
 - [x] Top-bar status icons evenly spaced — all three (Wi-Fi / battery / cog) are
       now identical 28×24 centred cells, so center-to-center spacing is uniform
       (38px each side) no matter the glyph width.
-- [ ] Wi-Fi + battery should feel "live" — react on hover (tooltip or colour
-      change; battery shows its level). Right now they're static decoration.
-- [ ] Boot loading bar should track the REAL boot/load time, not a fixed 3.6s
-      animation — fill as the screen actually finishes loading.
-- [ ] Region setting (timezone) so the clock is correct — pick once in Settings
-      (or set during install); the clock follows it. A locked device can't guess
-      location reliably.
-- [ ] Add App should BAN the obvious distraction sites (social media, Gmail,
-      YouTube, etc.) so Marie can't sneak one in via "add your own app".
+- [x] Wi-Fi + battery feel "live" — Wi-Fi opacity tracks `navigator.onLine`,
+      battery fill tracks `navigator.getBattery()`; titles show "Connected" /
+      "Offline" + "62% (charging)".
+- [x] Boot loading bar tracks REAL boot/load time — ~15% on script load,
+      35% on DOMContentLoaded, 75% on `document.fonts.ready`, 100% on
+      `window load`. Removed the fixed 3.6s CSS animation.
+- [x] Region/timezone picker in Settings — a curated dropdown of ~20 common
+      zones (default Auto). Stored in `qh-tz`; clock uses Intl.DateTimeFormat.
+- [x] Add App BANS the obvious distraction sites — facebook/instagram/x/
+      tiktok/youtube/netflix/reddit/gmail/etc. Refused with a friendly
+      "That one's a distraction" popup; nothing is added.
 
 ## Fix soon (found in the assessment)
 (all clear)
@@ -54,28 +81,27 @@ are in **docs/FINISHING_BATCH.md**. The device half (boot/lockdown/USB) comes af
 - [x] Removed the vertical indent lines in the tree
 - [x] Rename now via a pencil EDIT icon on each row (double-click was broken —
       the single click re-rendered the row before the double-click registered)
-- [ ] **Trash + delete-undo** instead of the browser "Are you sure?" popup: delete
-      moves to a Trash (holds projects AND notes), with an undo notification;
-      restore one item or a group; restoring an orphan (e.g. a lone chapter) drops
-      it into Notes. Model from T&T: soft-delete flags (isDeleted + deletedAt),
-      separate Trash view, explicit restore, two-step permanent delete. T&T has NO
-      auto-undo on delete — so the undo TOAST is our addition. Reuse the existing
-      styled confirm from settings — do NOT add a new dialog.
-- [ ] **Save to Google Drive** — once Drive is connected: a "Save to Drive" action
-      for notes + the whole writing app (pops up Drive, pick where to save) so work
-      is backed up off-device.
-- [ ] **Download button → "This device" or "Google Drive"** (the flow Marie wants):
-      a Download button at the top of the writing panel. "This device" exports the
-      whole book as a properly formatted manuscript (RTF — no library needed, opens
-      in Word) → real download AND a copy lands in the Files app → Documents.
-      "Google Drive" = the Save-to-Drive path above. STUDY how Typing & Tomes
-      exports a manuscript first. Manuscript paragraph rules: first line of a
-      paragraph indents, the rest don't; first paragraph after a heading is flush.
-- [ ] Move the collapse arrow to a faint arrow halfway down the panel edge (frees
-      the top spot for the download button).
-- [ ] The "+" on a project should be a small dropdown: add **Chapter** or **Part**.
-      NEEDS A QUICK STEER from Marie on the structure (is "Part" a level above
-      Chapters, or just another name for a Scene?).
+- [x] **Trash + delete-undo** — soft-delete to `qh-writing2.trash` (notes,
+      projects, parts, chapters, scenes); 6-second undo toast; third Trash
+      tab appears once anything's in it; orphan restores fall back to Notes;
+      two-step "Delete forever" via the shared qhConfirm. (Shipped 2026-06-22.)
+- [x] **Save to Google Drive** — full framework in `window.QHDrive`: paste a
+      Cloud Console OAuth Client ID once, sign in with Google, then Download
+      → "Google Drive" uploads the full backup .zip. Steps: docs/DRIVE_SETUP.md.
+      (Shipped 2026-06-22.)
+- [x] **Download button → "This device" or "Google Drive"** — top-right of
+      the writing panel; three options: "This book" (single .rtf), "Full
+      backup" (.zip of every project + note as .rtf + raw .json), "Google
+      Drive" (same .zip uploaded). Manuscript RTF: Times New Roman 12pt,
+      double-spaced, 1" margins, title page, chapter-per-page, first-line
+      paragraph indent (flush after every heading), strips highlights,
+      Unicode-safe. (Shipped 2026-06-22.)
+- [x] Collapse arrow moved to a faint floating arrow on the panel's right
+      edge, halfway down. (Shipped 2026-06-22.)
+- [x] "+" on a project opens a tiny menu with **Chapter** or **Part**. Parts
+      are an optional level above Chapters (Project → Part → Chapter →
+      Scene); chapter numbering stays sequential across top-level + parts;
+      Parts get their own heading page in the RTF. (Shipped 2026-06-22.)
 
 ### Data safety (Marie's worry: "it can't vanish on me")
 - Saving is solid day-to-day: the writing app autosaves to the device on every
@@ -84,8 +110,18 @@ are in **docs/FINISHING_BATCH.md**. The device half (boot/lockdown/USB) comes af
 - BUT it is **device-only** — a browser-data wipe or a dead device loses it,
   because there is no backup yet. The Save-to-Drive + download-manuscript items
   above ARE the safety net; worth doing at least the download/backup one soon.
-- [ ] Small hardening: if a save ever fails (storage full), tell the user instead
-      of failing silently.
+- [x] Save-failure hardening — writing.js + files.js persist() catch quota
+      errors and surface a one-shot danger popup naming what to delete to
+      free room. Writing app's "Saved" indicator stays at "NOT saved" until
+      a write succeeds again. (Shipped 2026-06-22.)
+- [x] **Restore from backup** — Settings → Restore backup → pick a
+      `quill-haven-backup-*.json` (or the whole `.zip`, we walk it). Confirms
+      with the date + counts before replacing `qh-writing2` + `qh-files`,
+      then reloads. (Shipped 2026-06-22.)
+- [x] **Full backup .zip** — Download → "Full backup" packs every project
+      and note as a Word file in `Projects/` and `Notes/` plus a restorable
+      `quill-haven-backup.json` plus a README, all in one .zip. Pure-JS
+      store-only zip generator (no library). (Shipped 2026-06-22.)
 - [x] Drag to reorder apps — grip handle on each row in Settings, order saved and
       applied to dock + top bar (qh-order in localStorage)
 - [x] Storage space indicator in settings — bar + "X used of Y" via the browser
@@ -142,27 +178,41 @@ are in **docs/FINISHING_BATCH.md**. The device half (boot/lockdown/USB) comes af
       by default (Marie: "let me design it and leave it as is"). The Dim slider
       stays, defaulting to 0, in case she ever wants to fade it for legibility.
 
-### Files app v2 — basics to add (Marie 2026-06-21)
-- [ ] **Make folders** + move/drag files between Documents/Pictures/Downloads.
-- [ ] Rename a file; basic file actions.
-- [ ] On the device: "Add a picture" opens the OS picker (can reach a USB);
-      drag a file onto USB/folders. (Needs the OS helper — device phase.)
+### Files app v2 — basics (Marie 2026-06-21)
+- [x] **Make folders** + drag files between folders inside Documents/
+      Pictures. "+ New folder" tile creates a folder with inline rename;
+      folder cards click-through to navigate; back tile returns to root.
+      (Shipped 2026-06-22.)
+- [x] Rename a file or folder (Rename button on every card). (Shipped 2026-06-22.)
+- [x] **USB section is real** — uses the File System Access API on
+      Chromium/Edge. Click USB → pick the drive once → it sticks (handle
+      saved in IndexedDB). Drag files in to copy across; "Copy in" pulls
+      files from USB into Documents/Pictures. Falls back to a friendly
+      "not supported" message on Firefox/Safari. (Shipped 2026-06-22.)
 
-## For the Chromebook (the OS half — this IS the project)
-> Quill Haven is the whole OS. The Chromebook is just the hardware. When the
-> device powers on it boots straight into this home screen — no ChromeOS, no
-> stray browser. "Only the writing apps" isn't a restriction we add, it's the
-> entire point: a device that can only write.
-> Install method: USB **once** to put the OS on the device (can't replace an OS
-> from inside ChromeOS without external media). After that, updates come from
-> GitHub — the "Update available" button already pulls the latest screen.
-- [ ] Boot sequence — power on goes straight into Quill Haven (kiosk/fullscreen)
-- [ ] Lockdown — only the writing apps run; no internet beyond the allowed sites
-- [ ] USB installer package (first-time install)
-- [ ] README on GitHub: "what this is" + how to install/update
+## For the device (the OS install side)
+> Quill Haven is the whole OS. Three install paths shipped:
+> - **Windows** (any 10/11 laptop): `chromebook-os/Windows/SETUP.md` +
+>   `setup-windows.ps1` + optional `setup-windows-lockdown.ps1` for the
+>   real URL allowlist via Edge registry policy.
+> - **Not Formattable** (ARM Chromebooks): PWA install + optional Google
+>   Family Link for the real wall (`chromebook-os/Not Formattable/`).
+> - **Formattable** (Intel/AMD Chromebooks): wipe ChromeOS, install
+>   Linux Mint, run `setup.sh` which now bakes the Chromium URL allowlist
+>   right into `/etc/chromium/policies/managed/` (`chromebook-os/Formattable/`).
+- [x] Boot sequence — kiosk launcher script ships in `setup.sh` (Linux)
+      and `setup-windows.ps1` (Windows). (Shipped 2026-06-22.)
+- [x] Lockdown — true URL allowlist on Linux (managed policy in setup.sh),
+      Windows (registry via setup-windows-lockdown.ps1), and ChromeOS
+      (Family Link doc). (Shipped 2026-06-22.)
+- [x] Install guides for all three paths. (Shipped 2026-06-22.)
+- [x] Top-level README on GitHub. (Shipped 2026-06-22.)
+- [ ] One-step custom USB ISO (Formattable path) — current path is
+      "Linux Mint install then setup.sh". Bake everything into one ISO.
 
 ## Future
-- [ ] AI spell checker in the writing app (3-level slider + off)
+- [ ] AI spell checker in the writing app (3-level slider + off).
+- [ ] Auto-backup to Drive every N minutes when signed in (default off).
 
 ## Done
 - [x] Boot quill redrawn to match the St John feather — full barbed plume, curved

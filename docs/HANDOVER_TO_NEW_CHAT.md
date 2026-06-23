@@ -91,58 +91,75 @@ TODO.md → this file.
 - Bug sweep done: destructive popups focus Cancel (no accidental Enter-delete);
   data-URL backgrounds quoted; picture-save warns when storage is full.
 
-## DONE — finishing batch (2026-06-22) ✅
+## DONE — full session (2026-06-22) ✅
 
-All seven items from `docs/FINISHING_BATCH.md` shipped + verified in preview:
-1. Background picker → Settings (already done).
-2. **Download → "This device" / "Google Drive"** with a real RTF manuscript
-   exporter (Times New Roman 12pt, double-spaced, title page, chapters on
-   new pages, first-line paragraph indents that go flush after every
-   heading, strips highlights, escapes Unicode). Saves a copy into Files →
-   Documents alongside the browser download.
-3. **Trash + undo** for the writing app — soft-delete with 6-second undo
-   toast, third "Trash" tab that appears once anything's in it; restore vs
-   Delete-forever; orphan items restore as a Note rather than vanishing.
-4. **+ Chapter / Part** — Project's `+` opens a tiny menu. Parts add an
-   optional `Project → Part → Chapter → Scene` level; chapter numbering
-   stays sequential; parts get their own heading page in the RTF.
-5. **Files folders + drag + rename** — sub-folders in Documents/Pictures,
-   drag files between them, rename anything. Folder deletes go through
-   Trash with restore.
-6. **Google Drive UI** — honest "Connect Drive" row in Settings + matching
-   "Connect first" message from Download → Drive. **Actual OAuth still
-   needs a Google Cloud project setup (Marie's call).**
-7. **Home polish** — live Wi-Fi (`navigator.onLine`), live battery
-   (`navigator.getBattery`), boot loader driven by real load events,
-   Region/timezone picker, Add App refuses distraction domains.
+**Finishing batch (the original 7):**
+1. Background picker → Settings (was already done).
+2. Download → "This book" / Google Drive + RTF manuscript exporter (TNR
+   12pt, double-spaced, title page, per-chapter pages, first-line
+   paragraph indents that go flush after every heading, Unicode-safe).
+3. Trash + undo for the writing app (soft-delete, 6s toast, third Trash
+   tab, orphan → Note on restore).
+4. "+" → Chapter / Part menu; optional `Project → Part → Chapter → Scene`;
+   parts get their own heading page in the RTF.
+5. Files folders + drag + rename (sub-folders inside Documents/Pictures,
+   folder trash + restore).
+6. Google Drive end-to-end framework — `window.QHDrive` handles Client
+   ID storage, Google Identity Services sign-in, multipart Drive upload.
+   `docs/DRIVE_SETUP.md` walks Marie through the 10-min Cloud Console
+   setup. Once she pastes a Client ID, Download → Drive uploads the .zip.
+7. Home polish — live Wi-Fi/battery, real-progress boot loader, region/
+   timezone picker, Add App distraction-site ban.
 
-Also new: **Windows kiosk package** at `chromebook-os/Windows/SETUP.md` +
-`setup-windows.ps1` at the repo root. Three device paths now covered
-(Windows / Not Formattable / Formattable).
+**Backup / restore (new):**
+- Download → "Full backup (.zip)" — every project + every note as a Word
+  file, plus a restorable `quill-haven-backup.json`, plus a README, all
+  in one .zip. Pure-JS store-only zip generator (no library).
+- Settings → "Restore backup" — pick a `.json` or `.zip`, danger-confirm
+  with the date + counts, replace everything, reload.
+- Save-failure hardening — quota-exceeded writes surface a one-shot
+  danger popup naming what to delete to free room.
 
-## DO NEXT — the device half (the BIG remaining chunk)
+**Files app USB (new):**
+- Real USB drag-drop on installed Chromium/Edge via the File System
+  Access API. Pick the USB folder once, handle saved in IndexedDB so it
+  sticks across sessions. Drag-in to copy across, "Copy in" to pull onto
+  the device.
 
-- **One-step USB image** for the Formattable Chromebook path — current
-  Reformat OS guide is "install Linux Mint, then run our script", which
-  works but is multi-step. Bake everything into a custom ISO so it's just
-  "boot from USB → wait → done".
-- **Real Drive sync** — wire up the OAuth flow once Marie sets up a
-  Google Cloud project + client ID. Until then the UI is honest about
-  needing setup.
-- **True site allowlist on Windows** — Edge URL allowlist via registry
-  policy (the kiosk only enforces fullscreen, not URL whitelisting).
-- **True site allowlist on Linux** — Chromium managed policy in
-  `/etc/chromium/policies/managed/` — that's the proper wall. Currently
-  `setup.sh` only does the kiosk launcher.
-- **Family Link path for ChromeOS** — for the Not Formattable Chromebook,
-  the real lockdown story is a managed child account; doc'd but not
-  scripted.
-- **Someday:** AI spell checker in the writing app.
+**Device install side — three paths, real walls on each:**
+- Windows: `chromebook-os/Windows/SETUP.md` + `setup-windows.ps1` (basic
+  kiosk launcher) + `setup-windows-lockdown.ps1` (admin: writes Edge URL
+  allowlist via registry, the real wall, with `-Remove` to undo).
+- Not Formattable (ARM Chromebooks): `chromebook-os/Not Formattable/
+  SETUP.md` (PWA install + shelf autohide) + `FAMILY_LINK.md` (the real
+  wall via Google Family Link managed account).
+- Formattable (Intel/AMD Chromebooks): `chromebook-os/Formattable/
+  SETUP.md` (firmware unlock, Linux Mint install) + `setup.sh` at the
+  repo root (Chromium kiosk launcher + bakes the URL allowlist into
+  `/etc/chromium/policies/managed/` automatically).
 
-Rough status: **~75% overall.** The app side (what Marie uses daily) is
-~95% done. The device-install half is ~30% done — written guides for all
-three device paths exist, plus shell + PowerShell installers; the
-one-step USB image and the real lockdown policies are what's left.
+**Repo housekeeping (new):**
+- Top-level `README.md` (GitHub Pages landing).
+- `LICENSE` (MIT).
+- `docs/AI_ASSESSMENT_PROMPT.md` and `docs/CODE_HEALTH.md` refreshed for
+  outside review.
+
+## DO NEXT — what's left
+
+- **One-step custom USB ISO** for the Formattable path. Today: install
+  Linux Mint from a generic Mint USB, then run `setup.sh`. Goal: a
+  single custom Quill Haven ISO that boots straight into the kiosk with
+  no script step. Needs ISO remaster tooling (Cubic on Linux or Docker-
+  based remaster). Skipped this session because it can't be safely
+  built without a real device to test on.
+- **Auto-backup to Drive** when signed in (a small QoL on top of the
+  framework). 30-min silent upload, keep last 10. Off by default.
+- **AI spell checker** (Future). 3-level slider + off; would lean on a
+  paid API so partially blocked on the question of who hosts it.
+
+Rough status: **~90% overall.** App side ~99% (only AI spellcheck and
+auto-backup-to-Drive remain). Device-install side ~75% (all three paths
+shipped with real walls; only the one-step ISO for Formattable is left).
 
 ## MARIE'S STYLE / WATCH-OUTS
 
