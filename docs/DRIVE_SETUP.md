@@ -83,18 +83,39 @@ manually.
 
 ### 6. Try it
 
-1. Open Local Writing → click the Download icon.
-2. Pick **Google Drive**.
-3. A `.zip` named like `quill-haven-backup-2026-06-22_1430.zip` lands
-   in your Google Drive (root folder by default).
+1. Open Local Writing → click the Download icon (top of the side
+   panel).
+2. Pick **Save to Drive**.
+3. A Word file (`Your Book.rtf`) lands in your Google Drive (root
+   folder by default).
+
+### 7. Turn on auto-backup (optional but nice)
+
+Once you're connected, the Settings → Google Drive area shows a new
+**Auto-backup to Drive** toggle. Flip it on and every 30 minutes Quill
+Haven silently uploads a `quill-haven-autobackup-YYYY-MM-DD-HHMM.json`
+to your Drive — so if anything ever happens to the device, the latest
+30-min snapshot is already off-device.
 
 ---
 
-## What gets uploaded
+## What gets uploaded — three different shapes
 
-The same `.zip` as "Full backup (.zip)" — every book as a Word file,
-every note as a Word file, plus the raw `quill-haven-backup.json` for
-restoring onto a new device.
+- **Save to Drive** (manual, single book/note) → one `.rtf` file with
+  whatever's open in the writing app. Editable in Word.
+- **Auto-backup** (silent, every 30 min when enabled) → one `.json`
+  file with the FULL restorable state (every project, note, file
+  setting). Used by "Restore backup" to put a fresh device back to the
+  saved state.
+- **All projects bundle** → goes to **device only**, never Drive.
+  That's a `.zip` for reading off-device or moving onto a USB.
+
+## Restoring later
+
+In Settings → **Restore backup**, pick a `.json` or `.zip` from your
+device. It confirms with the date + counts before replacing everything.
+To restore from Drive: download the latest `quill-haven-autobackup-*.json`
+from your Drive onto the new device, then use Restore backup.
 
 ## What if I lose the Client ID
 
@@ -104,8 +125,7 @@ the project entirely, you can — Quill Haven would just go back to the
 
 ## What this CAN'T do (today)
 
-- **Auto-sync every change.** Today the upload is a manual "Save to
-  Drive" click. A periodic auto-backup is a future option.
-- **Restore from Drive.** Today restore means downloading the latest
-  `.zip` from Drive, dragging it back onto a new device. An "Import
-  backup" button is also a future option.
+- **Direct restore from Drive without downloading.** Today restore
+  means downloading the latest auto-backup `.json` from your Drive,
+  then using Settings → Restore backup. A "Restore directly from Drive"
+  one-click flow isn't built yet.
