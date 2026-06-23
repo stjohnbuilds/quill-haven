@@ -22,7 +22,25 @@
   // ── Storage ──
   var STORE = 'qh-writing2';
   function newId() { return 'x' + Math.random().toString(36).slice(2, 9); }
-  function persist() { try { localStorage.setItem(STORE, JSON.stringify(data)); } catch (e) {} }
+  var _saveFailedWarned = false;
+  function persist() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify(data));
+      _saveFailedWarned = false;
+      return true;
+    } catch (e) {
+      if (saveEl) saveEl.textContent = 'NOT saved';
+      if (!_saveFailedWarned && window.qhConfirm) {
+        _saveFailedWarned = true;
+        window.qhConfirm({
+          title: 'Couldn\'t save your writing',
+          message: 'The device is out of room — your latest edits aren\'t saved yet. Empty the Trash tab or remove an old project / note, then keep typing.',
+          confirmText: 'OK', danger: true
+        });
+      }
+      return false;
+    }
+  }
 
   function migrateOrSeed() {
     // Carry any chapters from the old single-list app over as Notes.
@@ -728,9 +746,10 @@
     if (saveEl) saveEl.textContent = 'Saving…';
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = setTimeout(function () {
-      flush(); persist();
+      flush();
+      var ok = persist();
       renderNotes(); renderProjects();   // reflect title/header changes in the tree
-      if (saveEl) saveEl.textContent = 'Saved';
+      if (saveEl && ok) saveEl.textContent = 'Saved';
     }, 500);
   }
 

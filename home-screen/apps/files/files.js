@@ -31,7 +31,24 @@
   if (!data.folders || typeof data.folders !== 'object') data.folders = {};
   if (!Array.isArray(data.folders.documents)) data.folders.documents = [];
   if (!Array.isArray(data.folders.pictures)) data.folders.pictures = [];
-  function persist() { try { localStorage.setItem(STORE, JSON.stringify(data)); return true; } catch (e) { return false; } }
+  var _filesSaveFailedWarned = false;
+  function persist() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify(data));
+      _filesSaveFailedWarned = false;
+      return true;
+    } catch (e) {
+      if (!_filesSaveFailedWarned && window.qhConfirm) {
+        _filesSaveFailedWarned = true;
+        window.qhConfirm({
+          title: 'Couldn\'t save to Files',
+          message: 'The device is out of room. The last change to Files wasn\'t saved. Empty the trash, remove old pictures, or move documents off to USB.',
+          confirmText: 'OK', danger: true
+        });
+      }
+      return false;
+    }
+  }
   function getBg() { try { return localStorage.getItem('qh-bg') || ''; } catch (e) { return ''; } }
   function setBgStore(v) { try { if (v) localStorage.setItem('qh-bg', v); else localStorage.removeItem('qh-bg'); } catch (e) {} }
 

@@ -224,10 +224,10 @@ var BUILTIN_APPS = [
   { id:'docs', name:'Google Docs', kind:'site', url:'https://docs.google.com',
     c1:'#f7cfe6', c2:'#eeb1cf', vb:'0 0 28 28',
     icon:'<rect x="6" y="2" width="16" height="22" rx="2.5" fill="none" stroke="white" stroke-width="1.4" opacity="0.9"/><path d="M18 2L22 6L18 6Z" fill="white" opacity="0.35"/><line x1="9" y1="10" x2="19" y2="10" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/><line x1="9" y1="13.5" x2="16" y2="13.5" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.55"/><line x1="9" y1="17" x2="18" y2="17" stroke="white" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>' },
-  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=20',
+  { id:'writing', name:'Local Writing', kind:'local', src:'apps/writing/index.html?v=21',
     c1:'#c2e8c9', c2:'#97d6a4', vb:'0 0 24 24', sub:'Saves to device, not the cloud',
     icon:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" fill="none" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/><path d="M16 8 2 22" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/><path d="M17.5 15H9" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity="0.7"/>' },
-  { id:'files', name:'Files', kind:'local', src:'apps/files/index.html?v=6',
+  { id:'files', name:'Files', kind:'local', src:'apps/files/index.html?v=7',
     c1:'#c4d4f7', c2:'#a0bcee', vb:'0 0 24 24', sub:'Documents, pictures, USB',
     icon:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="white" stroke-width="1.5" stroke-linejoin="round" opacity="0.92"/>' }
 ];
