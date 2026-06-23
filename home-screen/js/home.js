@@ -240,11 +240,9 @@ var BUILTIN_APPS = [
 ];
 
 // Add-ons ship by default but can be removed (and the user can add their own).
-var DEFAULT_ADDONS = [
-  { id:'dabble', name:'Dabble Writer', kind:'site', url:'https://app.dabblewriter.com',
-    c1:'#ddcff7', c2:'#c6b2ec', vb:'0 0 28 28',
-    icon:'<path d="M14 7C12 6 7.5 5.5 4 6.8L4 22C7.5 21 12 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/><path d="M14 7C16 6 20.5 5.5 24 6.8L24 22C20.5 21 16 21.5 14 23" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/><line x1="14" y1="7" x2="14" y2="23" stroke="white" stroke-width="1.4" opacity="0.65"/>' }
-];
+// No forced add-ons. Dabble / Typing & Tomes are added by the user via "Add App"
+// (Marie's call — she didn't want them shoved in as defaults).
+var DEFAULT_ADDONS = [];
 
 function loadAddons() {
   var a = null;
@@ -312,6 +310,15 @@ var currentApp = null;
 
 function openApp(name) {
   if (currentApp === name) { goHome(); return; }
+  var siteApp = allApps().filter(function(a) { return a.id === name; })[0];
+  // Website apps (Google Docs, Dabble, Typing & Tomes, custom add-ons) actually
+  // OPEN the site now. On the device the kiosk loads it; a two-finger swipe-back
+  // (or the Back gesture) returns to the home screen.
+  if (siteApp && siteApp.kind !== 'local' && siteApp.url) {
+    flushOpenApps();           // save any in-flight local writing first
+    window.location.href = siteApp.url;
+    return;
+  }
   document.querySelectorAll('.app-view').forEach(function(v) { v.classList.remove('active'); });
   document.getElementById('homeScreen').style.display = 'none';
   var view = document.getElementById('view-' + name);
@@ -392,7 +399,7 @@ function buildView(app) {
       + '<div class="app-body-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 36) + '</div>'
       + '<div class="app-body-name">' + esc(app.name) + '</div>'
       + (host ? '<div class="app-body-url">' + esc(host) + '</div>' : '')
-      + '<div class="app-body-note">On your Chromebook, this opens<br>right here as a full window.</div>'
+      + '<div class="app-body-note">Opening ' + esc(app.name) + '…<br>swipe back with two fingers to return home.</div>'
       + '</div>';
   }
   return v;
@@ -1215,7 +1222,7 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '2.0';
+var LOCAL_VERSION = '2.1';
 function checkForUpdate() {
   fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json')
     .then(function(r) { return r.json(); })
@@ -1246,3 +1253,54 @@ function doUpdate() {
     });
 }
 setTimeout(checkForUpdate, 3000);
+
+// ── Power / Restart / Sleep / Exit-to-desktop ──
+// These call the tiny local helper that setup.sh installs on the device
+// (a web page can't power a computer off by itself). Off the device (preview /
+// plain website) the helper isn't there, so we say so honestly.
+var QH_HELPER = 'http://127.0.0.1:8137';
+function qhSystem(action) {
+  var done = false;
+  function fail() {
+    if (done) return; done = true;
+    if (window.qhConfirm) window.qhConfirm({
+      title: 'Only on the Quill Haven laptop',
+      message: 'Power, restart, sleep and exit work on the installed device — not in the preview or plain website.',
+      confirmText: 'OK', noCancel: true
+    });
+  }
+  var t = setTimeout(fail, 1500);   // helper not answering (no device) → say so, don't hang
+  fetch(QH_HELPER + '/' + action, { mode: 'cors' })
+    .then(function() { done = true; clearTimeout(t); })
+    .catch(function() { clearTimeout(t); fail(); });
+}
+function powerAction(action, label, danger) {
+  hidePowerMenu();
+  if (action === 'poweroff' || action === 'reboot') {
+    window.qhConfirm({ title: label + '?', confirmText: label, danger: !!danger, onConfirm: function() { qhSystem(action); } });
+  } else {
+    qhSystem(action);
+  }
+}
+var _powerMenu = null;
+function hidePowerMenu() {
+  if (_powerMenu) { _powerMenu.remove(); _powerMenu = null; document.removeEventListener('click', hidePowerMenu); }
+}
+function togglePowerMenu(e) {
+  if (e) e.stopPropagation();
+  if (_powerMenu) { hidePowerMenu(); return; }
+  var m = document.createElement('div');
+  m.className = 'power-menu';
+  m.innerHTML =
+      '<button type="button" data-act="desktop">Exit to desktop</button>'
+    + '<button type="button" data-act="sleep">Sleep</button>'
+    + '<button type="button" data-act="reboot">Restart</button>'
+    + '<button type="button" data-act="poweroff" class="danger">Power off</button>';
+  m.querySelector('[data-act="desktop"]').addEventListener('click', function() { powerAction('desktop', 'Exit to desktop'); });
+  m.querySelector('[data-act="sleep"]').addEventListener('click', function() { powerAction('sleep', 'Sleep'); });
+  m.querySelector('[data-act="reboot"]').addEventListener('click', function() { powerAction('reboot', 'Restart', true); });
+  m.querySelector('[data-act="poweroff"]').addEventListener('click', function() { powerAction('poweroff', 'Power off', true); });
+  document.body.appendChild(m);
+  _powerMenu = m;
+  setTimeout(function() { document.addEventListener('click', hidePowerMenu); }, 0);
+}

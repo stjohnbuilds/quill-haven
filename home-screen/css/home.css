@@ -202,6 +202,21 @@ body.top-mode .top-apps { display: flex; }
 }
 .settings-btn:hover { opacity: 1; background: var(--row-hover); }
 
+/* Power / Restart / Sleep / Exit menu (opens from the top-bar power button) */
+.power-menu {
+  position: fixed; top: 40px; right: 14px; z-index: 200;
+  background: var(--panel-bg, #fff); border: 1px solid var(--card-border, rgba(0,0,0,0.1));
+  border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.22);
+  padding: 6px; min-width: 168px; display: flex; flex-direction: column; gap: 2px;
+}
+.power-menu button {
+  text-align: left; background: none; border: none; cursor: pointer;
+  font: inherit; font-size: 13px; color: var(--text-strong);
+  padding: 9px 12px; border-radius: 8px;
+}
+.power-menu button:hover { background: var(--row-hover); }
+.power-menu button.danger { color: #e06a6a; }
+
 /* ── Home screen ── */
 .main {
   flex: 1; display: flex; flex-direction: column; align-items: center;
