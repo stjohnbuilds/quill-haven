@@ -94,15 +94,38 @@ Plus check each of these on the home screen + each app:
   collapses to a faded quill; faint edge-collapse arrow halfway down the
   panel; download icon top-right in the side; pill toolbar (B / I / U /
   S / highlight); centred page; word count; "Saved".
-- Writing: `+` on a project opens **Chapter / Part** menu; Parts create
-  a `Project → Part → Chapter → Scene` level; chapter numbering stays
-  sequential across top-level + parts.
+- Writing: `+` on a project opens **Chapter / Part** menu (no
+  descriptions, just labels); Parts create a `Project → Part → Chapter →
+  Scene` level; chapter numbering stays sequential across top-level +
+  parts; a **"Move to…"** button on each chapter (visible only when a
+  Part exists) moves the chapter between containers.
+- Writing → Download: three options — **Save to device** (single
+  book/note .rtf), **Save to Drive** (same single file to Drive), **All
+  projects bundle** (.zip of everything to device). Sub-labels swap
+  book↔note based on the open tab.
 - Writing: delete a scene / chapter / part / project / note — see undo
   toast, see Trash tab appear with the right count badge.
+- Hover the tree — row width does NOT jump when the edit/add/del buttons
+  reveal (they're opacity-faded, not display-toggled).
+- Dropdowns (dl-menu, popup-menu, undo-toast) are opaque — you should
+  not see anything underneath them.
+- Bold text in the editor is visibly heavy (700 weight bundled).
 - Files: Documents / Pictures / Downloads / USB / Trash in the sidebar.
 - Files: "+ New folder" tile creates a folder with inline rename; drag a
   file card onto a folder to move it in; folder click → navigate in;
   back tile → root.
+- Files → USB uses the File System Access API on Chromium/Edge —
+  click USB → pick the folder → handle persists. Falls back to a
+  friendly "not supported" message elsewhere.
+- Settings → **Restore backup** — picking a `quill-haven-backup-*.json`
+  or `.zip` confirms with date + counts, then replaces qh-writing2 +
+  qh-files on confirm.
+- Settings → **Google Drive** — three-state row ("Not connected" / "Ready
+  — tap to sign in" / "Connected as <email>"). The OAuth Client ID prompt
+  is plain `window.prompt` — point users at `docs/DRIVE_SETUP.md` for
+  the 10-min Cloud Console setup.
+- Settings → **Auto-backup to Drive** — toggle row that only appears when
+  Drive is connected. Off by default. When on, silent 30-min uploads.
 - Add App refuses obvious distraction domains (try facebook.com,
   youtube.com, gmail.com) — friendly popup, no add.
 
