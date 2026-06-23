@@ -274,8 +274,8 @@
       add.addEventListener('click', function (e) {
         e.stopPropagation();
         openAddMenu(add, [
-          { label: 'Chapter', sub: 'A new chapter in this book', action: function () { addChapter(p.id, null); } },
-          { label: 'Part',    sub: 'A group of chapters (Part 1, Part 2…)', action: function () { addPart(p.id); } }
+          { label: 'Chapter', action: function () { addChapter(p.id, null); } },
+          { label: 'Part',    action: function () { addPart(p.id); } }
         ]);
       });
       del.addEventListener('click', function (e) { e.stopPropagation(); deleteProject(p.id); });
@@ -313,18 +313,48 @@
     return node;
   }
 
-  function chapterNode(c) {
+  function moveBtnEl(title) {
+    var b = el('button', 'row-move'); b.type = 'button'; b.title = title;
+    b.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l-3 3-3-3"/><path d="M19 9l3 3-3 3"/><path d="M2 12h20"/><path d="M12 2v20"/></svg>';
+    return b;
+  }
+  function chapterMoveOptions(project, chapter, currentPart) {
+    var opts = [];
+    if (currentPart) opts.push({ label: 'Top level', action: function () { moveChapter(chapter, project, null); } });
+    (project.parts || []).forEach(function (pt) {
+      if (pt !== currentPart) opts.push({ label: 'Into "' + (pt.name || 'Untitled part') + '"', action: function () { moveChapter(chapter, project, pt); } });
+    });
+    return opts;
+  }
+  function moveChapter(chapter, project, toPart) {
+    // Find current container
+    var src = null;
+    if ((project.chapters || []).indexOf(chapter) >= 0) src = project.chapters;
+    if (!src) (project.parts || []).forEach(function (pt) { if (pt.chapters.indexOf(chapter) >= 0) src = pt.chapters; });
+    if (!src) return;
+    src.splice(src.indexOf(chapter), 1);
+    var dst = toPart ? toPart.chapters : project.chapters;
+    dst.push(chapter);
+    data.open[project.id] = true; if (toPart) data.open[toPart.id] = true; data.open[chapter.id] = true;
+    persist(); renderAll();
+  }
+  function chapterNode(c, project, part) {
     var node = el('div', 'node'); node.dataset.id = c.id; node.draggable = true; wireDrag(node);
     var isOpen = !!data.open[c.id];
     var row = el('div', 'row chapter-row' + (isOpen ? ' open' : ''));
     var name = el('span', 'row-name'); name.textContent = c.title || 'Untitled chapter';
     var edit = editBtn('Rename chapter'); var add = addBtn('Add scene'); var del = delBtn('Delete chapter');
-    row.append(caretEl(false), name, edit, add, del);
-    row.addEventListener('click', function (e) { if (e.target === add || e.target === del) return; toggleOpen(c.id); });
+    // "Move to…" is only useful if there's somewhere else to move the chapter to
+    var moveOpts = (project && (project.parts || []).length) ? chapterMoveOptions(project, c, part || null) : [];
+    var mv = moveOpts.length ? moveBtnEl('Move to another part') : null;
+    if (mv) row.append(caretEl(false), name, edit, mv, add, del);
+    else row.append(caretEl(false), name, edit, add, del);
+    row.addEventListener('click', function (e) { if (e.target === add || e.target === del || (mv && e.target === mv)) return; toggleOpen(c.id); });
     name.addEventListener('dblclick', function (e) { e.stopPropagation(); startRename(name, node, c, 'title'); });
     edit.addEventListener('click', function (e) { e.stopPropagation(); startRename(name, node, c, 'title'); });
     add.addEventListener('click', function (e) { e.stopPropagation(); addScene(c.id); });
     del.addEventListener('click', function (e) { e.stopPropagation(); deleteChapter(c.id); });
+    if (mv) mv.addEventListener('click', function (e) { e.stopPropagation(); openAddMenu(mv, moveOpts); });
     node.appendChild(row);
     if (isOpen) {
       var kids = el('div', 'children'); kids.dataset.group = 'scenes:' + c.id;

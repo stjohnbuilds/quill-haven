@@ -35,6 +35,16 @@
   src: url('../../fonts/eb-garamond-400i-latinext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
+@font-face {
+  font-family: 'EB Garamond'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('../../fonts/eb-garamond-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'EB Garamond'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('../../fonts/eb-garamond-700-latinext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -116,12 +126,12 @@ body.side-collapsed .side { margin-left: -233px; opacity: 0; pointer-events: non
 .edge-collapse:hover { opacity: 1; color: var(--accent-strong); background: var(--row-hover); }
 body.side-collapsed .edge-collapse { display: none; }
 
-/* Download dropdown menu */
+/* Download dropdown menu — opaque, not see-through */
 .dl-menu {
   position: fixed; z-index: 60;
-  min-width: 220px; padding: 6px;
-  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
-  box-shadow: 0 14px 36px rgba(0,0,0,0.16);
+  min-width: 240px; padding: 6px;
+  background: var(--panel-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  box-shadow: 0 14px 36px rgba(0,0,0,0.22);
   display: flex; flex-direction: column; gap: 2px;
   animation: dlPop 0.14s ease;
 }
@@ -144,11 +154,11 @@ body.side-collapsed .edge-collapse { display: none; }
 .dl-name { font-size: 13px; font-weight: 600; color: var(--text-strong); }
 .dl-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
 
-/* Undo toast (bottom-center) */
+/* Undo toast (bottom-center) — opaque */
 .undo-toast {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-  background: var(--card-bg); border: 1px solid var(--card-border);
-  border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+  background: var(--panel-bg); border: 1px solid var(--card-border);
+  border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.22);
   padding: 9px 9px 9px 16px; display: flex; align-items: center; gap: 10px;
   z-index: 70; min-width: 230px; max-width: calc(100% - 32px);
   animation: toastPop 0.18s ease;
@@ -180,12 +190,12 @@ body.side-collapsed .edge-collapse { display: none; }
 .row:hover .row-restore { display: flex; }
 .row-restore:hover { background: var(--card-bg); color: var(--accent-strong); }
 
-/* Tiny floating add menu (Chapter / Part) */
+/* Tiny floating add menu (Chapter / Part / Move to…) — opaque */
 .popup-menu {
   position: fixed; z-index: 60;
-  min-width: 180px; padding: 6px;
-  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 11px;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.14);
+  min-width: 160px; padding: 5px;
+  background: var(--panel-bg); border: 1px solid var(--card-border); border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.22);
   display: flex; flex-direction: column; gap: 2px;
   animation: dlPop 0.14s ease;
 }
@@ -225,14 +235,19 @@ body.side-collapsed .edge-collapse { display: none; }
 .row-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-faint); flex-shrink: 0; margin: 0 5px 0 2px; }
 .row-name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
 .row-name[contenteditable="true"] { outline: 1px solid var(--accent); border-radius: 4px; padding: 0 3px; cursor: text; }
-.row-add, .row-del, .row-edit {
+/* Always in the flow — invisible until hover — so the row doesn't jump in width */
+.row-add, .row-del, .row-edit, .row-move {
   width: 22px; height: 22px; flex-shrink: 0; border: none; background: none; cursor: pointer;
   border-radius: 6px; color: var(--text-faint); font-size: 15px; line-height: 1;
-  display: none; align-items: center; justify-content: center; transition: background 0.12s, color 0.12s;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.12s, background 0.12s, color 0.12s;
 }
-.row:hover .row-add, .row:hover .row-del, .row:hover .row-edit { display: flex; }
-.row-add:hover, .row-edit:hover { background: var(--card-bg); color: var(--accent-strong); }
-.row-del:hover { background: var(--card-bg); color: #e06a6a; }
+.row:hover .row-add, .row:hover .row-del, .row:hover .row-edit, .row:hover .row-move {
+  opacity: 1; pointer-events: auto;
+}
+.row-add:hover, .row-edit:hover, .row-move:hover { background: var(--panel-bg); color: var(--accent-strong); }
+.row-del:hover { background: var(--panel-bg); color: #e06a6a; }
 
 .children { margin-left: 16px; padding-left: 2px; }
 
@@ -322,6 +337,8 @@ body.side-collapsed .edge-collapse { display: none; }
 }
 .editor p { margin: 0; }
 .editor ul, .editor ol { text-indent: 0; padding-left: 1.5em; margin: 0.2em 0; }
+/* Real bold — the 700 weight is bundled now so b/strong actually look bold */
+.editor b, .editor strong, .doc-header b, .doc-header strong, .doc-subheader b, .doc-subheader strong { font-weight: 700; }
 
 /* notes mode hides the subtitle */
 body.mode-note .doc-subheader { display: none; }
