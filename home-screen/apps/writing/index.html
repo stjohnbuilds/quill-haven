@@ -46,15 +46,15 @@
   <div class="dl-menu" id="dlMenu" hidden>
     <button class="dl-item" data-dest="device" type="button">
       <span class="dl-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg></span>
-      <span class="dl-text"><span class="dl-name" id="dlNameThis">This book</span><span class="dl-sub" id="dlSubThis">Word file (.rtf) — also saved to Files</span></span>
-    </button>
-    <button class="dl-item" data-dest="backup" type="button">
-      <span class="dl-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg></span>
-      <span class="dl-text"><span class="dl-name">Full backup (.zip)</span><span class="dl-sub">Every book and note, readable in Word</span></span>
+      <span class="dl-text"><span class="dl-name" id="dlNameThis">Save to device</span><span class="dl-sub" id="dlSubThis">This book as a Word file (.rtf)</span></span>
     </button>
     <button class="dl-item" data-dest="drive" type="button">
       <span class="dl-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="14 14 12 12 10 14"/><line x1="12" y1="12" x2="12" y2="20"/></svg></span>
-      <span class="dl-text"><span class="dl-name">Google Drive</span><span class="dl-sub">Off-device backup</span></span>
+      <span class="dl-text"><span class="dl-name">Save to Drive</span><span class="dl-sub" id="dlSubDrive">This book to Google Drive</span></span>
+    </button>
+    <button class="dl-item" data-dest="backup" type="button">
+      <span class="dl-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg></span>
+      <span class="dl-text"><span class="dl-name">All projects bundle</span><span class="dl-sub">To device (everything as a .zip)</span></span>
     </button>
   </div>
 
@@ -93,6 +93,6 @@
   <!-- Undo toast (mounted on demand) -->
 
   <script src="../../shared/confirm.js?v=2"></script>
-  <script src="writing.js?v=22"></script>
+  <script src="writing.js?v=23"></script>
 </body>
 </html>

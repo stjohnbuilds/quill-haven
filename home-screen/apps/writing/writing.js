@@ -210,16 +210,15 @@
   }
   function syncDownloadBtn() {
     if (!downloadBtn) return;
-    // Visible on Notes (download current note OR backup) and Projects (download current book OR backup).
     downloadBtn.hidden = data.tab === 'trash';
-    var nameEl = document.getElementById('dlNameThis');
     var subEl = document.getElementById('dlSubThis');
+    var driveSub = document.getElementById('dlSubDrive');
     if (data.tab === 'notes') {
-      if (nameEl) nameEl.textContent = 'This note';
-      if (subEl) subEl.textContent = 'Word file (.rtf) of the current note';
+      if (subEl) subEl.textContent = 'This note as a Word file (.rtf)';
+      if (driveSub) driveSub.textContent = 'This note to Google Drive';
     } else {
-      if (nameEl) nameEl.textContent = 'This book';
-      if (subEl) subEl.textContent = 'Word file (.rtf) — also saved to Files';
+      if (subEl) subEl.textContent = 'This book as a Word file (.rtf)';
+      if (driveSub) driveSub.textContent = 'This book to Google Drive';
     }
   }
 
@@ -884,16 +883,17 @@
       var dest = btn.dataset.dest;
       flush(); persist();
       if (dest === 'backup') { doDownloadBackup(); return; }
-      if (dest === 'drive')  { doDownloadDrive(); return; }
-      // 'device' — depends on what's selected
-      if (data.tab === 'notes') {
-        var n = findNote(data.sel.note);
-        if (n) doDownloadNote(n);
+      // device + drive both work on the currently selected book / note
+      var note = data.tab === 'notes' ? findNote(data.sel.note) : null;
+      var proj = data.tab === 'projects' ? currentProject() : null;
+      if (dest === 'device') {
+        if (note) doDownloadNote(note);
+        else if (proj) doDownloadDevice(proj);
         else doDownloadBackup();
-      } else {
-        var p = currentProject();
-        if (p) doDownloadDevice(p);
-        else doDownloadBackup();
+      } else if (dest === 'drive') {
+        if (note) doDriveBook(noteRtfBundle(note), (note.title || 'Untitled note'));
+        else if (proj) doDriveBook(projectRtfBundle(proj), (proj.name || 'Untitled project'));
+        else doDriveBackup();
       }
     });
   }
@@ -1043,47 +1043,33 @@
     s += '}\n';
     return s;
   }
-  // Trigger a browser download AND save a copy into Files → Documents.
+  // Just trigger a browser download. The download itself is the user's copy —
+  // we don't squirrel an extra copy away in Files (that was confusing).
   function doDownloadDevice(project) {
     var rtf = generateProjectRtf(project);
     var base = (project.name || 'manuscript').replace(/[\/\\:*?"<>|]+/g, '_').trim() || 'manuscript';
-    var blob = new Blob([rtf], { type: 'application/rtf' });
+    triggerBlobDownload(new Blob([rtf], { type: 'application/rtf' }), base + '.rtf');
+  }
+  function triggerBlobDownload(blob, filename) {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
-    a.href = url; a.download = base + '.rtf';
+    a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-    saveToFilesDocuments(base, rtf);
   }
-  function saveToFilesDocuments(name, content) {
-    var files;
-    try { files = JSON.parse(localStorage.getItem('qh-files')) || {}; } catch (e) { files = {}; }
-    if (!Array.isArray(files.documents)) files.documents = [];
-    if (!Array.isArray(files.pictures)) files.pictures = [];
-    if (!Array.isArray(files.trash)) files.trash = [];
-    files.documents.push({
-      id: 'f' + Math.random().toString(36).slice(2, 9),
-      name: name,
-      date: Date.now(),
-      format: 'rtf',
-      content: content
-    });
-    try { localStorage.setItem('qh-files', JSON.stringify(files)); }
-    catch (e) {
-      // Out of room — pop and warn
-      files.documents.pop();
-      if (window.qhConfirm) window.qhConfirm({
-        title: 'Not enough room',
-        message: 'The download worked, but there wasn’t space to also save a copy in Files. Free up some pictures first.',
-        confirmText: 'OK'
-      });
-    }
+  function projectRtfBundle(project) {
+    var safe = (project.name || 'manuscript').replace(/[\/\\:*?"<>|]+/g, '_').trim() || 'manuscript';
+    return { blob: new Blob([generateProjectRtf(project)], { type: 'application/rtf' }), filename: safe + '.rtf' };
   }
-  function doDownloadDrive() {
+  function noteRtfBundle(note) {
+    var safe = (note.title || 'Untitled note').replace(/[\/\\:*?"<>|]+/g, '_').trim() || 'Untitled note';
+    return { blob: new Blob([generateNoteRtf(note)], { type: 'application/rtf' }), filename: safe + '.rtf' };
+  }
+  function reachDrive() {
     var QHDrive = (window.parent && window.parent !== window && window.parent.QHDrive) || window.QHDrive || null;
     if (!QHDrive) {
       if (window.qhConfirm) window.qhConfirm({ title: 'Drive isn\'t available here', message: 'Open the writing app from inside Quill Haven (the home screen) so it can reach the Drive setup.', confirmText: 'OK' });
-      return;
+      return null;
     }
     if (!QHDrive.hasClientId()) {
       if (window.qhConfirm) window.qhConfirm({
@@ -1091,8 +1077,22 @@
         message: 'Open the home screen, tap the cog, find Google Drive, and paste your OAuth Client ID. One-time setup — see docs/DRIVE_SETUP.md for the steps. Then come back and try Drive again.',
         confirmText: 'OK'
       });
-      return;
+      return null;
     }
+    return QHDrive;
+  }
+  // Upload a single book / note RTF to Drive
+  function doDriveBook(bundle, niceName) {
+    var QHDrive = reachDrive(); if (!QHDrive) return;
+    QHDrive.uploadFile(bundle.filename, bundle.blob, 'application/rtf').then(function (file) {
+      if (window.qhConfirm) window.qhConfirm({ title: 'Saved to Drive', message: '"' + (file.name || bundle.filename) + '" is now in your Google Drive.', confirmText: 'OK' });
+    }).catch(function (err) {
+      if (window.qhConfirm) window.qhConfirm({ title: 'Drive save failed', message: String(err && err.message || err), confirmText: 'OK' });
+    });
+  }
+  // Fallback when nothing's selected — upload the full backup zip
+  function doDriveBackup() {
+    var QHDrive = reachDrive(); if (!QHDrive) return;
     var blob = generateFullBackupZip();
     var when = new Date();
     var stamp = when.getFullYear() + '-' + String(when.getMonth() + 1).padStart(2, '0') + '-' + String(when.getDate()).padStart(2, '0') + '_' + String(when.getHours()).padStart(2, '0') + String(when.getMinutes()).padStart(2, '0');
@@ -1116,15 +1116,14 @@
     return s;
   }
   function doDownloadNote(note) {
-    var rtf = generateNoteRtf(note);
-    var base = (note.title || 'Untitled note').replace(/[\/\\:*?"<>|]+/g, '_').trim() || 'Untitled note';
-    var blob = new Blob([rtf], { type: 'application/rtf' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = base + '.rtf';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-    saveToFilesDocuments(base, rtf);
+    var bundle = noteRtfBundle(note);
+    triggerBlobDownload(bundle.blob, bundle.filename);
+  }
+  function doDownloadBackup() {
+    var blob = generateFullBackupZip();
+    var when = new Date();
+    var stamp = when.getFullYear() + '-' + String(when.getMonth() + 1).padStart(2, '0') + '-' + String(when.getDate()).padStart(2, '0');
+    triggerBlobDownload(blob, 'quill-haven-backup-' + stamp + '.zip');
   }
 
   // ═══ Zip generator — store-only (no compression), pure JS, no library ═══
@@ -1264,16 +1263,6 @@
     try { var f = JSON.parse(localStorage.getItem('qh-files') || 'null'); if (f) raw.files = f; } catch (e) {}
     files.push({ name: 'quill-haven-backup.json', data: enc.encode(JSON.stringify(raw, null, 2)) });
     return zipBuild(files, when);
-  }
-  function doDownloadBackup() {
-    var blob = generateFullBackupZip();
-    var when = new Date();
-    var stamp = when.getFullYear() + '-' + String(when.getMonth() + 1).padStart(2, '0') + '-' + String(when.getDate()).padStart(2, '0');
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = 'quill-haven-backup-' + stamp + '.zip';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
   // ── Tabs ──
