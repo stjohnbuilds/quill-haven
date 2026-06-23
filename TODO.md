@@ -18,17 +18,13 @@ our setup.sh" which works fine but isn't one-step.
       install with no script step. Needs ISO remaster tooling — non-
       trivial.
 
-### App side (small)
-- [ ] **Auto-backup to Drive** when signed in — periodic (e.g. every
-      30 minutes) silent upload of the full backup .zip. Setting in
-      Settings → Google Drive to turn it on. Leverages QHDrive that's
-      already built.
-- [ ] **Restore from inside the writing app** (currently restore lives
-      in the home-screen Settings panel, which is correct, but a "load
-      from backup" link inside Local Writing → empty state might
-      reduce confusion).
+### App side (nice-to-have, not blocking)
+- [ ] **Restore from inside the writing app** — currently lives in the
+      home-screen Settings panel (which is correct), but a "load from
+      backup" link inside Local Writing's empty state might reduce
+      confusion if she ever wipes the device and reaches for it.
 
-### Future / nice-to-have
+### Future
 - [ ] AI spell checker in the writing app (3-level slider + off).
 
 ## Home-screen polish (from Marie's boot walkthrough 2026-06-21)
@@ -212,7 +208,6 @@ our setup.sh" which works fine but isn't one-step.
 
 ## Future
 - [ ] AI spell checker in the writing app (3-level slider + off).
-- [ ] Auto-backup to Drive every N minutes when signed in (default off).
 
 ## Done
 - [x] Boot quill redrawn to match the St John feather — full barbed plume, curved
