@@ -39,7 +39,7 @@ while true; do
     EXT_FLAG="--load-extension=$EXT_DIR"
   fi
   chromium \
-    --kiosk \
+    --app="https://stjohnbuilds.github.io/quill-haven/" \
     --start-fullscreen \
     $SIZE_FLAGS \
     --user-data-dir="$HOME/.quill-profile" \
@@ -47,7 +47,6 @@ while true; do
     --disable-session-crashed-bubble \
     --disable-features=TranslateUI,LocalNetworkAccessChecks \
     --overscroll-history-navigation=1 \
-    $EXT_FLAG \
-    "https://stjohnbuilds.github.io/quill-haven/"
+    $EXT_FLAG
   sleep 2
 done
