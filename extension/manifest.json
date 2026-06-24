@@ -1,15 +1,26 @@
 {
   "manifest_version": 3,
   "name": "Quill Haven",
-  "version": "1.0",
-  "description": "The Quill Haven writing OS overlay",
+  "version": "3.1",
+  "description": "Quill Haven overlay — the status pill and app switcher that live on every page so you can always see the time and never get stuck in an app.",
   "permissions": ["storage"],
+  "host_permissions": [
+    "http://127.0.0.1:8137/*",
+    "https://stjohnbuilds.github.io/*",
+    "https://docs.google.com/*",
+    "https://*.google.com/*",
+    "https://*.dabblewriter.com/*",
+    "https://typingandtomes.vercel.app/*",
+    "https://*.vercel.app/*"
+  ],
+  "background": { "service_worker": "qh-bg.js" },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["quill-overlay.js"],
+      "js": ["confirm.js", "quill-overlay.js"],
       "css": ["quill-overlay.css"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": false
     }
   ],
   "icons": {

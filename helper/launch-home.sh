@@ -31,12 +31,22 @@ if [ -n "$W" ] && [ -n "$H" ]; then
   SIZE_FLAGS="--window-position=0,0 --window-size=$W,$H"
 fi
 
+# Load the Quill Haven overlay extension (the pill + app switcher that ride on
+# every page). Only added if the extension actually downloaded, so a partial
+# download can never stop the laptop from booting into the home screen.
+EXT_DIR="$HOME/.local/share/quill-haven/extension"
+EXT_FLAGS=""
+if [ -f "$EXT_DIR/manifest.json" ]; then
+  EXT_FLAGS="--load-extension=$EXT_DIR --disable-extensions-except=$EXT_DIR"
+fi
+
 # If Chromium ever crashes, restart it so Marie is never dumped to a bare X.
 while true; do
   chromium \
     --kiosk \
     --start-fullscreen \
     $SIZE_FLAGS \
+    $EXT_FLAGS \
     --user-data-dir="$HOME/.quill-profile" \
     --no-first-run --noerrdialogs --disable-infobars \
     --disable-session-crashed-bubble \

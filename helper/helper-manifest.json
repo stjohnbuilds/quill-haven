@@ -1,1 +1,14 @@
-{ "version": "1.6", "sha256": "45df20b6e2906cf06b949bd2d36a3f4abb703b422218ac3678850489ee129ac9", "extras": [ { "name": "launch-home.sh", "src": "helper/launch-home.sh", "sha256": "2fab03df19240d3abbe01590e494a3ee87b9472f67a8b168491e89d6cbacba4f" } ] }
+{
+  "version": "1.6",
+  "sha256": "45df20b6e2906cf06b949bd2d36a3f4abb703b422218ac3678850489ee129ac9",
+  "extras": [
+    { "name": "extension/manifest.json",     "src": "extension/manifest.json",     "sha256": "c53c88152755e78e42afbfa0e3beb586d4fba14e201fcedf9a5b92a77ee9e62a" },
+    { "name": "extension/quill-overlay.js",   "src": "extension/quill-overlay.js",   "sha256": "6d9b4b16f9ee1883c3f99e35451992343c0295918ecd97c872a24ae214b86eab" },
+    { "name": "extension/quill-overlay.css",  "src": "extension/quill-overlay.css",  "sha256": "e69fd44926c082d68b4742118839ea5bd9977cab7c1225c4175f9b1b83e4f460" },
+    { "name": "extension/confirm.js",         "src": "extension/confirm.js",         "sha256": "188b9df00508a8d46d7ac23535b576a92f780a2664eb7f39b3709781a01e3b8c" },
+    { "name": "extension/qh-bg.js",           "src": "extension/qh-bg.js",           "sha256": "8672330165d0a5503e77ae4dfbba70e3ac22e5f73f8333a536e9aef9a4748016" },
+    { "name": "extension/icon-48.png",        "src": "extension/icon-48.png",        "sha256": "79e92d2d24acf0a86f2debd4329187095b68b2d30b4d5cbe6735ee831bc673b9" },
+    { "name": "extension/icon-128.png",       "src": "extension/icon-128.png",       "sha256": "79e92d2d24acf0a86f2debd4329187095b68b2d30b4d5cbe6735ee831bc673b9" },
+    { "name": "launch-home.sh",               "src": "helper/launch-home.sh",        "sha256": "4777ef666027aefb7374dc8d8b918263aa9417bb6c6bfbe0721d085b6ab934bb" }
+  ]
+}
