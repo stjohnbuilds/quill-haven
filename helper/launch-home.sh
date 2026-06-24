@@ -16,6 +16,9 @@ pgrep -f run-helper.sh >/dev/null || "$HOME/.local/share/quill-haven/run-helper.
 # fullscreen with no decorations; the WM just handles window stacking.
 pgrep -x xfwm4 >/dev/null || xfwm4 &
 
+# XFCE settings daemon — makes keyboard shortcuts (Ctrl+H = come home) work.
+pgrep -x xfsettingsd >/dev/null || xfsettingsd &
+
 # Detect screen resolution so Chromium fills every pixel (no black bars)
 RES=$(xdpyinfo 2>/dev/null | awk '/dimensions:/{print $2}')
 if [ -z "$RES" ]; then

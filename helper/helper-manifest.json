@@ -1,1 +1,1 @@
-{ "version": "1.5", "sha256": "7e98efe315c84f9aee00170776690403b58e5c679bb0014046e284f2e3a99151", "extras": [ { "name": "launch-home.sh", "sha256": "652ed35688af57b3f62d6927036ece4d7362584fc56e5095b5536f624fdbaba5" } ] }
+{ "version": "1.5", "sha256": "7e98efe315c84f9aee00170776690403b58e5c679bb0014046e284f2e3a99151", "extras": [ { "name": "launch-home.sh", "sha256": "2fab03df19240d3abbe01590e494a3ee87b9472f67a8b168491e89d6cbacba4f" } ] }
