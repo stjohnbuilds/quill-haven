@@ -254,13 +254,19 @@ body.top-mode .app-view { bottom: 0; }
 .app-body-name { font-size: 18px; font-weight: 600; color: var(--text-strong); }
 .app-body-url { font-size: 12px; color: var(--text-muted); margin-top: -6px; }
 .app-body-note { font-size: 11px; color: var(--text-faint); margin-top: 6px; text-align: center; line-height: 1.5; }
-.app-embed-fallback { flex: 1; display: flex; }
+.app-launch { flex: 1; display: flex; }
 .app-open-btn {
-  margin-top: 10px; padding: 10px 28px; border: none; border-radius: 10px;
-  background: var(--accent, #c9a0e0); color: #fff; font-size: 14px;
+  margin-top: 16px; padding: 12px 36px; border: none; border-radius: 12px;
+  background: var(--accent, #c9a0e0); color: #fff; font-size: 15px;
   font-weight: 600; cursor: pointer; transition: opacity 0.15s;
 }
 .app-open-btn:hover { opacity: 0.85; }
+.app-home-btn {
+  margin-top: 12px; padding: 8px 20px; border: none; border-radius: 8px;
+  background: transparent; color: var(--text-faint); font-size: 13px;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.app-home-btn:hover { opacity: 0.7; }
 
 /* ── Dock ── */
 .dock {
@@ -329,7 +335,7 @@ body.app-open .dock .app::before { display: none; }
 .settings-overlay.open { opacity: 1; pointer-events: all; }
 
 .settings-panel {
-  width: 440px; max-height: 85vh; overflow-y: auto;
+  width: 520px; max-height: 85vh; overflow-y: auto;
   background: var(--panel-bg);
   border: 1px solid var(--card-border); border-radius: 18px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.18); padding: 20px;

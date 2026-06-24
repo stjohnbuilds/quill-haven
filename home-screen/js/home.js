@@ -324,7 +324,18 @@ function openApp(name) {
   var siteApp = allApps().filter(function(a) { return a.id === name; })[0];
   if (siteApp && siteApp.kind !== 'local' && siteApp.url) {
     flushOpenApps();
-    window.open(siteApp.url, siteApp.id);
+    var view = document.getElementById('view-' + name);
+    if (view) view.classList.add('active');
+    document.getElementById('homeScreen').style.display = 'none';
+    document.querySelectorAll('[data-app]').forEach(function(a) {
+      a.classList.toggle('active', a.dataset.app === name);
+    });
+    var nm = document.getElementById('openAppName');
+    if (nm) nm.textContent = siteApp.name;
+    var tag = document.getElementById('openAppTag');
+    if (tag) tag.classList.add('show');
+    document.body.classList.add('app-open');
+    currentApp = name;
     return;
   }
   document.querySelectorAll('.app-view').forEach(function(v) { v.classList.remove('active'); });
@@ -400,15 +411,13 @@ function buildView(app) {
   if (app.kind === 'local') {
     v.innerHTML = '<iframe class="app-frame" src="' + app.src + '" title="' + esc(app.name) + '"></iframe>';
   } else {
-    // Site apps get a lazy iframe (src set when opened). If the site blocks
-    // iframes (Google Docs), a fallback message appears after 4 seconds.
-    v.innerHTML = '<iframe class="app-frame" data-url="' + esc(app.url) + '" title="' + esc(app.name) + '" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>'
-      + '<div class="app-embed-fallback" style="display:none;">'
+    v.innerHTML = '<div class="app-launch">'
       + '<div class="app-body">'
       + '<div class="app-body-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 36) + '</div>'
       + '<div class="app-body-name">' + esc(app.name) + '</div>'
-      + '<div class="app-body-note">This app doesn\'t allow embedding.<br>It\'ll open in its own window — press <b>Ctrl+H</b> to come home.</div>'
-      + '<button class="app-open-btn" onclick="window.open(\'' + esc(app.url) + '\', \'_blank\')">Open ' + esc(app.name) + '</button>'
+      + '<button class="app-open-btn" onclick="window.location.href=\'' + esc(app.url) + '\'">Open ' + esc(app.name) + '</button>'
+      + '<div class="app-body-note">To come home, close this window:<br><b>Alt + F4</b> on the keyboard</div>'
+      + '<button class="app-home-btn" onclick="goHome()">← Back to Home</button>'
       + '</div></div>';
   }
   return v;
@@ -1231,8 +1240,8 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '3.0';
-var LOCAL_EMOJI = '🔥';
+var LOCAL_VERSION = '3.1';
+var LOCAL_EMOJI = '⭐';
 
 // Set the footer version + emoji dynamically so it always matches the code
 (function() {
