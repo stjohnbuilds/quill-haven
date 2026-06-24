@@ -54,9 +54,17 @@ touch "$HOME/.linuxmint/mintwelcome/norun.flag"
 rm -f "$HOME/.config/autostart/mintwelcome.desktop" 2>/dev/null || true
 
 say "Stopping the 'unlock keyring' password prompt"
-# Wipe any old keyring so auto-login won't get blocked by an unlock prompt.
-rm -f "$HOME/.local/share/keyrings/login.keyring" 2>/dev/null || true
-rm -f "$HOME/.local/share/keyrings/default" 2>/dev/null || true
+# Nuke the whole keyrings folder + pre-create a BLANK-password keyring so the
+# OS never pops up "choose a password for the new keyring" on first boot.
+rm -rf "$HOME/.local/share/keyrings" 2>/dev/null || true
+mkdir -p "$HOME/.local/share/keyrings"
+cat > "$HOME/.local/share/keyrings/default" <<EOF
+login
+EOF
+# Empty login.keyring file with the magic header so the daemon treats it as
+# created with no password (matches what GNOME writes on "use unsafe storage").
+printf 'GnomeKeyring\n\n\x00' > "$HOME/.local/share/keyrings/login.keyring"
+chmod 600 "$HOME/.local/share/keyrings"/* 2>/dev/null || true
 # Don't autostart the keyring at all (no saved passwords needed inside Quill Haven).
 mkdir -p "$HOME/.config/autostart"
 for f in gnome-keyring-secrets gnome-keyring-pkcs11 gnome-keyring-ssh gnome-keyring-gpg; do
