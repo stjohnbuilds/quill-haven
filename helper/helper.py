@@ -99,6 +99,21 @@ class H(BaseHTTPRequestHandler):
         p = self.path.split("?")[0]
         if p in ("/status", "/ping"):
             self._send(body=("quill-helper " + current_version() + " ok").encode())
+        elif p == "/network":
+            ssid = ""
+            try:
+                out = subprocess.run(["nmcli", "-t", "-f", "active,ssid", "dev", "wifi"],
+                                     capture_output=True, text=True, timeout=2).stdout
+                for line in out.splitlines():
+                    if line.startswith("yes:"):
+                        ssid = line.split(":", 1)[1].strip(); break
+            except Exception:
+                pass
+            body = json.dumps({"ssid": ssid}).encode()
+            self.send_response(200); self._cors()
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers(); self.wfile.write(body)
         else:
             self._send(404, b"no")
 
@@ -120,6 +135,13 @@ class H(BaseHTTPRequestHandler):
                 self._send()
             else:
                 self._send(500, b"no terminal installed")
+        elif p == "/wifi-settings":              # open the Wi-Fi network picker on top
+            tool = next((t for t in ("nm-connection-editor", "nm-applet") if shutil.which(t)), None)
+            if tool:
+                subprocess.Popen([tool])
+                self._send()
+            else:
+                self._send(500, b"no wifi tool installed")
         else:
             self._send(404, b"no")
 

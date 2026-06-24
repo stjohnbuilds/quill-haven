@@ -23,7 +23,7 @@ say() { printf "\n\033[1;36m==> %s\033[0m\n" "$*"; }
 say "Updating packages"
 sudo apt-get update -y
 say "Installing Chromium + helpers"
-sudo apt-get install -y chromium unclutter xdotool python3 curl xfce4-terminal
+sudo apt-get install -y chromium unclutter xdotool python3 curl xfce4-terminal network-manager-gnome
 
 # Chromium must be the APT build, not snap — snap ignores /etc/chromium policies.
 if snap list 2>/dev/null | grep -q '^chromium '; then
@@ -113,20 +113,24 @@ chmod +x "$HELPER_DIR/run-helper.sh" "$HELPER_DIR/helper.py" 2>/dev/null || true
 # ---------------------------------------------------------------------------
 # Kiosk launcher — opens Quill Haven, starts the helper, allows the localhost call
 # ---------------------------------------------------------------------------
-say "Creating the Quill Haven launcher"
+say "Creating the Quill Haven launcher (with crash-restart loop)"
 cat > "$HELPER_DIR/launch-home.sh" <<'LAUNCH'
 #!/usr/bin/env bash
 xset s off || true; xset -dpms || true; xset s noblank || true
 pgrep -f unclutter   >/dev/null || unclutter -idle 2 -root &
 pgrep -f run-helper.sh >/dev/null || "$HOME/.local/share/quill-haven/run-helper.sh" &
-exec chromium \
-  --kiosk \
-  --user-data-dir="$HOME/.quill-profile" \
-  --no-first-run --noerrdialogs --disable-infobars \
-  --disable-session-crashed-bubble \
-  --disable-features=TranslateUI,LocalNetworkAccessChecks \
-  --overscroll-history-navigation=1 \
-  "https://stjohnbuilds.github.io/quill-haven/"
+# If Chromium ever crashes, restart it so Marie is never dumped to a bare X.
+while true; do
+  chromium \
+    --kiosk \
+    --user-data-dir="$HOME/.quill-profile" \
+    --no-first-run --noerrdialogs --disable-infobars \
+    --disable-session-crashed-bubble \
+    --disable-features=TranslateUI,LocalNetworkAccessChecks \
+    --overscroll-history-navigation=1 \
+    "https://stjohnbuilds.github.io/quill-haven/"
+  sleep 2
+done
 LAUNCH
 chmod +x "$HELPER_DIR/launch-home.sh"
 sudo ln -sf "$HELPER_DIR/launch-home.sh" /usr/local/bin/quill-haven-launch
@@ -134,7 +138,7 @@ sudo ln -sf "$HELPER_DIR/launch-home.sh" /usr/local/bin/quill-haven-launch
 # ---------------------------------------------------------------------------
 # "Come home" — leave any app from anywhere
 # ---------------------------------------------------------------------------
-say "Adding the Come-home key (Command+H)"
+say "Adding the Come-home key (Ctrl+H)"
 sudo tee /usr/local/bin/quill-home >/dev/null <<'HOME'
 #!/usr/bin/env bash
 # Ask the helper to go home; if the helper is down, do it directly.
@@ -144,16 +148,43 @@ sleep 1
 exec /usr/local/bin/quill-haven-launch
 HOME
 sudo chmod +x /usr/local/bin/quill-home
-# Bind a few combos so at least one works on a Mac keyboard.
-for combo in "<Super>h" "<Primary><Alt>h" "<Super>Escape"; do
-  xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/$combo" -n -t string -s "/usr/local/bin/quill-home" 2>/dev/null \
-  || xfconf-query -c xfce4-keyboard-shortcuts -p "/commands/custom/$combo" -s "/usr/local/bin/quill-home" 2>/dev/null || true
-done
+# Bind Ctrl+H to come-home by dropping the XFCE shortcut XML directly
+# (xfconf-query from inside curl|bash has no D-Bus and silently no-ops).
+mkdir -p "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml"
+cat > "$HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-keyboard-shortcuts.xml" <<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-keyboard-shortcuts" version="1.0">
+  <property name="commands" type="empty">
+    <property name="custom" type="empty">
+      <property name="&lt;Primary&gt;h" type="string" value="/usr/local/bin/quill-home"/>
+      <property name="&lt;Super&gt;Escape" type="string" value="/usr/local/bin/quill-home"/>
+      <property name="override" type="bool" value="true"/>
+    </property>
+  </property>
+</channel>
+XML
 
 # ---------------------------------------------------------------------------
 # Open at login
 # ---------------------------------------------------------------------------
-say "Setting Quill Haven to open at login"
+say "Setting Quill Haven to open at login (custom session — no XFCE flash)"
+# Custom X session: login goes STRAIGHT to Chromium kiosk, no XFCE desktop.
+# This kills two birds: no Linux-desktop flash on boot, and no XFCE panel/taskbar
+# leaking when the user hits the Command/Super key.
+sudo tee /usr/share/xsessions/quill-haven.desktop >/dev/null <<EOF
+[Desktop Entry]
+Name=Quill Haven
+Comment=Quill Haven distraction-free writing OS
+Exec=/usr/local/bin/quill-haven-launch
+Type=Application
+EOF
+# Tell lightdm to use that session for the autologin user.
+sudo tee -a /etc/lightdm/lightdm.conf.d/12-quillhaven-autologin.conf >/dev/null <<EOF
+user-session=quill-haven
+autologin-session=quill-haven
+EOF
+# Belt-and-braces: keep the autostart entry too, so even if someone logs into
+# the normal XFCE session (e.g. after recovery), Quill Haven still opens.
 mkdir -p "$HOME/.config/autostart"
 cat > "$HOME/.config/autostart/quillhaven.desktop" <<EOF
 [Desktop Entry]
@@ -199,11 +230,28 @@ write_policy() {
     "stjohnbuilds.github.io",
     "raw.githubusercontent.com",
     "google.com",
+    "www.google.com",
     "accounts.google.com",
-    "accounts.youtube.com",
-    "googleusercontent.com",
-    "gstatic.com",
+    "accounts.google.co.uk",
+    "docs.google.com",
+    "drive.google.com",
+    "drive.usercontent.google.com",
+    "play.google.com",
+    "myaccount.google.com",
+    "apis.google.com",
+    "clients6.google.com",
+    "ogs.google.com",
+    "ssl.google.com",
+    "oauth2.googleapis.com",
+    "content.googleapis.com",
     "googleapis.com",
+    "googleusercontent.com",
+    "lh3.googleusercontent.com",
+    "ssl.gstatic.com",
+    "fonts.gstatic.com",
+    "fonts.googleapis.com",
+    "gstatic.com",
+    "accounts.youtube.com",
     "youtube.com",
     "app.dabblewriter.com",
     "dabblewriter.com",

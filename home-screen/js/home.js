@@ -115,17 +115,28 @@ function updateClock() {
 }
 updateClock(); setInterval(updateClock, 1000);
 
-// ── Live Wi-Fi (online/offline) ──
-function updateOnline() {
+// ── Live Wi-Fi (uses the helper for the real network name; falls back to online/offline) ──
+function updateOnline(extra) {
   var on = (typeof navigator !== 'undefined' && navigator.onLine !== false);
   var icon = document.getElementById('topWifi');
   var sub = document.getElementById('wifiSub');
-  if (icon) { icon.style.opacity = on ? '' : '0.35'; icon.title = on ? 'Connected' : 'Offline'; }
-  if (sub) { sub.textContent = on ? 'Connected' : 'Offline'; }
+  var label = on ? (extra && extra.ssid ? extra.ssid : 'Connected') : 'Offline';
+  if (icon) { icon.style.opacity = on ? '' : '0.35'; icon.title = label; }
+  if (sub) { sub.textContent = label; }
 }
-window.addEventListener('online', updateOnline);
-window.addEventListener('offline', updateOnline);
-updateOnline();
+function refreshWifi() {
+  if (!navigator.onLine) { updateOnline(); return; }
+  fetch('http://127.0.0.1:8137/network', { method: 'GET', mode: 'cors' })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(j) { updateOnline(j || {}); })
+    .catch(function() { updateOnline(); });   // no helper (preview/website) -> plain "Connected"
+}
+window.addEventListener('online', refreshWifi);
+window.addEventListener('offline', refreshWifi);
+refreshWifi();
+setInterval(refreshWifi, 15000);
+// Tap the Wi-Fi row in Settings to open the network picker (only works on the device)
+function openWifiPicker() { qhSystem('wifi-settings'); }
 
 // ── Live battery (uses navigator.getBattery if the browser exposes it) ──
 function updateBatteryUI(level, charging) {
@@ -1222,7 +1233,7 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '2.4';
+var LOCAL_VERSION = '2.5';
 function checkForUpdate() {
   fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json')
     .then(function(r) { return r.json(); })

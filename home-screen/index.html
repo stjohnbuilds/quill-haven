@@ -75,9 +75,10 @@
     <!-- General settings — one card -->
     <div class="settings-section">Settings</div>
     <div class="settings-card">
-      <div class="settings-row">
+      <div class="settings-row" onclick="openWifiPicker()" style="cursor:pointer;">
         <div class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="white" stroke="none"/></svg></div>
         <div class="settings-row-text"><div class="settings-row-label">Wi-Fi</div><div class="settings-row-sub" id="wifiSub">Connected</div></div>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4;"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="settings-row">
         <div class="settings-row-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
@@ -178,14 +179,14 @@
       </div>
     </div>
 
-    <div class="settings-footer">Quill Haven v2.4 🌸</div>
+    <div class="settings-footer">Quill Haven v2.5 🌸</div>
   </div>
 </div>
 
 <div class="clipboard-copied" id="clipToast">Copied to clipboard</div>
 
 <script src="shared/confirm.js?v=3"></script>
-<script src="js/home.js?v=34"></script>
+<script src="js/home.js?v=35"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
