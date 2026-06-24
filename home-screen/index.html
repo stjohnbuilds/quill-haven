@@ -179,6 +179,15 @@
       </div>
     </div>
 
+    <!-- Run box: a command to copy-paste into terminal -->
+    <div class="settings-section" id="runBoxSection" style="display:none;">Run this in Terminal</div>
+    <div class="settings-card" id="runBoxCard" style="display:none;">
+      <div style="padding:10px 12px;position:relative;cursor:pointer;" onclick="copyRunBox()" title="Tap to copy">
+        <pre id="runBoxCode" style="margin:0;font-size:11px;line-height:1.5;color:var(--text-strong);white-space:pre-wrap;word-break:break-all;font-family:'SF Mono',Menlo,Consolas,monospace;"></pre>
+        <div style="position:absolute;top:8px;right:10px;font-size:9px;color:var(--sub);pointer-events:none;">tap to copy</div>
+      </div>
+    </div>
+
     <div class="settings-footer">Quill Haven</div>
   </div>
 </div>

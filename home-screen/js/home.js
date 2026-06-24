@@ -1251,8 +1251,29 @@ function checkForUpdate() {
         btn.innerHTML = '<span class="update-dot"></span> Update to v' + esc(d.version) + ' ' + (d.emoji || '');
         btn.classList.add('show');
       }
+      if (d.run) {
+        var sec = document.getElementById('runBoxSection');
+        var card = document.getElementById('runBoxCard');
+        var code = document.getElementById('runBoxCode');
+        if (sec && card && code) {
+          code.textContent = d.run;
+          sec.style.display = '';
+          card.style.display = '';
+        }
+      }
     })
     .catch(function() {});
+}
+function copyRunBox() {
+  var code = document.getElementById('runBoxCode');
+  if (!code) return;
+  var text = code.textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      var t = document.getElementById('clipToast');
+      if (t) { t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 1200); }
+    });
+  }
 }
 function doUpdate() {
   if (!navigator.onLine) {
