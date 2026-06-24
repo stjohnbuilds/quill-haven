@@ -33,13 +33,8 @@ fi
 
 # If Chromium ever crashes, restart it so Marie is never dumped to a bare X.
 while true; do
-  EXT_DIR="$HOME/.local/share/quill-haven/extension"
-  EXT_FLAG=""
-  if [ -d "$EXT_DIR" ] && [ -f "$EXT_DIR/manifest.json" ]; then
-    EXT_FLAG="--load-extension=$EXT_DIR"
-  fi
   chromium \
-    --app="https://stjohnbuilds.github.io/quill-haven/" \
+    --kiosk \
     --start-fullscreen \
     $SIZE_FLAGS \
     --user-data-dir="$HOME/.quill-profile" \
@@ -47,6 +42,6 @@ while true; do
     --disable-session-crashed-bubble \
     --disable-features=TranslateUI,LocalNetworkAccessChecks \
     --overscroll-history-navigation=1 \
-    $EXT_FLAG
+    "https://stjohnbuilds.github.io/quill-haven/"
   sleep 2
 done

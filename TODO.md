@@ -1,16 +1,23 @@
 # TODO — Quill Haven
 
-## Status at a glance (2026-06-22)
+## Status at a glance (2026-06-23)
 
-The finishing batch is shipped. The app side is ~99% done. The device-
-install side is ~80% done — **one** install path now (USB → wipe →
-Linux Mint → run `setup.sh`) covering any Intel/AMD laptop. Browser /
-PWA install paths were removed in favour of this — Quill Haven IS the
-OS, not a thing inside another OS. The only remaining device-side item
-is a one-step custom USB ISO so the install + kiosk step is one boot
-instead of two.
+Home screen v3.1 is live on the device. The next big task is rebuilding
+the UI as a **Chrome extension** so the pill (top bar) and dock (app
+switcher) appear on EVERY page — not just the home screen. This fixes
+the "trapped in Google Docs with no way home" problem. See HANDOVER.md
+for the full design and instructions.
 
 ## What's left
+
+### Extension (next up)
+- [ ] **Chrome extension overlay** — pill (top bar) + dock (app switcher)
+      injected on every page. Must reuse existing home-screen icons,
+      colors, settings. See HANDOVER.md for Marie's full design spec.
+- [ ] **Strip the home screen** — once the extension works, remove the
+      top bar, dock, and settings from the home screen (extension handles it).
+- [ ] **"Check for updates" button** in settings — calls a new `/check-update`
+      endpoint on the helper so Marie doesn't wait 6 hours.
 
 ### Device side
 - [ ] **One-step custom USB ISO.** Today: install Linux Mint from a
@@ -20,6 +27,8 @@ instead of two.
       remaster).
 
 ### App side (nice-to-have, not blocking)
+- [ ] **Google Docs recents** — show a recent-docs list instead of the
+      full Google Drive interface.
 - [ ] **Restore from inside the writing app** — currently lives in the
       home-screen Settings panel (which is correct), but a "load from
       backup" link inside Local Writing's empty state might reduce
