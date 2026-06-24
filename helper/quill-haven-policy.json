@@ -1,0 +1,26 @@
+{
+  "URLAllowlist": [
+    "127.0.0.1",
+    "stjohnbuilds.github.io",
+    "raw.githubusercontent.com",
+    ".google.com",
+    ".google.co.uk",
+    ".googleapis.com",
+    ".googleusercontent.com",
+    ".gstatic.com",
+    ".youtube.com",
+    ".dabblewriter.com",
+    ".typingandtomes.vercel.app",
+    ".vercel.app",
+    ".vercel-scripts.com",
+    ".vercel.live"
+  ],
+  "URLBlocklist": ["*"],
+  "LocalNetworkAccessAllowedForUrls": ["https://stjohnbuilds.github.io"],
+  "LocalNetworkAccessRestrictionsTemporaryOptOut": true,
+  "DefaultBrowserSettingEnabled": false,
+  "IncognitoModeAvailability": 1,
+  "DeveloperToolsAvailability": 2,
+  "TranslateEnabled": false,
+  "PasswordManagerEnabled": false
+}
