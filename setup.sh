@@ -101,38 +101,46 @@ mkdir -p "$HELPER_DIR"
 fetch_to() {  # url dest  — only overwrites on a clean download
   if curl -fsSL "$1" -o "$2.dl" 2>/dev/null; then mv "$2.dl" "$2"; fi
 }
-fetch_to "$RAW/helper.py"     "$HELPER_DIR/helper.py"
-fetch_to "$RAW/run-helper.sh" "$HELPER_DIR/run-helper.sh"
+fetch_to "$RAW/helper.py"       "$HELPER_DIR/helper.py"
+fetch_to "$RAW/run-helper.sh"   "$HELPER_DIR/run-helper.sh"
+fetch_to "$RAW/launch-home.sh"  "$HELPER_DIR/launch-home.sh"
 # Seed the version file from the manifest so the first update check is honest.
 curl -fsSL "$RAW/helper-manifest.json" \
   | python3 -c 'import sys,json; print(json.load(sys.stdin)["version"])' > "$HELPER_DIR/helper-version.txt" 2>/dev/null \
   || echo "0" > "$HELPER_DIR/helper-version.txt"
 cp "$HELPER_DIR/helper.py" "$HELPER_DIR/helper.py.bak" 2>/dev/null || true
-chmod +x "$HELPER_DIR/run-helper.sh" "$HELPER_DIR/helper.py" 2>/dev/null || true
+chmod +x "$HELPER_DIR/run-helper.sh" "$HELPER_DIR/helper.py" "$HELPER_DIR/launch-home.sh" 2>/dev/null || true
 
 # ---------------------------------------------------------------------------
-# Kiosk launcher — opens Quill Haven, starts the helper, allows the localhost call
+# Admin helper — lets the helper push system-level fixes from GitHub
 # ---------------------------------------------------------------------------
-say "Creating the Quill Haven launcher (with crash-restart loop)"
-cat > "$HELPER_DIR/launch-home.sh" <<'LAUNCH'
+say "Installing the admin helper (so future fixes push without re-running this)"
+sudo tee /usr/local/bin/qh-admin >/dev/null <<'ADMIN'
 #!/usr/bin/env bash
-xset s off || true; xset -dpms || true; xset s noblank || true
-pgrep -f unclutter   >/dev/null || unclutter -idle 2 -root &
-pgrep -f run-helper.sh >/dev/null || "$HOME/.local/share/quill-haven/run-helper.sh" &
-# If Chromium ever crashes, restart it so Marie is never dumped to a bare X.
-while true; do
-  chromium \
-    --kiosk \
-    --user-data-dir="$HOME/.quill-profile" \
-    --no-first-run --noerrdialogs --disable-infobars \
-    --disable-session-crashed-bubble \
-    --disable-features=TranslateUI,LocalNetworkAccessChecks \
-    --overscroll-history-navigation=1 \
-    "https://stjohnbuilds.github.io/quill-haven/"
-  sleep 2
-done
-LAUNCH
-chmod +x "$HELPER_DIR/launch-home.sh"
+set -euo pipefail
+DIR="${1:-}"
+[ -d "$DIR" ] || { echo "Usage: qh-admin <workdir>"; exit 1; }
+[ -f "$DIR/files.tsv" ] || { echo "No files.tsv in $DIR"; exit 1; }
+while IFS=$'\t' read -r name dest mode; do
+    [ -z "$name" ] && continue
+    src="$DIR/$name"
+    [ -f "$src" ] || { echo "SKIP $name (not found)"; continue; }
+    mkdir -p "$(dirname "$dest")"
+    [ -f "$dest" ] && cp -a "$dest" "${dest}.qh-bak"
+    cp "$src" "$dest"
+    chmod "$mode" "$dest"
+    echo "OK $dest"
+done < "$DIR/files.tsv"
+ADMIN
+sudo chmod +x /usr/local/bin/qh-admin
+# Allow the helper to call qh-admin without a password — scoped to this one script
+echo "$ME ALL=(ALL) NOPASSWD: /usr/local/bin/qh-admin" | sudo tee /etc/sudoers.d/quill-haven >/dev/null
+sudo chmod 440 /etc/sudoers.d/quill-haven
+
+# ---------------------------------------------------------------------------
+# Kiosk launcher — pulled from GitHub (the helper keeps it up to date)
+# ---------------------------------------------------------------------------
+say "Setting up the Quill Haven launcher"
 sudo ln -sf "$HELPER_DIR/launch-home.sh" /usr/local/bin/quill-haven-launch
 
 # ---------------------------------------------------------------------------

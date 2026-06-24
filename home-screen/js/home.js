@@ -1233,35 +1233,46 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '2.5';
+var LOCAL_VERSION = '2.6';
+var LOCAL_EMOJI = '🦋';
+
+// Set the footer version + emoji dynamically so it always matches the code
+(function() {
+  var f = document.querySelector('.settings-footer');
+  if (f) f.textContent = 'Quill Haven v' + LOCAL_VERSION + ' ' + LOCAL_EMOJI;
+})();
+
 function checkForUpdate() {
-  fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json')
+  fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json', { cache: 'no-store' })
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.version && d.version !== LOCAL_VERSION) {
-        document.getElementById('updateBtn').classList.add('show');
+        var btn = document.getElementById('updateBtn');
+        btn.innerHTML = '<span class="update-dot"></span> Update to v' + esc(d.version) + ' ' + (d.emoji || '');
+        btn.classList.add('show');
       }
     })
     .catch(function() {});
 }
 function doUpdate() {
-  var btn = document.getElementById('updateBtn');
-  btn.textContent = 'Updating...';
-  btn.style.pointerEvents = 'none';
-  fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/home-screen/index.html', { cache: 'no-store' })
-    .then(function(r) { if (!r.ok) throw new Error('fetch failed'); return r.text(); })
-    .then(function(html) {
-      if (html.indexOf('Quill Haven') === -1) throw new Error('unexpected content');
-      btn.textContent = 'Loading new version...';
-      document.open();
-      document.write(html);
-      document.close();
-    })
-    .catch(function() {
-      btn.textContent = 'Update failed — try again';
-      btn.style.pointerEvents = 'auto';
-      setTimeout(function() { btn.innerHTML = '<span class="update-dot"></span> Update available'; }, 2800);
+  if (!navigator.onLine) {
+    if (window.qhConfirm) window.qhConfirm({
+      title: 'Need Wi-Fi',
+      message: 'Connect to Wi-Fi, then try the update again.',
+      confirmText: 'OK', noCancel: true
     });
+    return;
+  }
+  var btn = document.getElementById('updateBtn');
+  btn.textContent = 'Updating…';
+  btn.style.pointerEvents = 'none';
+  (window.caches ? caches.keys().then(function(ks) {
+    return Promise.all(ks.map(function(k) { return caches.delete(k); }));
+  }) : Promise.resolve()).then(function() {
+    window.location.reload();
+  }).catch(function() {
+    window.location.reload();
+  });
 }
 setTimeout(checkForUpdate, 3000);
 

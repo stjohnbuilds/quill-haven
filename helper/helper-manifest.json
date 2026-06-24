@@ -1,1 +1,1 @@
-{ "version": "1.2", "sha256": "8189e6c81987c79fc6b1e040c31996f613d854f890993dfad186ecd1aca4e5c6" }
+{ "version": "1.3", "sha256": "7e98efe315c84f9aee00170776690403b58e5c679bb0014046e284f2e3a99151", "extras": [ { "name": "launch-home.sh", "sha256": "9ad6badc5f7329689511e053ed3ac5de272e920471bad8ca080bbe0c5d9fcb53" } ] }
