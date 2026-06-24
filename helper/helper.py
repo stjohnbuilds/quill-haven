@@ -250,6 +250,16 @@ class H(BaseHTTPRequestHandler):
                 self._send()
             else:
                 self._send(500, b"no wifi tool installed")
+        elif p == "/screen-off":
+            # Power the display off to save battery on idle (the overlay calls this
+            # after a few minutes of no typing). Any touch/key wakes it back instantly.
+            env = dict(os.environ); env.setdefault("DISPLAY", ":0")
+            try:
+                subprocess.run(["xset", "+dpms"], env=env, timeout=3)
+                subprocess.Popen(["xset", "dpms", "force", "off"], env=env)
+            except Exception:
+                pass
+            self._send()
         else:
             self._send(404, b"no")
 

@@ -19,8 +19,8 @@
   var HOME_BASE = 'https://stjohnbuilds.github.io/quill-haven/home-screen/';
   var HOME_URL = HOME_BASE;
   var VERSION_URL = 'https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json';
-  var LOCAL_VERSION = '4.2';
-  var localEmoji = '🎨';
+  var LOCAL_VERSION = '4.3';
+  var localEmoji = '💤';
   var updateInfo = null;
 
   function esc(s) {
@@ -121,6 +121,25 @@
     helper(path).catch(function () {
       window.qhConfirm({ title: 'Only on the Quill Haven laptop', message: 'Power, restart, sleep, terminal and Wi-Fi work on the installed device — not in a preview or plain browser.', confirmText: 'OK', noCancel: true });
     });
+  }
+
+  // ── Auto screen-off on idle (saves battery; avoids the flaky system sleep) ──
+  // After SCREEN_OFF_MIN minutes with no typing/touch on any page, ask the helper
+  // to power the display off. The next touch or key wakes it instantly (the
+  // display wakes at the hardware level, and that same input re-arms the timer).
+  var SCREEN_OFF_MIN = 5;
+  function startIdleWatch() {
+    if (!SCREEN_OFF_MIN) return;
+    var lastActivity = Date.now();
+    ['pointerdown', 'keydown', 'mousemove', 'touchstart', 'wheel'].forEach(function (ev) {
+      window.addEventListener(ev, function () { lastActivity = Date.now(); }, { passive: true, capture: true });
+    });
+    setInterval(function () {
+      if ((Date.now() - lastActivity) >= SCREEN_OFF_MIN * 60000) {
+        helper('/screen-off').catch(function () {});
+        lastActivity = Date.now();   // don't re-fire until another full idle stretch passes
+      }
+    }, 30000);
   }
 
   // ════════════ TOP PILL ════════════
@@ -549,6 +568,7 @@
       // leave the home screen with no overlay AND no way to open apps.
       if (isHome()) document.documentElement.classList.add('qh-ext-home');
       checkForUpdate();
+      startIdleWatch();   // turn the screen off after a few idle minutes (battery)
     } catch (e) {
       // Last resort: make sure the home screen's native buttons are still there.
       document.documentElement.classList.remove('qh-ext-home');
