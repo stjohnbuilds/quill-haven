@@ -104,6 +104,14 @@ fetch_to() {  # url dest  — only overwrites on a clean download
 fetch_to "$RAW/helper.py"       "$HELPER_DIR/helper.py"
 fetch_to "$RAW/run-helper.sh"   "$HELPER_DIR/run-helper.sh"
 fetch_to "$RAW/launch-home.sh"  "$HELPER_DIR/launch-home.sh"
+# Download the Quill Haven overlay extension
+EXT_RAW="https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/extension"
+mkdir -p "$HELPER_DIR/extension"
+fetch_to "$EXT_RAW/manifest.json"       "$HELPER_DIR/extension/manifest.json"
+fetch_to "$EXT_RAW/quill-overlay.js"    "$HELPER_DIR/extension/quill-overlay.js"
+fetch_to "$EXT_RAW/quill-overlay.css"   "$HELPER_DIR/extension/quill-overlay.css"
+fetch_to "$EXT_RAW/icon-48.png"         "$HELPER_DIR/extension/icon-48.png"
+fetch_to "$EXT_RAW/icon-128.png"        "$HELPER_DIR/extension/icon-128.png"
 # Seed the version file from the manifest so the first update check is honest.
 curl -fsSL "$RAW/helper-manifest.json" \
   | python3 -c 'import sys,json; print(json.load(sys.stdin)["version"])' > "$HELPER_DIR/helper-version.txt" 2>/dev/null \
