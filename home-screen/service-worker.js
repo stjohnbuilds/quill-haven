@@ -7,7 +7,7 @@
 //
 // BUMP VERSION on every release — keep it in step with version.json and
 // LOCAL_VERSION in js/home.js.
-const VERSION = '2.9';
+const VERSION = '3.0';
 const CACHE = 'quill-haven-' + VERSION;
 const SHELL = [
   './',

@@ -107,11 +107,11 @@ function updateClock() {
   var mStr = String(p.m).padStart(2, '0');
   var h12 = p.h % 12 || 12, ampm = p.h >= 12 ? 'PM' : 'AM';
   document.getElementById('clock').textContent = h12 + ':' + mStr;
-  var g = 'Good evening';
-  if (p.h < 12) g = 'Good morning'; else if (p.h < 17) g = 'Good afternoon';
-  document.getElementById('greeting').textContent = g;
+  document.getElementById('greeting').textContent = '';
   document.getElementById('dateLine').textContent = DAY_NAMES[p.day] + ', ' + MONTH_NAMES[p.mon] + ' ' + p.date;
   document.getElementById('topBarTime').textContent = DAY_NAMES[p.day].slice(0, 3) + ', ' + MONTH_NAMES[p.mon] + ' ' + p.date + '  ' + h12 + ':' + mStr + ' ' + ampm;
+  var emojiEl = document.getElementById('topEmoji');
+  if (emojiEl) emojiEl.textContent = LOCAL_EMOJI;
 }
 updateClock(); setInterval(updateClock, 1000);
 
@@ -1231,8 +1231,8 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '2.9';
-var LOCAL_EMOJI = '🌙';
+var LOCAL_VERSION = '3.0';
+var LOCAL_EMOJI = '🔥';
 
 // Set the footer version + emoji dynamically so it always matches the code
 (function() {
@@ -1249,29 +1249,8 @@ function checkForUpdate() {
         btn.innerHTML = '<span class="update-dot"></span> Update to v' + esc(d.version) + ' ' + (d.emoji || '');
         btn.classList.add('show');
       }
-      if (d.run) {
-        var sec = document.getElementById('runBoxSection');
-        var card = document.getElementById('runBoxCard');
-        var code = document.getElementById('runBoxCode');
-        if (sec && card && code) {
-          code.textContent = d.run;
-          sec.style.display = '';
-          card.style.display = '';
-        }
-      }
     })
     .catch(function() {});
-}
-function copyRunBox() {
-  var code = document.getElementById('runBoxCode');
-  if (!code) return;
-  var text = code.textContent;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(function() {
-      var t = document.getElementById('clipToast');
-      if (t) { t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 1200); }
-    });
-  }
 }
 function doUpdate() {
   if (!navigator.onLine) {
@@ -1285,12 +1264,16 @@ function doUpdate() {
   var btn = document.getElementById('updateBtn');
   btn.textContent = 'Updating…';
   btn.style.pointerEvents = 'none';
-  (window.caches ? caches.keys().then(function(ks) {
+  var p1 = window.caches ? caches.keys().then(function(ks) {
     return Promise.all(ks.map(function(k) { return caches.delete(k); }));
-  }) : Promise.resolve()).then(function() {
-    window.location.reload();
+  }) : Promise.resolve();
+  var p2 = navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then(function(regs) {
+    return Promise.all(regs.map(function(r) { return r.unregister(); }));
+  }) : Promise.resolve();
+  Promise.all([p1, p2]).then(function() {
+    window.location.href = window.location.pathname + '?v=' + Date.now();
   }).catch(function() {
-    window.location.reload();
+    window.location.href = window.location.pathname + '?v=' + Date.now();
   });
 }
 setTimeout(checkForUpdate, 3000);

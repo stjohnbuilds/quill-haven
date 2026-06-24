@@ -142,6 +142,7 @@ body.has-bg .dock { background: var(--dock-bg-strong); }
   animation: pulse 2s ease infinite;
 }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.top-emoji { font-size: 13px; margin-right: 2px; }
 .top-datetime { font-weight: 500; font-size: 12px; }
 .top-right { display: flex; align-items: center; gap: 10px; }
 /* All three status icons are identical centred cells so the spacing is even */

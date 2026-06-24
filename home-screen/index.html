@@ -10,7 +10,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="shared/theme.css?v=22">
-  <link rel="stylesheet" href="css/home.css?v=28">
+  <link rel="stylesheet" href="css/home.css?v=29">
 </head>
 <body>
 
@@ -41,6 +41,7 @@
   <div class="top-right">
     <!-- App icons (top-bar mode) sit next to the status icons -->
     <div class="top-apps" id="topApps"></div>
+    <span class="top-emoji" id="topEmoji"></span>
     <span class="top-icon" id="topWifi" title="Connected"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg></span>
     <span class="top-icon" id="topBattery" title="Battery"><svg width="18" height="14" viewBox="0 0 28 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="2" width="22" height="10" rx="2.5"/><rect id="topBatteryFill" x="3.5" y="4.5" width="15" height="5" rx="1" fill="currentColor" stroke="none" opacity="0.6"/><rect x="23" y="5" width="3" height="4" rx="1" fill="currentColor" stroke="none" opacity="0.4"/></svg></span>
     <button class="settings-btn" id="powerBtn" title="Power" onclick="togglePowerMenu(event)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v9"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg></button>
@@ -179,15 +180,6 @@
       </div>
     </div>
 
-    <!-- Run box: a command to copy-paste into terminal -->
-    <div class="settings-section" id="runBoxSection" style="display:none;">Run this in Terminal</div>
-    <div class="settings-card" id="runBoxCard" style="display:none;">
-      <div style="padding:10px 12px;position:relative;cursor:pointer;" onclick="copyRunBox()" title="Tap to copy">
-        <pre id="runBoxCode" style="margin:0;font-size:11px;line-height:1.5;color:var(--text-strong);white-space:pre-wrap;word-break:break-all;font-family:'SF Mono',Menlo,Consolas,monospace;"></pre>
-        <div style="position:absolute;top:8px;right:10px;font-size:9px;color:var(--sub);pointer-events:none;">tap to copy</div>
-      </div>
-    </div>
-
     <div class="settings-footer">Quill Haven</div>
   </div>
 </div>
@@ -195,7 +187,7 @@
 <div class="clipboard-copied" id="clipToast">Copied to clipboard</div>
 
 <script src="shared/confirm.js?v=3"></script>
-<script src="js/home.js?v=38"></script>
+<script src="js/home.js?v=39"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
