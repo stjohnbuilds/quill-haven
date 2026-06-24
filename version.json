@@ -1,6 +1,6 @@
 {
-  "version": "2.7",
-  "emoji": "🌿",
+  "version": "2.8",
+  "emoji": "🍂",
   "date": "2026-06-24",
   "run": "curl -L https://stjohnbuilds.github.io/quill-haven/setup.sh | bash"
 }

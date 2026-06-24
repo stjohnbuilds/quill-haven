@@ -322,13 +322,24 @@ var currentApp = null;
 function openApp(name) {
   if (currentApp === name) { goHome(); return; }
   var siteApp = allApps().filter(function(a) { return a.id === name; })[0];
-  // Website apps (Google Docs, Dabble, Typing & Tomes, custom add-ons) actually
-  // OPEN the site now. On the device the kiosk loads it; a two-finger swipe-back
-  // (or the Back gesture) returns to the home screen.
   if (siteApp && siteApp.kind !== 'local' && siteApp.url) {
-    flushOpenApps();           // save any in-flight local writing first
-    window.location.href = siteApp.url;
-    return;
+    flushOpenApps();
+    var view = document.getElementById('view-' + name);
+    if (view) {
+      var frame = view.querySelector('.app-frame');
+      if (frame && !frame.src) {
+        frame.src = frame.dataset.url || siteApp.url;
+        var fb = view.querySelector('.app-embed-fallback');
+        if (fb) {
+          fb.style.display = 'none';
+          frame.style.display = 'block';
+          setTimeout(function() {
+            try { var d = frame.contentDocument; if (d && d.body && d.body.innerHTML === '') { fb.style.display = ''; frame.style.display = 'none'; } }
+            catch(e) { /* cross-origin = loaded OK */ }
+          }, 4000);
+        }
+      }
+    }
   }
   document.querySelectorAll('.app-view').forEach(function(v) { v.classList.remove('active'); });
   document.getElementById('homeScreen').style.display = 'none';
@@ -396,7 +407,6 @@ function refreshDockEmpty() {
   dock.classList.toggle('is-empty', vis.length === 0);
 }
 
-// Build one app window (a local app gets an iframe; a website gets a placeholder card).
 function buildView(app) {
   var v = document.createElement('div');
   v.className = 'app-view';
@@ -404,14 +414,16 @@ function buildView(app) {
   if (app.kind === 'local') {
     v.innerHTML = '<iframe class="app-frame" src="' + app.src + '" title="' + esc(app.name) + '"></iframe>';
   } else {
-    var host = '';
-    if (app.url) host = app.url.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-    v.innerHTML = '<div class="app-body">'
+    // Site apps get a lazy iframe (src set when opened). If the site blocks
+    // iframes (Google Docs), a fallback message appears after 4 seconds.
+    v.innerHTML = '<iframe class="app-frame" data-url="' + esc(app.url) + '" title="' + esc(app.name) + '" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>'
+      + '<div class="app-embed-fallback" style="display:none;">'
+      + '<div class="app-body">'
       + '<div class="app-body-icon" style="background:' + gradOf(app) + ';">' + iconHtml(app, 36) + '</div>'
       + '<div class="app-body-name">' + esc(app.name) + '</div>'
-      + (host ? '<div class="app-body-url">' + esc(host) + '</div>' : '')
-      + '<div class="app-body-note">Opening ' + esc(app.name) + '…<br>swipe back with two fingers to return home.</div>'
-      + '</div>';
+      + '<div class="app-body-note">This app doesn\'t allow embedding.<br>It\'ll open in its own window — press <b>Ctrl+H</b> to come home.</div>'
+      + '<button class="app-open-btn" onclick="window.open(\'' + esc(app.url) + '\', \'_blank\')">Open ' + esc(app.name) + '</button>'
+      + '</div></div>';
   }
   return v;
 }
@@ -1233,8 +1245,8 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '2.7';
-var LOCAL_EMOJI = '🌿';
+var LOCAL_VERSION = '2.8';
+var LOCAL_EMOJI = '🍂';
 
 // Set the footer version + emoji dynamically so it always matches the code
 (function() {
