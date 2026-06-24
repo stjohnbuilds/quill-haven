@@ -19,8 +19,8 @@
   var HOME_BASE = 'https://stjohnbuilds.github.io/quill-haven/home-screen/';
   var HOME_URL = HOME_BASE;
   var VERSION_URL = 'https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json';
-  var LOCAL_VERSION = '4.0';
-  var localEmoji = '🪶';
+  var LOCAL_VERSION = '4.1';
+  var localEmoji = '📝';
   var updateInfo = null;
 
   function esc(s) {
@@ -476,39 +476,38 @@
   }
   function setupDrag(el, key) {
     applyPos(el, settings[key]);
-    var startX, startY, origX, origY, dragging = false, moved = false;
+    var startX, startY, origX, origY, pending = false, dragging = false;
+    // IMPORTANT: do NOT capture the pointer on press — that would steal a plain
+    // tap from the button underneath. We only start a drag once the finger/mouse
+    // has actually MOVED past a small threshold; until then it's a normal tap and
+    // the button's own click runs as usual.
     el.addEventListener('pointerdown', function (e) {
       if (e.button && e.button !== 0) return;        // left button / touch only
       var r = el.getBoundingClientRect();
       origX = r.left; origY = r.top; startX = e.clientX; startY = e.clientY;
-      dragging = true; moved = false;
-      try { el.setPointerCapture(e.pointerId); } catch (_) {}
+      pending = true; dragging = false;
     });
-    el.addEventListener('pointermove', function (e) {
-      if (!dragging) return;
+    document.addEventListener('pointermove', function (e) {
+      if (!pending) return;
       var dx = e.clientX - startX, dy = e.clientY - startY;
-      if (!moved && (dx * dx + dy * dy) < 36) return;  // ~6px before it counts as a drag (so taps still work)
-      moved = true;
+      if (!dragging && (dx * dx + dy * dy) < 36) return;  // ~6px before it counts as a drag
+      dragging = true;
       var w = el.offsetWidth, h = el.offsetHeight;
       el.style.left = clamp(origX + dx, 4, window.innerWidth - w - 4) + 'px';
       el.style.top = clamp(origY + dy, 4, window.innerHeight - h - 4) + 'px';
       el.style.right = 'auto'; el.style.bottom = 'auto';
     });
-    function end(e) {
-      if (!dragging) return;
+    document.addEventListener('pointerup', function () {
+      if (!pending) return;
+      pending = false;
+      if (!dragging) return;                           // plain tap → let the click reach the button
       dragging = false;
-      try { el.releasePointerCapture(e.pointerId); } catch (_) {}
-      if (moved) {
-        el._qhDragged = true;                          // swallow the click that fires right after a drag
-        setTimeout(function () { el._qhDragged = false; }, 60);
-        var patch = {}; patch[key] = { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
-        saveSettings(patch);
-      }
-    }
-    el.addEventListener('pointerup', end);
-    el.addEventListener('pointercancel', end);
-    // Capture-phase click guard: after an actual drag, don't let the click reach
-    // the pill's expand toggle or an app's open handler.
+      el._qhDragged = true;                            // swallow only the click that follows a real drag
+      setTimeout(function () { el._qhDragged = false; }, 0);
+      var patch = {}; patch[key] = { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
+      saveSettings(patch);
+    });
+    document.addEventListener('pointercancel', function () { pending = false; dragging = false; });
     el.addEventListener('click', function (e) {
       if (el._qhDragged) { e.stopPropagation(); e.preventDefault(); }
     }, true);
