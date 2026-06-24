@@ -23,7 +23,7 @@ say() { printf "\n\033[1;36m==> %s\033[0m\n" "$*"; }
 say "Updating packages"
 sudo apt-get update -y
 say "Installing Chromium + helpers"
-sudo apt-get install -y chromium unclutter xdotool python3 curl
+sudo apt-get install -y chromium unclutter xdotool python3 curl xfce4-terminal
 
 # Chromium must be the APT build, not snap — snap ignores /etc/chromium policies.
 if snap list 2>/dev/null | grep -q '^chromium '; then
@@ -48,6 +48,28 @@ sudo gpasswd -a "$ME" autologin >/dev/null 2>&1 || true
 # ---------------------------------------------------------------------------
 # Power buttons work without a password (polkit) — harmless if already allowed
 # ---------------------------------------------------------------------------
+say "Killing the 'Welcome to Linux Mint' popup at boot"
+mkdir -p "$HOME/.linuxmint/mintwelcome"
+touch "$HOME/.linuxmint/mintwelcome/norun.flag"
+rm -f "$HOME/.config/autostart/mintwelcome.desktop" 2>/dev/null || true
+
+say "Stopping the 'unlock keyring' password prompt"
+# Wipe any old keyring so auto-login won't get blocked by an unlock prompt.
+rm -f "$HOME/.local/share/keyrings/login.keyring" 2>/dev/null || true
+rm -f "$HOME/.local/share/keyrings/default" 2>/dev/null || true
+# Don't autostart the keyring at all (no saved passwords needed inside Quill Haven).
+mkdir -p "$HOME/.config/autostart"
+for f in gnome-keyring-secrets gnome-keyring-pkcs11 gnome-keyring-ssh gnome-keyring-gpg; do
+  cat > "$HOME/.config/autostart/${f}.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=$f (disabled)
+Exec=/bin/true
+Hidden=true
+X-GNOME-Autostart-enabled=false
+EOF
+done
+
 say "Allowing power / restart / sleep without a password"
 sudo tee /etc/polkit-1/rules.d/49-quillhaven.rules >/dev/null <<EOF
 polkit.addRule(function(action, subject) {

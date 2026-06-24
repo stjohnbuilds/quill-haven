@@ -113,6 +113,13 @@ class H(BaseHTTPRequestHandler):
             if os.path.exists(LAUNCH):
                 subprocess.Popen(["bash", LAUNCH])
             self._send()
+        elif p == "/terminal":                    # open a normal terminal window on top
+            term = next((t for t in ("xfce4-terminal", "gnome-terminal", "mate-terminal", "xterm") if shutil.which(t)), None)
+            if term:
+                subprocess.Popen([term])
+                self._send()
+            else:
+                self._send(500, b"no terminal installed")
         else:
             self._send(404, b"no")
 

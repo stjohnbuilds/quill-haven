@@ -1222,7 +1222,7 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '2.2';
+var LOCAL_VERSION = '2.3';
 function checkForUpdate() {
   fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json')
     .then(function(r) { return r.json(); })
@@ -1291,12 +1291,12 @@ function togglePowerMenu(e) {
   if (_powerMenu) { hidePowerMenu(); return; }
   var m = document.createElement('div');
   m.className = 'power-menu';
+  // Exit-to-desktop deliberately removed — the whole point is "no escape hatch."
+  // (Use the cog → "Open terminal" or the recovery escape if you actually need out.)
   m.innerHTML =
-      '<button type="button" data-act="desktop">Exit to desktop</button>'
-    + '<button type="button" data-act="sleep">Sleep</button>'
+      '<button type="button" data-act="sleep">Sleep</button>'
     + '<button type="button" data-act="reboot">Restart</button>'
     + '<button type="button" data-act="poweroff" class="danger">Power off</button>';
-  m.querySelector('[data-act="desktop"]').addEventListener('click', function() { powerAction('desktop', 'Exit to desktop'); });
   m.querySelector('[data-act="sleep"]').addEventListener('click', function() { powerAction('sleep', 'Sleep'); });
   m.querySelector('[data-act="reboot"]').addEventListener('click', function() { powerAction('reboot', 'Restart', true); });
   m.querySelector('[data-act="poweroff"]').addEventListener('click', function() { powerAction('poweroff', 'Power off', true); });
