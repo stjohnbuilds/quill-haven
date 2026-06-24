@@ -52,11 +52,11 @@
   }
 
   // ── Settings: chrome.storage is the single source of truth. ──
-  var settings = { theme: 'purple', tz: '', addons: '[]', apps: '{}', order: '[]' };
+  var settings = { theme: 'purple', tz: '', addons: '[]', apps: '{}', order: '[]', posPill: null, posDock: null };
   function loadSettings() {
     return new Promise(function (resolve) {
       try {
-        chrome.storage.local.get(['theme', 'tz', 'addons', 'apps', 'order'], function (got) {
+        chrome.storage.local.get(['theme', 'tz', 'addons', 'apps', 'order', 'posPill', 'posDock'], function (got) {
           if (got) for (var k in got) if (got[k] != null) settings[k] = got[k];
           resolve();
         });
@@ -462,6 +462,58 @@
     Promise.all([p1, p2]).then(go).catch(go);
   }
 
+  // ════════════ DRAG TO REPOSITION ════════════
+  // The pill and the app switcher can be dragged anywhere and stay put, so they
+  // never cover something important on the page underneath. Positions are saved
+  // per-widget (chrome.storage) and restored on every page.
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function applyPos(el, pos) {
+    if (!pos || typeof pos.x !== 'number' || typeof pos.y !== 'number') return;
+    var w = el.offsetWidth || 0, h = el.offsetHeight || 0;
+    el.style.left = clamp(pos.x, 4, Math.max(4, window.innerWidth - w - 4)) + 'px';
+    el.style.top = clamp(pos.y, 4, Math.max(4, window.innerHeight - h - 4)) + 'px';
+    el.style.right = 'auto'; el.style.bottom = 'auto';
+  }
+  function setupDrag(el, key) {
+    applyPos(el, settings[key]);
+    var startX, startY, origX, origY, dragging = false, moved = false;
+    el.addEventListener('pointerdown', function (e) {
+      if (e.button && e.button !== 0) return;        // left button / touch only
+      var r = el.getBoundingClientRect();
+      origX = r.left; origY = r.top; startX = e.clientX; startY = e.clientY;
+      dragging = true; moved = false;
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var dx = e.clientX - startX, dy = e.clientY - startY;
+      if (!moved && (dx * dx + dy * dy) < 36) return;  // ~6px before it counts as a drag (so taps still work)
+      moved = true;
+      var w = el.offsetWidth, h = el.offsetHeight;
+      el.style.left = clamp(origX + dx, 4, window.innerWidth - w - 4) + 'px';
+      el.style.top = clamp(origY + dy, 4, window.innerHeight - h - 4) + 'px';
+      el.style.right = 'auto'; el.style.bottom = 'auto';
+    });
+    function end(e) {
+      if (!dragging) return;
+      dragging = false;
+      try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+      if (moved) {
+        el._qhDragged = true;                          // swallow the click that fires right after a drag
+        setTimeout(function () { el._qhDragged = false; }, 60);
+        var patch = {}; patch[key] = { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
+        saveSettings(patch);
+      }
+    }
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+    // Capture-phase click guard: after an actual drag, don't let the click reach
+    // the pill's expand toggle or an app's open handler.
+    el.addEventListener('click', function (e) {
+      if (el._qhDragged) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+  }
+
   // ════════════ INIT ════════════
   loadSettings().then(function () {
     try {
@@ -473,6 +525,8 @@
       document.documentElement.appendChild(pill);
       document.documentElement.appendChild(dock);
       document.documentElement.appendChild(settingsEl);
+      setupDrag(pill, 'posPill');   // drag the pill anywhere; it stays put
+      setupDrag(dock, 'posDock');   // drag the app switcher anywhere; it stays put
       // Only hide the home screen's OWN top bar + dock AFTER our overlay is safely
       // on the page. If anything above threw, we skip this — so a glitch can never
       // leave the home screen with no overlay AND no way to open apps.

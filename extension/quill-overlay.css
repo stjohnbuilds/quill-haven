@@ -97,9 +97,11 @@ html.qh-ext-home .dock { display: none !important; }
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px; color: var(--qh-bar-text);
   box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-  user-select: none; -webkit-user-select: none; cursor: pointer;
+  user-select: none; -webkit-user-select: none; cursor: grab;
   transition: box-shadow 0.2s;
+  touch-action: none;            /* so dragging the pill on touch doesn't scroll the page */
 }
+#qh-pill:active { cursor: grabbing; }
 #qh-pill:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.14); }
 
 /* The icon cluster is hidden until you hover (mouse) or tap (touch) the pill */
@@ -141,6 +143,7 @@ html.qh-ext-home .dock { display: none !important; }
   position: fixed; bottom: 14px; right: 14px; z-index: 2147483600;
   display: flex; align-items: center; gap: 0;
   user-select: none; -webkit-user-select: none;
+  touch-action: none;            /* so dragging the switcher on touch doesn't scroll the page */
 }
 #qh-dock-tray {
   display: flex; align-items: center; gap: 7px;
