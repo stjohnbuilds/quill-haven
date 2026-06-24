@@ -32,6 +32,11 @@ Marie. Non-technical. Talk like she's 10. No jargon.
 - One task at a time
 - "Files I changed" footer on every response
 - No confidence percentages or self-certifying
+- **EVERY release gets a NEW emoji.** Marie reads the pill emoji as "which version am
+  I on" and the changing emoji is her proof an update landed. On every push that ships
+  a change, bump `version.json` (version + a DIFFERENT emoji) AND the matching
+  `LOCAL_VERSION`/emoji in BOTH `extension/quill-overlay.js` and `home-screen/js/home.js`.
+  Never ship a change without a new emoji.
 
 ## What we're building
 1. A home screen (HTML/CSS/JS) that looks like a real OS — Mac-style dock or top-bar icons, settings panel
