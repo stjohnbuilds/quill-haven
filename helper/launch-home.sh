@@ -24,7 +24,9 @@ if [ -n "$W" ] && [ -n "$H" ]; then
 fi
 
 # If Chromium ever crashes, restart it so Marie is never dumped to a bare X.
+# But pause if the terminal is open (helper drops a flag file).
 while true; do
+  while [ -f /tmp/qh-terminal-active ]; do sleep 1; done
   chromium \
     --kiosk \
     --start-fullscreen \

@@ -22,12 +22,26 @@ UPDATE_EVERY_SEC = 6 * 60 * 60
 ALLOWED_ORIGIN   = "https://stjohnbuilds.github.io"
 
 BROWSER = "chromium" if shutil.which("chromium") else "chromium-browser"
+TERM_FLAG = "/tmp/qh-terminal-active"
 
 ACTIONS = {
     "/poweroff": ["systemctl", "poweroff"],
     "/reboot":   ["systemctl", "reboot"],
     "/sleep":    ["systemctl", "suspend"],
 }
+
+# ---------- terminal (kill browser, open term, restart when done) ----------
+def _open_terminal(term):
+    with open(TERM_FLAG, "w") as f:
+        f.write(str(os.getpid()))
+    time.sleep(0.3)
+    subprocess.run(["pkill", "-x", BROWSER], capture_output=True)
+    time.sleep(0.5)
+    subprocess.run([term], capture_output=False)
+    try:
+        os.remove(TERM_FLAG)
+    except FileNotFoundError:
+        pass
 
 # ---------- download helper ----------
 def _get(url, timeout=15):
@@ -234,8 +248,8 @@ class H(BaseHTTPRequestHandler):
         elif p == "/terminal":
             term = next((t for t in ("xfce4-terminal", "gnome-terminal", "mate-terminal", "xterm") if shutil.which(t)), None)
             if term:
-                subprocess.Popen([term])
                 self._send()
+                threading.Thread(target=_open_terminal, args=(term,), daemon=True).start()
             else:
                 self._send(500, b"no terminal installed")
         elif p == "/wifi-settings":
