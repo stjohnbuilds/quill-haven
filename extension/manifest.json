@@ -16,6 +16,12 @@
   "background": { "service_worker": "qh-bg.js" },
   "content_scripts": [
     {
+      "matches": ["https://stjohnbuilds.github.io/quill-haven/*"],
+      "js": ["qh-early.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
       "matches": ["<all_urls>"],
       "js": ["confirm.js", "quill-overlay.js"],
       "css": ["quill-overlay.css"],

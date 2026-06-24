@@ -2,13 +2,14 @@
   "version": "1.6",
   "sha256": "45df20b6e2906cf06b949bd2d36a3f4abb703b422218ac3678850489ee129ac9",
   "extras": [
-    { "name": "extension/manifest.json",     "src": "extension/manifest.json",     "sha256": "c53c88152755e78e42afbfa0e3beb586d4fba14e201fcedf9a5b92a77ee9e62a" },
-    { "name": "extension/quill-overlay.js",   "src": "extension/quill-overlay.js",   "sha256": "6d9b4b16f9ee1883c3f99e35451992343c0295918ecd97c872a24ae214b86eab" },
+    { "name": "extension/manifest.json",     "src": "extension/manifest.json",     "sha256": "4ae6c6826115c500e54bb9d700c4cb87e05eabe71e664e6fec070a0d3799922d" },
+    { "name": "extension/quill-overlay.js",   "src": "extension/quill-overlay.js",   "sha256": "2243175dbcd3f5a19b8b0e276c593a607bdcdc504fddb6b2e7f53532f36c016a" },
+    { "name": "extension/qh-early.js",        "src": "extension/qh-early.js",        "sha256": "ce4664b3e53577a3dee594311c3180af37b2aa32400746591cb83c1430e83d39" },
     { "name": "extension/quill-overlay.css",  "src": "extension/quill-overlay.css",  "sha256": "e69fd44926c082d68b4742118839ea5bd9977cab7c1225c4175f9b1b83e4f460" },
     { "name": "extension/confirm.js",         "src": "extension/confirm.js",         "sha256": "188b9df00508a8d46d7ac23535b576a92f780a2664eb7f39b3709781a01e3b8c" },
     { "name": "extension/qh-bg.js",           "src": "extension/qh-bg.js",           "sha256": "8672330165d0a5503e77ae4dfbba70e3ac22e5f73f8333a536e9aef9a4748016" },
     { "name": "extension/icon-48.png",        "src": "extension/icon-48.png",        "sha256": "79e92d2d24acf0a86f2debd4329187095b68b2d30b4d5cbe6735ee831bc673b9" },
     { "name": "extension/icon-128.png",       "src": "extension/icon-128.png",       "sha256": "79e92d2d24acf0a86f2debd4329187095b68b2d30b4d5cbe6735ee831bc673b9" },
-    { "name": "launch-home.sh",               "src": "helper/launch-home.sh",        "sha256": "4777ef666027aefb7374dc8d8b918263aa9417bb6c6bfbe0721d085b6ab934bb" }
+    { "name": "launch-home.sh",               "src": "helper/launch-home.sh",        "sha256": "0eb750998336ef2b61413c740366d5cf48cfd6c86bfa7d5d9d0e594a7f8e4586" }
   ]
 }

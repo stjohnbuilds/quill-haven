@@ -14,7 +14,9 @@
   if (window.__qhOverlay) return;
   window.__qhOverlay = true;
 
-  var HOME_BASE = 'https://stjohnbuilds.github.io/quill-haven/';
+  // The site root redirects to home-screen/, so the real home screen and its
+  // local apps (Writing, Files) live under .../quill-haven/home-screen/.
+  var HOME_BASE = 'https://stjohnbuilds.github.io/quill-haven/home-screen/';
   var HOME_URL = HOME_BASE;
   var VERSION_URL = 'https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json';
   var LOCAL_VERSION = '3.1';
@@ -479,6 +481,7 @@
     } catch (e) {
       // Last resort: make sure the home screen's native buttons are still there.
       document.documentElement.classList.remove('qh-ext-home');
+      var eh = document.getElementById('qh-early-hide'); if (eh) eh.remove();
     }
   });
 })();
