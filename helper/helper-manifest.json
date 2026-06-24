@@ -1,1 +1,12 @@
-{ "version": "1.5", "sha256": "7e98efe315c84f9aee00170776690403b58e5c679bb0014046e284f2e3a99151", "extras": [ { "name": "launch-home.sh", "sha256": "1412a53b4ad182ebd2b53a3bece5522836b921b8e585a8bc26e1a90d2f84617f" } ] }
+{
+  "version": "1.6",
+  "sha256": "45df20b6e2906cf06b949bd2d36a3f4abb703b422218ac3678850489ee129ac9",
+  "extras": [
+    { "name": "launch-home.sh", "src": "helper/launch-home.sh", "sha256": "1412a53b4ad182ebd2b53a3bece5522836b921b8e585a8bc26e1a90d2f84617f" },
+    { "name": "extension/manifest.json", "src": "extension/manifest.json", "sha256": "bf2ce84c9a5564c22c4c1b7575a21588a60f540e2a624eb9fc6885320351980d" },
+    { "name": "extension/quill-overlay.js", "src": "extension/quill-overlay.js", "sha256": "edc974fe988e74fdd629b1b7e3d7de03f52eaabc74f0574fead763825ea63888" },
+    { "name": "extension/quill-overlay.css", "src": "extension/quill-overlay.css", "sha256": "dc6eab2fcef221513918980feae622647a1108c424364b12d18837dfbd3a0fa4" },
+    { "name": "extension/icon-48.png", "src": "extension/icon-48.png", "sha256": "79e92d2d24acf0a86f2debd4329187095b68b2d30b4d5cbe6735ee831bc673b9" },
+    { "name": "extension/icon-128.png", "src": "extension/icon-128.png", "sha256": "79e92d2d24acf0a86f2debd4329187095b68b2d30b4d5cbe6735ee831bc673b9" }
+  ]
+}

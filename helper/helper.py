@@ -10,7 +10,8 @@ import hashlib, json, os, shutil, subprocess, sys, tempfile, threading, time, ur
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT      = 8137
-BASE      = "https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/helper"
+REPO_BASE = "https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main"
+BASE      = REPO_BASE + "/helper"
 HERE      = os.path.dirname(os.path.abspath(__file__))
 LIVE      = os.path.join(HERE, "helper.py")
 BAK       = LIVE + ".bak"
@@ -87,35 +88,39 @@ def check_for_update():
 
 # ---------- extras: user-space files (launch-home.sh etc.) ----------
 def _update_extras(man):
-    """Update non-helper files listed in the manifest's 'extras' array."""
+    """Update non-helper files listed in the manifest's 'extras' array.
+    Supports subdirectory paths like 'extension/manifest.json'."""
     extras = man.get("extras", [])
+    changed_names = []
     for entry in extras:
         name = entry.get("name", "")
         want_sha = entry.get("sha256", "").lower()
+        src_url = entry.get("src", name)
         if not name or not want_sha:
             continue
         dest = os.path.join(HERE, name)
-        # Check if the local copy already matches
         try:
             with open(dest, "rb") as f:
                 if _sha(f.read()) == want_sha:
                     continue
         except FileNotFoundError:
             pass
-        # Download and verify
         try:
-            blob = _get(BASE + "/" + name)
+            blob = _get(REPO_BASE + "/" + src_url)
         except Exception:
             continue
         if _sha(blob) != want_sha:
             continue
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
         tmp = dest + ".tmp"
         with open(tmp, "wb") as f:
             f.write(blob); f.flush(); os.fsync(f.fileno())
         os.replace(tmp, dest)
-        # Make scripts executable
         if name.endswith(".sh"):
             os.chmod(dest, 0o755)
+        changed_names.append(name)
+    if any(n == "launch-home.sh" for n in changed_names):
+        subprocess.Popen(["pkill", "-x", BROWSER])
 
 # ---------- device manifest: system-level file pushes (needs sudo) ----------
 def check_device_manifest():
