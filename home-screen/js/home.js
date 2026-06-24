@@ -1222,7 +1222,7 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '2.3';
+var LOCAL_VERSION = '2.4';
 function checkForUpdate() {
   fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json')
     .then(function(r) { return r.json(); })
