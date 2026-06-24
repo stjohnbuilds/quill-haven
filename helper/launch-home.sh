@@ -11,6 +11,11 @@ pgrep -f unclutter >/dev/null || unclutter -idle 2 -root &
 # Start the helper (power/restart/sleep/wifi/updates)
 pgrep -f run-helper.sh >/dev/null || "$HOME/.local/share/quill-haven/run-helper.sh" &
 
+# Window manager — needed so the terminal can appear on top of kiosk Chromium.
+# xfwm4 is already installed on XFCE Linux Mint. Chromium --kiosk still goes
+# fullscreen with no decorations; the WM just handles window stacking.
+pgrep -x xfwm4 >/dev/null || xfwm4 &
+
 # Detect screen resolution so Chromium fills every pixel (no black bars)
 RES=$(xdpyinfo 2>/dev/null | awk '/dimensions:/{print $2}')
 if [ -z "$RES" ]; then
@@ -24,9 +29,7 @@ if [ -n "$W" ] && [ -n "$H" ]; then
 fi
 
 # If Chromium ever crashes, restart it so Marie is never dumped to a bare X.
-# But pause if the terminal is open (helper drops a flag file).
 while true; do
-  while [ -f /tmp/qh-terminal-active ]; do sleep 1; done
   chromium \
     --kiosk \
     --start-fullscreen \
