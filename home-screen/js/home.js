@@ -324,22 +324,8 @@ function openApp(name) {
   var siteApp = allApps().filter(function(a) { return a.id === name; })[0];
   if (siteApp && siteApp.kind !== 'local' && siteApp.url) {
     flushOpenApps();
-    var view = document.getElementById('view-' + name);
-    if (view) {
-      var frame = view.querySelector('.app-frame');
-      if (frame && !frame.src) {
-        frame.src = frame.dataset.url || siteApp.url;
-        var fb = view.querySelector('.app-embed-fallback');
-        if (fb) {
-          fb.style.display = 'none';
-          frame.style.display = 'block';
-          setTimeout(function() {
-            try { var d = frame.contentDocument; if (d && d.body && d.body.innerHTML === '') { fb.style.display = ''; frame.style.display = 'none'; } }
-            catch(e) { /* cross-origin = loaded OK */ }
-          }, 4000);
-        }
-      }
-    }
+    window.open(siteApp.url, siteApp.id);
+    return;
   }
   document.querySelectorAll('.app-view').forEach(function(v) { v.classList.remove('active'); });
   document.getElementById('homeScreen').style.display = 'none';
@@ -1245,8 +1231,8 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '2.8';
-var LOCAL_EMOJI = '🍂';
+var LOCAL_VERSION = '2.9';
+var LOCAL_EMOJI = '🌙';
 
 // Set the footer version + emoji dynamically so it always matches the code
 (function() {
