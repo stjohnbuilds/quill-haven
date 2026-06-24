@@ -19,8 +19,8 @@
   var HOME_BASE = 'https://stjohnbuilds.github.io/quill-haven/home-screen/';
   var HOME_URL = HOME_BASE;
   var VERSION_URL = 'https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json';
-  var LOCAL_VERSION = '4.1';
-  var localEmoji = '📝';
+  var LOCAL_VERSION = '4.2';
+  var localEmoji = '🎨';
   var updateInfo = null;
 
   function esc(s) {
@@ -42,6 +42,8 @@
   // The "Home" button uses the home screen's own purple swatch.
   var HOME_ICON = '<path d="M3 10.5 12 3l9 7.5" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>';
   var HOME_GRAD = 'linear-gradient(145deg,#d9c2f5,#b083e0)';
+  // Six-dot drag handle (same look as the home screen's reorder grip).
+  var GRIP_SVG = '<svg width="12" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.7"/><circle cx="15" cy="5" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="19" r="1.7"/><circle cx="15" cy="19" r="1.7"/></svg>';
 
   function gradOf(app) { return 'linear-gradient(145deg,' + app.c1 + ',' + app.c2 + ')'; }
   // Same icon logic as home.js: built-in SVG, or the app's first letter.
@@ -135,7 +137,8 @@
 
   function buildPill() {
     pill.innerHTML =
-      '<span class="qhp-icons">'
+      '<span class="qhp-grip" id="qh-pill-grip" title="Drag to move">' + GRIP_SVG + '</span>'
+      + '<span class="qhp-icons">'
       + statusIcon(WIFI_SVG, ' id="qh-pill-wifi" title="Wi-Fi"')
       + statusIcon(BATTERY_SVG, ' id="qh-pill-battery" title="Battery"')
       + statusIcon(POWER_SVG, ' id="qh-pill-power" title="Power"')
@@ -144,9 +147,11 @@
       + '<span id="qh-pill-emoji">' + esc(localEmoji) + '<span class="qhp-tip"></span></span>'
       + '<span id="qh-pill-time"></span>';
 
-    // Tapping the pill (its bare area) expands it — needed on the touchscreen,
-    // where there's no hover. Tapping an icon does the icon's own job.
+    // Tapping the pill's bare area (time/emoji) opens or closes the icon row.
+    // The grip is for dragging only, so it must NOT also toggle.
     pill.addEventListener('click', function () { pill.classList.toggle('qhp-open'); });
+    var grip = pill.querySelector('#qh-pill-grip');
+    if (grip) grip.addEventListener('click', function (e) { e.stopPropagation(); });
     function iconClick(id, fn) {
       var el = pill.querySelector(id);
       if (el) el.addEventListener('click', function (e) { e.stopPropagation(); fn(e); });
@@ -241,19 +246,23 @@
   // ════════════ BOTTOM-RIGHT APP SWITCHER ════════════
   var dock = document.createElement('div');
   dock.id = 'qh-dock';
-  var trayOpen = false;
 
   function buildDock() {
     var curId = detectCurrentId();
     var home = curId === '__home__';
     var current = (!home && curId) ? appById(curId) : null;
 
+    var grip = document.createElement('span');
+    grip.id = 'qh-dock-grip';
+    grip.title = 'Drag to move';
+    grip.innerHTML = GRIP_SVG;
+
     var cur = document.createElement('div');
     cur.id = 'qh-dock-current';
     if (home) {
       cur.style.background = HOME_GRAD;
       cur.innerHTML = '<span style="width:24px;height:24px;color:#fff;display:flex;"><svg width="24" height="24" viewBox="0 0 24 24">' + HOME_ICON + '</svg></span>';
-      cur.title = 'Home';
+      cur.title = 'Apps';
     } else if (current) {
       cur.style.background = gradOf(current);
       cur.innerHTML = iconHtml(current, 26);
@@ -263,47 +272,53 @@
       cur.innerHTML = '<span style="width:22px;height:22px;color:#fff;display:flex;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>';
       cur.title = 'Apps';
     }
-
-    var tray = document.createElement('div');
-    tray.id = 'qh-dock-tray';
-
-    orderedVisible().forEach(function (a) {
-      if (curId === a.id) return; // don't show the app you're already in
-      var b = document.createElement('div');
-      b.className = 'qh-dock-app';
-      b.style.background = gradOf(a);
-      b.setAttribute('data-name', a.name);
-      b.innerHTML = iconHtml(a, 22);
-      b.addEventListener('click', function (e) { e.stopPropagation(); window.location.href = appUrl(a); });
-      tray.appendChild(b);
-    });
-    if (!home) {
-      var hb = document.createElement('div');
-      hb.className = 'qh-dock-app';
-      hb.style.background = HOME_GRAD;
-      hb.setAttribute('data-name', 'Home');
-      hb.innerHTML = '<span style="width:20px;height:20px;color:#fff;display:flex;"><svg width="20" height="20" viewBox="0 0 24 24">' + HOME_ICON + '</svg></span>';
-      hb.addEventListener('click', function (e) { e.stopPropagation(); window.location.href = HOME_URL; });
-      tray.appendChild(hb);
-    }
-
-    cur.addEventListener('click', function (e) {
-      e.stopPropagation();
-      trayOpen = !trayOpen;
-      tray.classList.toggle('open', trayOpen);
-    });
+    cur.addEventListener('click', function (e) { e.stopPropagation(); toggleDockPanel(); });
 
     dock.innerHTML = '';
-    dock.appendChild(tray);
+    dock.appendChild(grip);
     dock.appendChild(cur);
   }
-  document.addEventListener('click', function (e) {
-    if (trayOpen && !dock.contains(e.target)) {
-      trayOpen = false;
-      var t = dock.querySelector('#qh-dock-tray');
-      if (t) t.classList.remove('open');
+
+  // The pop-out panel: a clear card of apps (icon + name), opened by tapping the bubble.
+  var dockPanel = null;
+  function closeDockPanel() {
+    if (dockPanel) { dockPanel.remove(); dockPanel = null; document.removeEventListener('click', onDockAway); }
+  }
+  function onDockAway(e) { if (dockPanel && !dockPanel.contains(e.target) && !dock.contains(e.target)) closeDockPanel(); }
+  function dockRow(label, grad, iconInner, onClick) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'qh-dock-row';
+    b.innerHTML = '<span class="qh-dock-row-icon" style="background:' + grad + ';">' + iconInner + '</span><span class="qh-dock-row-name">' + esc(label) + '</span>';
+    b.addEventListener('click', function (e) { e.stopPropagation(); closeDockPanel(); onClick(); });
+    return b;
+  }
+  function toggleDockPanel() {
+    if (dockPanel) { closeDockPanel(); return; }
+    var curId = detectCurrentId(), home = curId === '__home__';
+    var p = document.createElement('div');
+    p.id = 'qh-dock-panel';
+    orderedVisible().forEach(function (a) {
+      if (curId === a.id) return;
+      p.appendChild(dockRow(a.name, gradOf(a), iconHtml(a, 20), function () { window.location.href = appUrl(a); }));
+    });
+    if (!home) {
+      if (p.childNodes.length) { var sep = document.createElement('div'); sep.className = 'qh-dock-panel-sep'; p.appendChild(sep); }
+      p.appendChild(dockRow('Home', HOME_GRAD, '<span style="width:20px;height:20px;color:#fff;display:flex;"><svg width="20" height="20" viewBox="0 0 24 24">' + HOME_ICON + '</svg></span>', function () { window.location.href = HOME_URL; }));
     }
-  });
+    if (!p.childNodes.length) {
+      p.appendChild(dockRow('Home', HOME_GRAD, '<span style="width:20px;height:20px;color:#fff;display:flex;"><svg width="20" height="20" viewBox="0 0 24 24">' + HOME_ICON + '</svg></span>', function () { window.location.href = HOME_URL; }));
+    }
+    document.documentElement.appendChild(p);
+    // Position just above the current bubble, right-aligned, clamped on screen.
+    var cr = dock.querySelector('#qh-dock-current').getBoundingClientRect();
+    var pr = p.getBoundingClientRect();
+    var left = clamp(cr.right - pr.width, 6, Math.max(6, window.innerWidth - pr.width - 6));
+    var top = cr.top - pr.height - 8;
+    if (top < 6) top = cr.bottom + 8;   // no room above → drop below
+    p.style.left = left + 'px'; p.style.top = top + 'px';
+    dockPanel = p;
+    setTimeout(function () { document.addEventListener('click', onDockAway); }, 0);
+  }
 
   // ════════════ SETTINGS POPUP ════════════
   var settingsEl = document.createElement('div');
@@ -332,7 +347,7 @@
 
     settingsEl.innerHTML =
       '<div class="qhx-panel">'
-      + '<div class="qhx-header"><div><div class="qhx-title">Settings</div><div class="qhx-subtitle">Quill Haven</div></div><button class="qhx-close" title="Close">&#x2715;</button></div>'
+      + '<div class="qhx-header"><div><div class="qhx-title">Settings</div><div class="qhx-subtitle">Quick settings · all settings on Home</div></div><button class="qhx-close" title="Close">&#x2715;</button></div>'
 
       + '<div class="qhx-section">Look</div>'
       + '<div class="qhx-card"><div class="qhx-row" style="flex-direction:column;align-items:stretch;gap:8px;">'
@@ -378,7 +393,19 @@
     act('more', openAllSettings);
   }
 
-  function openSettings() { buildSettings(); refreshWifiSub(); settingsEl.classList.add('open'); }
+  function openSettings() {
+    // On the home screen, open the REAL full settings panel (theme, brightness,
+    // Drive, storage, restore, apps, clipboard — all already there and wired).
+    // Clicking the home's own (now-hidden) gear runs its toggleSettings(), which
+    // also refreshes storage/drive/region. Off-home we show the quick panel.
+    if (isHome()) {
+      var btn = document.querySelector('.settings-btn[onclick="toggleSettings()"]')
+             || document.querySelector('.settings-btn[onclick*="toggleSettings"]');
+      if (btn) { btn.click(); return; }
+      var ov = document.querySelector('.settings-overlay'); if (ov) { ov.classList.add('open'); return; }
+    }
+    buildSettings(); refreshWifiSub(); settingsEl.classList.add('open');
+  }
   function closeSettings() { settingsEl.classList.remove('open'); }
   function refreshWifiSub() {
     var s = settingsEl.querySelector('#qhx-wifi-sub'); if (s) s.textContent = navigator.onLine !== false ? 'Connected' : 'Offline';
@@ -474,43 +501,34 @@
     el.style.top = clamp(pos.y, 4, Math.max(4, window.innerHeight - h - 4)) + 'px';
     el.style.right = 'auto'; el.style.bottom = 'auto';
   }
-  function setupDrag(el, key) {
+  // Drag is started ONLY from the small grip handle, so every other tap on the
+  // widget (buttons, the app bubble) is a normal click — nothing gets stolen.
+  function setupDrag(el, handle, key) {
     applyPos(el, settings[key]);
-    var startX, startY, origX, origY, pending = false, dragging = false;
-    // IMPORTANT: do NOT capture the pointer on press — that would steal a plain
-    // tap from the button underneath. We only start a drag once the finger/mouse
-    // has actually MOVED past a small threshold; until then it's a normal tap and
-    // the button's own click runs as usual.
-    el.addEventListener('pointerdown', function (e) {
-      if (e.button && e.button !== 0) return;        // left button / touch only
+    if (!handle) return;
+    var startX, startY, origX, origY, dragging = false;
+    handle.addEventListener('pointerdown', function (e) {
+      if (e.button && e.button !== 0) return;
+      e.preventDefault();
       var r = el.getBoundingClientRect();
       origX = r.left; origY = r.top; startX = e.clientX; startY = e.clientY;
-      pending = true; dragging = false;
+      dragging = true;
     });
     document.addEventListener('pointermove', function (e) {
-      if (!pending) return;
-      var dx = e.clientX - startX, dy = e.clientY - startY;
-      if (!dragging && (dx * dx + dy * dy) < 36) return;  // ~6px before it counts as a drag
-      dragging = true;
+      if (!dragging) return;
       var w = el.offsetWidth, h = el.offsetHeight;
-      el.style.left = clamp(origX + dx, 4, window.innerWidth - w - 4) + 'px';
-      el.style.top = clamp(origY + dy, 4, window.innerHeight - h - 4) + 'px';
+      el.style.left = clamp(origX + (e.clientX - startX), 4, window.innerWidth - w - 4) + 'px';
+      el.style.top = clamp(origY + (e.clientY - startY), 4, window.innerHeight - h - 4) + 'px';
       el.style.right = 'auto'; el.style.bottom = 'auto';
     });
-    document.addEventListener('pointerup', function () {
-      if (!pending) return;
-      pending = false;
-      if (!dragging) return;                           // plain tap → let the click reach the button
+    function end() {
+      if (!dragging) return;
       dragging = false;
-      el._qhDragged = true;                            // swallow only the click that follows a real drag
-      setTimeout(function () { el._qhDragged = false; }, 0);
       var patch = {}; patch[key] = { x: parseFloat(el.style.left), y: parseFloat(el.style.top) };
       saveSettings(patch);
-    });
-    document.addEventListener('pointercancel', function () { pending = false; dragging = false; });
-    el.addEventListener('click', function (e) {
-      if (el._qhDragged) { e.stopPropagation(); e.preventDefault(); }
-    }, true);
+    }
+    document.addEventListener('pointerup', end);
+    document.addEventListener('pointercancel', end);
   }
 
   // ════════════ INIT ════════════
@@ -524,8 +542,8 @@
       document.documentElement.appendChild(pill);
       document.documentElement.appendChild(dock);
       document.documentElement.appendChild(settingsEl);
-      setupDrag(pill, 'posPill');   // drag the pill anywhere; it stays put
-      setupDrag(dock, 'posDock');   // drag the app switcher anywhere; it stays put
+      setupDrag(pill, pill.querySelector('#qh-pill-grip'), 'posPill');   // drag from the grip
+      setupDrag(dock, dock.querySelector('#qh-dock-grip'), 'posDock');   // drag from the grip
       // Only hide the home screen's OWN top bar + dock AFTER our overlay is safely
       // on the page. If anything above threw, we skip this — so a glitch can never
       // leave the home screen with no overlay AND no way to open apps.

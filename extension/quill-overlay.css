@@ -109,8 +109,17 @@ html.qh-ext-home .dock { display: none !important; }
   max-width: 0; overflow: hidden; opacity: 0;
   transition: max-width 0.28s ease, opacity 0.2s ease;
 }
-#qh-pill:hover .qhp-icons,
-#qh-pill.qhp-open .qhp-icons { max-width: 170px; opacity: 1; }
+/* Open only on tap (a touchscreen has no real hover, and hover got stuck "open"). */
+#qh-pill.qhp-open .qhp-icons { max-width: 220px; opacity: 1; }
+
+/* Drag handle — the ONLY part that moves the pill. Everything else taps normally. */
+#qh-pill .qhp-grip {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--qh-bar-icon); opacity: 0.5; cursor: grab; flex-shrink: 0;
+  touch-action: none; margin: -2px 2px -2px -4px; padding: 2px;
+}
+#qh-pill .qhp-grip:hover { opacity: 0.85; }
+#qh-pill .qhp-grip:active { cursor: grabbing; }
 
 #qh-pill .qhp-icon {
   color: var(--qh-bar-icon); opacity: 0.9; flex-shrink: 0;
@@ -140,16 +149,20 @@ html.qh-ext-home .dock { display: none !important; }
 /* ════════════ Bottom-right app switcher ════════════ */
 #qh-dock {
   position: fixed; bottom: 14px; right: 14px; z-index: 2147483600;
-  display: flex; align-items: center; gap: 0;
+  display: flex; align-items: center; gap: 4px;
   user-select: none; -webkit-user-select: none;
-  touch-action: none;            /* so dragging the switcher on touch doesn't scroll the page */
 }
-#qh-dock-tray {
-  display: flex; align-items: center; gap: 7px;
-  max-width: 0; overflow: hidden; opacity: 0; padding: 0;
-  transition: max-width 0.28s ease, opacity 0.2s ease, padding 0.28s ease;
+
+/* Drag handle — the ONLY part that moves the switcher. The bubble taps normally. */
+#qh-dock-grip {
+  display: flex; align-items: center; justify-content: center;
+  width: 18px; height: 46px; border-radius: 8px; flex-shrink: 0;
+  color: var(--qh-bar-icon); opacity: 0.5; cursor: grab; touch-action: none;
+  background: var(--qh-bar-bg-strong); border: 1px solid var(--qh-bar-border);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
 }
-#qh-dock-tray.open { max-width: 320px; opacity: 1; padding: 0 10px 0 0; }
+#qh-dock-grip:hover { opacity: 0.85; }
+#qh-dock-grip:active { cursor: grabbing; }
 
 #qh-dock-current {
   width: 46px; height: 46px; border-radius: 14px;
@@ -157,31 +170,34 @@ html.qh-ext-home .dock { display: none !important; }
   cursor: pointer; flex-shrink: 0;
   box-shadow: 0 3px 12px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.3);
   border: 1px solid rgba(255,255,255,0.25);
-  transition: transform 0.15s;
+  transition: transform 0.12s;
 }
-#qh-dock-current:hover { transform: scale(1.06); }
-#qh-dock-current:active { transform: scale(0.94); }
+#qh-dock-current:active { transform: scale(0.95); }
 
-.qh-dock-app {
-  position: relative;
-  width: 40px; height: 40px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3);
-  border: 1px solid rgba(255,255,255,0.25);
-  transition: transform 0.15s;
-}
-.qh-dock-app:hover { transform: scale(1.1) translateY(-2px); }
-.qh-dock-app::before {
-  content: attr(data-name); position: absolute; bottom: calc(100% + 8px);
-  left: 50%; transform: translateX(-50%) scale(0.95);
-  background: var(--qh-tooltip-bg); color: var(--qh-tooltip-text);
-  padding: 4px 9px; border-radius: 6px; font-size: 11px; font-weight: 500;
-  white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-  opacity: 0; pointer-events: none; transition: opacity 0.12s, transform 0.12s;
+/* The pop-out panel: a clear card listing the apps, each with its name. */
+#qh-dock-panel {
+  position: fixed; z-index: 2147483601;
+  background: var(--qh-panel-bg); border: 1px solid var(--qh-card-border);
+  border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.28);
+  padding: 6px; min-width: 190px; max-width: 250px;
+  display: flex; flex-direction: column; gap: 2px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  animation: qh-panel-in 0.16s ease;
 }
-.qh-dock-app:hover::before { opacity: 1; transform: translateX(-50%) scale(1); }
+@keyframes qh-panel-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.qh-dock-row {
+  display: flex; align-items: center; gap: 11px; padding: 8px 10px;
+  border-radius: 10px; cursor: pointer; transition: background 0.12s;
+  border: none; background: none; width: 100%; text-align: left; font-family: inherit;
+}
+.qh-dock-row:hover { background: var(--qh-row-hover); }
+.qh-dock-row-icon {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.qh-dock-row-name { font-size: 13px; font-weight: 500; color: var(--qh-label); }
+.qh-dock-panel-sep { height: 1px; background: var(--qh-row-border); margin: 4px 6px; }
 
 /* ════════════ Settings overlay (mirrors the home screen settings) ════════════ */
 #qh-settings-overlay {

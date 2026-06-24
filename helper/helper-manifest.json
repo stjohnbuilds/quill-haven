@@ -3,13 +3,13 @@
   "sha256": "45df20b6e2906cf06b949bd2d36a3f4abb703b422218ac3678850489ee129ac9",
   "extras": [
     { "name": "extension/manifest.json",     "src": "extension/manifest.json",     "sha256": "4ae6c6826115c500e54bb9d700c4cb87e05eabe71e664e6fec070a0d3799922d" },
-    { "name": "extension/quill-overlay.js",   "src": "extension/quill-overlay.js",   "sha256": "7ad981966788135b29da9df7a2fe992f1aba832e61c6a5b1ae8424cc5538ff27" },
+    { "name": "extension/quill-overlay.js",   "src": "extension/quill-overlay.js",   "sha256": "a96ea333a0a17cfe4b3e6cff1da5bc49ed17988506cb068345f27bc3cf929f36" },
     { "name": "extension/qh-early.js",        "src": "extension/qh-early.js",        "sha256": "ce4664b3e53577a3dee594311c3180af37b2aa32400746591cb83c1430e83d39" },
-    { "name": "extension/quill-overlay.css",  "src": "extension/quill-overlay.css",  "sha256": "ebd995cbda95595d60b75842030cfe5357a1c232e0b30da5a94872c89208e9ef" },
+    { "name": "extension/quill-overlay.css",  "src": "extension/quill-overlay.css",  "sha256": "7ae303f700f1592b36f5ae69d6969e4b2bfbf7939a0835c9318badb22e209f16" },
     { "name": "extension/confirm.js",         "src": "extension/confirm.js",         "sha256": "188b9df00508a8d46d7ac23535b576a92f780a2664eb7f39b3709781a01e3b8c" },
     { "name": "extension/qh-bg.js",           "src": "extension/qh-bg.js",           "sha256": "8672330165d0a5503e77ae4dfbba70e3ac22e5f73f8333a536e9aef9a4748016" },
     { "name": "extension/icon-48.png",        "src": "extension/icon-48.png",        "sha256": "18278d9b569bb3abdf5229c6d003d312d5773d571a8b347d4a15e9a7a188cc92" },
     { "name": "extension/icon-128.png",       "src": "extension/icon-128.png",       "sha256": "b9d996dd818baa807f22b8b6eb0634ad591b4e3c756c3e3b34e89026dd42cfae" },
-    { "name": "launch-home.sh",               "src": "helper/launch-home.sh",        "sha256": "f1578755e739824a804e88c23c10f364ee684a0d59ad7a5304564c9939b49adb" }
+    { "name": "launch-home.sh",               "src": "helper/launch-home.sh",        "sha256": "7d70c80c63d9a50a7f4f0e1726b31f1d180409e6997ae97cfa9b572861f8c3d8" }
   ]
 }
