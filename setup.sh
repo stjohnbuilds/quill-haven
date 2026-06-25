@@ -271,6 +271,37 @@ POLICY
 write_policy /etc/chromium/policies/managed
 write_policy /etc/chromium-browser/policies/managed
 
+# ---------------------------------------------------------------------------
+# Battery saver — a writing appliance only needs a short list of things on.
+# Tune power management, then switch off background services it never uses.
+# Wi-Fi is deliberately kept at FULL power so it never lags — only the rest
+# is tuned down. Everything here is safe to re-run and easy to undo.
+# ---------------------------------------------------------------------------
+say "Tuning for battery (switching off everything a writing machine never uses)"
+
+# TLP automatically powers down the CPU, disk, USB and PCIe lanes when idle.
+sudo apt-get install -y tlp || true
+# On Ubuntu/Mint 22 a rival power daemon can fight TLP — park it so TLP wins.
+sudo systemctl mask power-profiles-daemon 2>/dev/null || true
+# Keep Wi-Fi at full power on battery (this laptop's Wi-Fi can lag if throttled).
+sudo mkdir -p /etc/tlp.d
+sudo tee /etc/tlp.d/01-quillhaven.conf >/dev/null <<'TLP'
+# Quill Haven: tune for battery, but NEVER throttle Wi-Fi (keeps it snappy).
+WIFI_PWR_ON_AC=off
+WIFI_PWR_ON_BAT=off
+TLP
+sudo systemctl enable --now tlp 2>/dev/null || true
+
+# Switch off background services a locked writing machine never uses:
+# printing, Bluetooth, local-network discovery, and the cellular-modem manager.
+# (Each is one command to turn back on — e.g. `sudo systemctl enable --now bluetooth`.)
+for svc in cups cups.socket cups.path cups-browsed bluetooth \
+           avahi-daemon avahi-daemon.socket ModemManager; do
+  sudo systemctl disable --now "$svc" 2>/dev/null || true
+done
+# Turn the Bluetooth radio fully off (saves the most of the four).
+sudo rfkill block bluetooth 2>/dev/null || true
+
 echo ""
 echo "==========================================="
 echo "  Quill Haven is set up. Rebooting in 5s   "
