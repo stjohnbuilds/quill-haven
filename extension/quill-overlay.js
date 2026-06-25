@@ -19,8 +19,8 @@
   var HOME_BASE = 'https://stjohnbuilds.github.io/quill-haven/home-screen/';
   var HOME_URL = HOME_BASE;
   var VERSION_URL = 'https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json';
-  var LOCAL_VERSION = '4.6';
-  var localEmoji = '🕯️';
+  var LOCAL_VERSION = '4.7';
+  var localEmoji = '☕';
   var updateInfo = null;
 
   function esc(s) {
@@ -260,7 +260,7 @@
     if (powerMenu) { hidePowerMenu(); return; }
     var m = document.createElement('div');
     m.id = 'qh-power-menu';
-    m.style.cssText = 'position:fixed;top:44px;right:8px;z-index:2147483641;background:var(--qh-panel-bg);border:1px solid var(--qh-card-border);border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,0.22);padding:6px;min-width:168px;display:flex;flex-direction:column;gap:2px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;';
+    m.style.cssText = 'position:fixed;z-index:2147483641;background:var(--qh-panel-bg);border:1px solid var(--qh-card-border);border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,0.22);padding:6px;min-width:168px;display:flex;flex-direction:column;gap:2px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;visibility:hidden;';
     m.innerHTML =
       '<button type="button" data-act="sleep">Sleep</button>'
       + '<button type="button" data-act="reboot">Restart</button>'
@@ -274,6 +274,19 @@
     m.querySelector('[data-act="reboot"]').addEventListener('click', function () { hidePowerMenu(); window.qhConfirm({ title: 'Restart?', confirmText: 'Restart', danger: true, onConfirm: function () { helperAction('/reboot'); } }); });
     m.querySelector('[data-act="poweroff"]').addEventListener('click', function () { hidePowerMenu(); window.qhConfirm({ title: 'Power off?', confirmText: 'Power off', danger: true, onConfirm: function () { helperAction('/poweroff'); } }); });
     document.documentElement.appendChild(m);
+    // Anchor the menu to the pill's CURRENT position, and flip it ABOVE the pill
+    // when the pill is near the bottom of the screen, so it follows the pill and
+    // never runs off-screen.
+    (function () {
+      var r = pill.getBoundingClientRect();
+      var mw = m.offsetWidth, mh = m.offsetHeight;
+      var left = Math.min(Math.max(8, r.right - mw), Math.max(8, window.innerWidth - mw - 8));
+      var below = r.bottom + 6;
+      var top = (below + mh <= window.innerHeight - 8) ? below : (r.top - 6 - mh);
+      top = Math.min(Math.max(8, top), Math.max(8, window.innerHeight - mh - 8));
+      m.style.left = left + 'px'; m.style.top = top + 'px'; m.style.right = 'auto';
+      m.style.visibility = 'visible';
+    })();
     powerMenu = m;
     setTimeout(function () { document.addEventListener('click', hidePowerMenu); }, 0);
   }
