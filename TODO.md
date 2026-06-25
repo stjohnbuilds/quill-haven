@@ -1,27 +1,30 @@
 # TODO — Quill Haven
 
-## 🔧 Fixing now (2026-06-24) — from Marie's first real-hardware run (Surface Laptop Go)
+## 🔧 Active list (2026-06-24) — priority order
 
-**Quick UI**
-- [x] Loading screen: removed the load bar; subtitle shows as plain text. (4.5)
-- [x] Pill: full length — no longer resizes on click/hover. (4.5)
-- [x] Pill drag-handle: round, even dots (were stretched ovals). (4.5)
+**✅ MILESTONE: the update pipeline works.** Pushes now land on the device
+(emoji confirmed changing on hardware: 📜 → 🔖), Dabble opens, and a setup re-run
+no longer bails early. Everything below builds on this.
 
-**Behaviour**
-- [x] Power-off button reliability — helper call now wakes-and-retries the asleep
-      MV3 worker (4x, 200ms apart), so the tap no longer misses. (4.6)
-- [x] Boot order: ROOT fix — launcher waits until the home host is reachable
-      before opening Chromium, so it never lands on the Dino page. (4.5)
-- [ ] Clean shutdown: hide the scary "[FAILED] Failed to…" flash on power-off.
+### ▶ NEXT UP (Marie's order, 2026-06-24)
+- [ ] **1. "Updates available" gate** — stop auto-applying updates; show "update
+      available" and only update when Marie taps it, so a bad push can't auto-break
+      a working setup. NOTE: one last auto-update carries the switch over, then it
+      is manual from then on.
+- [ ] **2. Battery "time left"** (≈ Xh) in the pill — the helper reads it from the
+      laptop (upower / /sys/class/power_supply) and the pill shows it.
 
-**Bigger builds**
-- [ ] Battery "time left" (≈ Xh) readout in the pill (helper reads it).
-- [ ] Simple built-in Wi-Fi picker (list networks → tap → type password → done);
-      keep the native window as a fallback.
-- [~] One app list / single source of truth — the add-app LAG is fixed: the home
-      screen signals changes live and the overlay refreshes the switcher with no
-      reload (4.6). STILL TODO: remove the overlay's hard-copy of BUILTIN so there
-      is truly one list (docs/REMAINING_FIXES.md → FIX-9).
+### Then (from the audit + earlier asks)
+- [ ] Writing backup — only one copy of the novel today; a reset loses it. (biggest real risk)
+- [ ] "Blocked page = stuck" trap — a blocked site should bounce home, not dead-end.
+- [ ] Lock the helper back door — terminal/power endpoints need a token. (security)
+- [ ] Limit the root file-writer to an allowlist of paths. (security)
+- [ ] Clean shutdown — hide the "[FAILED] Failed to…" flash on power-off.
+- [ ] Simple built-in Wi-Fi picker (keep the native window as a fallback).
+- [ ] One app list — finish single-source (lag already fixed in 4.6); remove the
+      overlay's hard-copy of BUILTIN.
+- [ ] Graceful restart — don't drop the last ½-second of typing on update/go-home.
+- [ ] Small: add smoke tests; setBg out-of-room warning; docs-vs-code default apps.
 
 **Done this session (2026-06-24)**
 - [x] "No buttons" safety net (FIX-2): qh-early.js self-clears the native-UI hide
