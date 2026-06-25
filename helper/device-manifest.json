@@ -1,16 +1,16 @@
 {
-  "version": "1",
+  "version": "2",
   "files": [
     {
       "name": "quill-haven-policy.json",
       "dest": "/etc/chromium/policies/managed/quill-haven.json",
-      "sha256": "82fe191f1ac54234c0293046528ba7cc53c8c00ae3b9b594c9a0fa6090084e1e",
+      "sha256": "5f1218d83f5ecac25e47341f83fcf351ad1280f20149d45aa0fe0b66f02af2dc",
       "mode": "644"
     },
     {
       "name": "quill-haven-policy.json",
       "dest": "/etc/chromium-browser/policies/managed/quill-haven.json",
-      "sha256": "82fe191f1ac54234c0293046528ba7cc53c8c00ae3b9b594c9a0fa6090084e1e",
+      "sha256": "5f1218d83f5ecac25e47341f83fcf351ad1280f20149d45aa0fe0b66f02af2dc",
       "mode": "644"
     }
   ]

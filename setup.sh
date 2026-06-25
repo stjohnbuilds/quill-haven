@@ -241,28 +241,33 @@ sudo chmod +x /usr/local/bin/quill-haven-enable
 # ---------------------------------------------------------------------------
 # Chromium allowlist + Local-Network opt-in (so the power button can reach the helper)
 # ---------------------------------------------------------------------------
-say "Locking the browser to the writing sites (with working Google sign-in)"
+say "Blocking the common distraction sites (everything else stays open)"
 write_policy() {
   sudo mkdir -p "$1"
   sudo tee "$1/quill-haven.json" >/dev/null <<'POLICY'
 {
-  "URLAllowlist": [
-    "127.0.0.1",
-    "stjohnbuilds.github.io",
-    "raw.githubusercontent.com",
-    ".google.com",
-    ".google.co.uk",
-    ".googleapis.com",
-    ".googleusercontent.com",
-    ".gstatic.com",
-    ".youtube.com",
-    ".dabblewriter.com",
-    ".typingandtomes.vercel.app",
-    ".vercel.app",
-    ".vercel-scripts.com",
-    ".vercel.live"
+  "URLBlocklist": [
+    "facebook.com",
+    "instagram.com",
+    "twitter.com",
+    "x.com",
+    "tiktok.com",
+    "reddit.com",
+    "snapchat.com",
+    "pinterest.com",
+    "tumblr.com",
+    "threads.net",
+    "netflix.com",
+    "twitch.tv",
+    "hulu.com",
+    "disneyplus.com",
+    "amazon.com",
+    "ebay.com",
+    "discord.com",
+    "9gag.com",
+    "imgur.com",
+    "buzzfeed.com"
   ],
-  "URLBlocklist": ["*"],
   "LocalNetworkAccessAllowedForUrls": ["https://stjohnbuilds.github.io"],
   "LocalNetworkAccessRestrictionsTemporaryOptOut": true,
   "DefaultBrowserSettingEnabled": false,
