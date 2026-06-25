@@ -272,6 +272,35 @@ write_policy /etc/chromium/policies/managed
 write_policy /etc/chromium-browser/policies/managed
 
 # ---------------------------------------------------------------------------
+# Surface touchscreen — ONLY runs on Microsoft Surface hardware, so this stays
+# safe on any other laptop. Adds the community linux-surface kernel so the
+# touchscreen works. Fully guarded: if it can't run (Secure Boot still on) or
+# anything fails, the rest of Quill Haven still installs and the laptop works
+# fine on trackpad + keyboard — we can switch touch on later by re-running.
+# ---------------------------------------------------------------------------
+QH_VENDOR="$(cat /sys/class/dmi/id/sys_vendor 2>/dev/null || true)"
+QH_PRODUCT="$(cat /sys/class/dmi/id/product_name 2>/dev/null || true)"
+if printf '%s %s' "$QH_VENDOR" "$QH_PRODUCT" | grep -qi surface; then
+  sudo apt-get install -y mokutil 2>/dev/null || true
+  if mokutil --sb-state 2>/dev/null | grep -qi enabled; then
+    say "Surface touchscreen needs Secure Boot turned OFF first (one toggle in the Surface firmware). Skipping touch for now — trackpad + keyboard still work. Turn Secure Boot off, then re-run this and touch switches on."
+  else
+    say "Microsoft Surface detected — adding the touchscreen driver (linux-surface)"
+    {
+      sudo mkdir -p /etc/apt/keyrings &&
+      curl -fsSL https://raw.githubusercontent.com/linux-surface/linux-surface/master/pkg/keys/surface.asc \
+        | sudo gpg --dearmor --yes --output /etc/apt/keyrings/linux-surface.gpg &&
+      echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/linux-surface.gpg] https://pkg.surfacelinux.com/debian release main" \
+        | sudo tee /etc/apt/sources.list.d/linux-surface.list >/dev/null &&
+      sudo apt-get update -y &&
+      sudo apt-get install -y linux-image-surface linux-headers-surface iptsd libwacom-surface &&
+      sudo update-grub &&
+      say "Surface touchscreen driver installed (takes effect after the reboot)"
+    } || say "Surface driver step hit a snag — skipped it. Quill Haven still works on the trackpad; we can add touch later."
+  fi
+fi
+
+# ---------------------------------------------------------------------------
 # Battery saver — a writing appliance only needs a short list of things on.
 # Tune power management, then switch off background services it never uses.
 # Wi-Fi is deliberately kept at FULL power so it never lags — only the rest
