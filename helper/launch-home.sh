@@ -2,7 +2,7 @@
 # Quill Haven kiosk launcher. Starts Chromium in fullscreen kiosk mode and the
 # helper service. If Chromium crashes, it restarts automatically.
 # This file is kept up to date by the helper's self-update (no re-run needed).
-# rev: 2026-06-24e  (bumping this line makes the helper relaunch Chromium so a
+# rev: 2026-06-24f  (bumping this line makes the helper relaunch Chromium so a
 #                    new overlay extension takes effect after one reboot)
 
 xset s off 2>/dev/null; xset -dpms 2>/dev/null; xset s noblank 2>/dev/null

@@ -19,8 +19,8 @@
   var HOME_BASE = 'https://stjohnbuilds.github.io/quill-haven/home-screen/';
   var HOME_URL = HOME_BASE;
   var VERSION_URL = 'https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json';
-  var LOCAL_VERSION = '4.3';
-  var localEmoji = '💤';
+  var LOCAL_VERSION = '4.4';
+  var localEmoji = '✒️';
   var updateInfo = null;
 
   function esc(s) {
