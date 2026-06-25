@@ -1235,8 +1235,8 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '4.8';
-var LOCAL_EMOJI = '📜';
+var LOCAL_VERSION = '4.9';
+var LOCAL_EMOJI = '🔖';
 
 // Set the footer version + emoji dynamically so it always matches the code
 (function() {
