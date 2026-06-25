@@ -103,14 +103,11 @@ html.qh-ext-home .dock { display: none !important; }
 }
 #qh-pill:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.14); }
 
-/* The icon cluster is hidden until you hover (mouse) or tap (touch) the pill */
+/* The icon cluster is ALWAYS visible — the pill stays full length and never
+   resizes on tap or hover (Marie's request). */
 #qh-pill .qhp-icons {
   display: flex; align-items: center; gap: 14px;
-  max-width: 0; overflow: hidden; opacity: 0;
-  transition: max-width 0.28s ease, opacity 0.2s ease;
 }
-/* Open only on tap (a touchscreen has no real hover, and hover got stuck "open"). */
-#qh-pill.qhp-open .qhp-icons { max-width: 220px; opacity: 1; }
 
 /* Drag handle — the ONLY part that moves the pill. Everything else taps normally. */
 #qh-pill .qhp-grip {

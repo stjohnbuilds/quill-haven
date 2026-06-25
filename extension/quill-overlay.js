@@ -19,8 +19,8 @@
   var HOME_BASE = 'https://stjohnbuilds.github.io/quill-haven/home-screen/';
   var HOME_URL = HOME_BASE;
   var VERSION_URL = 'https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json';
-  var LOCAL_VERSION = '4.4';
-  var localEmoji = '✒️';
+  var LOCAL_VERSION = '4.5';
+  var localEmoji = '📖';
   var updateInfo = null;
 
   function esc(s) {
@@ -42,8 +42,9 @@
   // The "Home" button uses the home screen's own purple swatch.
   var HOME_ICON = '<path d="M3 10.5 12 3l9 7.5" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5" fill="none" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>';
   var HOME_GRAD = 'linear-gradient(145deg,#d9c2f5,#b083e0)';
-  // Six-dot drag handle (same look as the home screen's reorder grip).
-  var GRIP_SVG = '<svg width="12" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="5" r="1.7"/><circle cx="15" cy="5" r="1.7"/><circle cx="9" cy="12" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="9" cy="19" r="1.7"/><circle cx="15" cy="19" r="1.7"/></svg>';
+  // Six-dot drag handle. viewBox matches the 12x16 display box so the dots stay
+  // perfectly ROUND and evenly spaced (the old 24x24 viewBox stretched them oval).
+  var GRIP_SVG = '<svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor"><circle cx="4" cy="3.5" r="1.4"/><circle cx="8" cy="3.5" r="1.4"/><circle cx="4" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="4" cy="12.5" r="1.4"/><circle cx="8" cy="12.5" r="1.4"/></svg>';
 
   function gradOf(app) { return 'linear-gradient(145deg,' + app.c1 + ',' + app.c2 + ')'; }
   // Same icon logic as home.js: built-in SVG, or the app's first letter.
@@ -166,9 +167,8 @@
       + '<span id="qh-pill-emoji">' + esc(localEmoji) + '<span class="qhp-tip"></span></span>'
       + '<span id="qh-pill-time"></span>';
 
-    // Tapping the pill's bare area (time/emoji) opens or closes the icon row.
-    // The grip is for dragging only, so it must NOT also toggle.
-    pill.addEventListener('click', function () { pill.classList.toggle('qhp-open'); });
+    // The pill stays full length (icons always shown), so a tap never changes
+    // its size. The grip drags; each icon below has its own tap handler.
     var grip = pill.querySelector('#qh-pill-grip');
     if (grip) grip.addEventListener('click', function (e) { e.stopPropagation(); });
     function iconClick(id, fn) {

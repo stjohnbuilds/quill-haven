@@ -2,7 +2,7 @@
 # Quill Haven kiosk launcher. Starts Chromium in fullscreen kiosk mode and the
 # helper service. If Chromium crashes, it restarts automatically.
 # This file is kept up to date by the helper's self-update (no re-run needed).
-# rev: 2026-06-24f  (bumping this line makes the helper relaunch Chromium so a
+# rev: 2026-06-24g  (bumping this line makes the helper relaunch Chromium so a
 #                    new overlay extension takes effect after one reboot)
 
 xset s off 2>/dev/null; xset -dpms 2>/dev/null; xset s noblank 2>/dev/null
@@ -41,6 +41,15 @@ EXT_FLAGS=""
 if [ -f "$EXT_DIR/manifest.json" ]; then
   EXT_FLAGS="--load-extension=$EXT_DIR --disable-extensions-except=$EXT_DIR"
 fi
+
+# ROOT-CAUSE fix for the "boots into the dino game" problem: wait until the home
+# host is actually reachable BEFORE loading it, so Chromium never opens on the
+# offline error page. Polls up to ~30s, then falls through (so a genuinely
+# offline boot still proceeds rather than hanging forever).
+for _ in $(seq 1 30); do
+  curl -fsS --max-time 2 -o /dev/null "https://stjohnbuilds.github.io/quill-haven/version.json" && break
+  sleep 1
+done
 
 # If Chromium ever crashes, restart it so Marie is never dumped to a bare X.
 while true; do
