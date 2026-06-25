@@ -1,5 +1,40 @@
 # TODO — Quill Haven
 
+## 🔧 Fixing now (2026-06-24) — from Marie's first real-hardware run (Surface Laptop Go)
+
+**Quick UI**
+- [ ] Loading screen: remove the load bar; show the subtitle as plain text
+      (it loads too fast for the typing animation to play).
+- [ ] Pill: full length — does NOT resize or move on click/hover.
+- [ ] Pill drag-handle: even dots.
+
+**Behaviour**
+- [ ] Power-off button reliability — the relay to the helper can be asleep (MV3
+      service worker), so the tap misses. Make it wake-and-retry.
+- [ ] Boot order: never show Chromium's offline "Dino" page — wait for Wi-Fi /
+      show a "connecting…" state.
+- [ ] Clean shutdown: hide the scary "[FAILED] Failed to…" flash on power-off.
+
+**Bigger builds**
+- [ ] Battery "time left" (≈ Xh) readout in the pill (helper reads it).
+- [ ] Simple built-in Wi-Fi picker (list networks → tap → type password → done);
+      keep the native window as a fallback.
+- [ ] One app list / single source of truth — the overlay keeps its OWN copy of
+      the apps, so an added app can miss the bottom-right switcher. Make both
+      layers read ONE list.
+
+**Done this session (2026-06-24)**
+- [x] Site lock flipped allowlist → 20-site distraction BLOCKlist (unblocks
+      Dabble + normal sites); device-manifest v2 pushes it to the device.
+- [x] Release 4.4 ✒️ — emoji bump as an update-pipeline test.
+- [x] setup.sh: fetch ALL 8 overlay files (was missing 3 → no overlay on fresh
+      install); battery tuning (TLP, disable printing/BT/avahi/modem); auto
+      Surface touch driver (guarded, Secure-Boot-aware).
+- [x] remove-touch.sh — one-time drop of the Surface kernel so Secure Boot can
+      go back on (padlock off).
+- [x] docs/QUILL_HAVEN_CODE_AUDIT_INSTRUCTIONS.md — brief for an external AI scan.
+- [x] devices/SETUP.md — Surface install steps (Secure Boot off + USB boot).
+
 ## Status at a glance (2026-06-23)
 
 Home screen v3.1 is live on the device. The next big task is rebuilding
