@@ -9,7 +9,7 @@
 # <code> is the private code word (given in chat). The report is also printed
 # here in the terminal.
 
-TOPIC="${1:-}"
+TOPIC="${1:-qh-mariemk-diag-3f9k2}"   # default drop, so it works with no arg typed
 QH="$HOME/.local/share/quill-haven"
 OUT="$(mktemp)"
 P1="/etc/chromium/policies/managed/quill-haven.json"
