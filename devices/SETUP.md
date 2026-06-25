@@ -11,6 +11,9 @@ Any laptop with an **Intel or AMD chip**:
 - **Windows laptops** — any maker, any age.
 - **Intel Macs** (pre-2020-ish, before Apple Silicon).
 - **Intel / AMD Chromebooks** — needs one extra firmware-unlock step first.
+- **Microsoft Surface** (Intel models — Surface Laptop Go, Surface Laptop,
+  etc.) — needs Secure Boot turned **off** first (see Step 3). The touchscreen
+  driver then installs automatically in Step 5.
 
 ## What doesn't work
 
@@ -126,6 +129,16 @@ $30 SuzyQable from US, 1–3 week ship. See `BEFORE-YOU-BUY.md`.
 
 ## Step 3 — Boot the laptop from the USB
 
+> **Microsoft Surface only — do this first.** A Surface refuses to boot Linux
+> until Secure Boot is off:
+> 1. Turn the Surface fully off. Hold **Volume-Up** and press **Power** once;
+>    keep holding Volume-Up until the firmware screen appears.
+> 2. Tap **Security** → **Secure Boot** → choose **None**.
+> 3. Tap **Exit** → **Restart now**.
+>
+> Then boot from the USB using the **Volume-Down** trick in the table below
+> (hold Volume-Down while pressing Power, until Linux Mint appears).
+
 1. Plug the USB stick into the laptop.
 2. Turn the laptop on, **immediately** and **repeatedly** press the
    boot-menu key. Which key depends on the maker:
@@ -138,6 +151,7 @@ $30 SuzyQable from US, 1–3 week ship. See `BEFORE-YOU-BUY.md`.
 | Windows — Samsung | **F12** or **Esc** |
 | Intel Mac | hold **Option (⌥)** the whole time |
 | Intel/AMD Chromebook (after Step 2) | **Esc** |
+| Microsoft Surface | hold **Volume-Down** while pressing Power |
 
 3. A menu appears. Pick the USB stick (often called something like
    "USB", "UEFI: SanDisk", "Generic USB Device").
