@@ -33,10 +33,12 @@ Marie. Non-technical. Talk like she's 10. No jargon.
 - "Files I changed" footer on every response
 - No confidence percentages or self-certifying
 - **EVERY release gets a NEW emoji.** Marie reads the pill emoji as "which version am
-  I on" and the changing emoji is her proof an update landed. On every push that ships
-  a change, bump `version.json` (version + a DIFFERENT emoji) AND the matching
-  `LOCAL_VERSION`/emoji in BOTH `extension/quill-overlay.js` and `home-screen/js/home.js`.
-  Never ship a change without a new emoji.
+  I on" and the changing emoji is her proof an update landed. **This is built in: run
+  `tools/release.sh`** — it bumps the version + the NEXT unused emoji in EVERY place
+  that must agree (`version.json`, `extension/quill-overlay.js`, `home-screen/js/home.js`,
+  `home-screen/service-worker.js`, `extension/manifest.json`), bumps the launcher rev,
+  and recomputes every `helper-manifest.json` hash. Use `QH_DRY=1 tools/release.sh` to
+  preview. Never hand-bump versions and never ship a change without a new emoji.
 
 ## What we're building
 1. A home screen (HTML/CSS/JS) that looks like a real OS — Mac-style dock or top-bar icons, settings panel
