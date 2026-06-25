@@ -6,7 +6,7 @@
 // (This used to be CACHE-FIRST with a hand-bumped VERSION. When the bump was
 //  forgotten the old cache served forever, so new pushes "didn't show up". That
 //  is exactly the bug this rewrite fixes — no more stale home screen.)
-const VERSION = '4.7';
+const VERSION = '4.8';
 const CACHE = 'quill-haven-' + VERSION;
 const SHELL = [
   './',
