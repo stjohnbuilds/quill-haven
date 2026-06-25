@@ -8,8 +8,8 @@
 - [x] Pill drag-handle: round, even dots (were stretched ovals). (4.5)
 
 **Behaviour**
-- [ ] Power-off button reliability — the relay to the helper can be asleep (MV3
-      service worker), so the tap misses. Make it wake-and-retry.
+- [x] Power-off button reliability — helper call now wakes-and-retries the asleep
+      MV3 worker (4x, 200ms apart), so the tap no longer misses. (4.6)
 - [x] Boot order: ROOT fix — launcher waits until the home host is reachable
       before opening Chromium, so it never lands on the Dino page. (4.5)
 - [ ] Clean shutdown: hide the scary "[FAILED] Failed to…" flash on power-off.
@@ -18,11 +18,17 @@
 - [ ] Battery "time left" (≈ Xh) readout in the pill (helper reads it).
 - [ ] Simple built-in Wi-Fi picker (list networks → tap → type password → done);
       keep the native window as a fallback.
-- [ ] One app list / single source of truth — the overlay keeps its OWN copy of
-      the apps, so an added app can miss the bottom-right switcher. Make both
-      layers read ONE list.
+- [~] One app list / single source of truth — the add-app LAG is fixed: the home
+      screen signals changes live and the overlay refreshes the switcher with no
+      reload (4.6). STILL TODO: remove the overlay's hard-copy of BUILTIN so there
+      is truly one list (docs/REMAINING_FIXES.md → FIX-9).
 
 **Done this session (2026-06-24)**
+- [x] "No buttons" safety net (FIX-2): qh-early.js self-clears the native-UI hide
+      after ~4.5s unless the overlay comes up — never strands the user. (4.6)
+- [x] Releases 4.5 📖 (full pill, round dots, dino root fix, load bar gone) and
+      4.6 🕯️ (no-buttons net, power-off retry, live app-list). tools/release.sh now
+      auto-bumps the emoji + every version and self-checks for drift.
 - [x] Site lock flipped allowlist → 20-site distraction BLOCKlist (unblocks
       Dabble + normal sites); device-manifest v2 pushes it to the device.
 - [x] Release 4.4 ✒️ — emoji bump as an update-pipeline test.
