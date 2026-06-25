@@ -1,13 +1,12 @@
 // Quill Haven service worker.
-// CACHE-FIRST — the page loads fast from cache. When a new version is pushed to
-// GitHub, the browser installs this new SW in the background. The home screen's
-// update check fetches version.json (different domain, bypasses the SW) and shows
-// an "Update available" button. Tapping it clears the cache and reloads — the SW
-// falls through to the network and serves the fresh version.
+// NETWORK-FIRST: always try the network so a freshly-pushed version shows up
+// immediately. Fall back to the cache ONLY when offline, so the home screen
+// still boots with no Wi-Fi. Successful loads refresh the cache for next time.
 //
-// BUMP VERSION on every release — keep it in step with version.json and
-// LOCAL_VERSION in js/home.js.
-const VERSION = '3.1';
+// (This used to be CACHE-FIRST with a hand-bumped VERSION. When the bump was
+//  forgotten the old cache served forever, so new pushes "didn't show up". That
+//  is exactly the bug this rewrite fixes — no more stale home screen.)
+const VERSION = '4.4';
 const CACHE = 'quill-haven-' + VERSION;
 const SHELL = [
   './',
@@ -38,23 +37,19 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Cache-first: serve from cache if available, otherwise fetch from the network
-// and cache the response for next time. ignoreSearch means ?v=XX cache-busting
-// params don't cause misses against the pre-cached shell entries.
+// Network-first: fetch fresh, cache the success, fall back to cache when offline.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request, { ignoreSearch: true })
-      .then(cached => {
-        if (cached) return cached;
-        return fetch(e.request).then(resp => {
-          if (resp && resp.ok && resp.type === 'basic') {
-            const copy = resp.clone();
-            caches.open(CACHE).then(c => c.put(e.request, copy));
-          }
-          return resp;
-        });
+    fetch(e.request)
+      .then(resp => {
+        if (resp && resp.ok && resp.type === 'basic') {
+          const copy = resp.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+        }
+        return resp;
       })
-      .catch(() => caches.match('./index.html', { ignoreSearch: true }))
+      .catch(() => caches.match(e.request, { ignoreSearch: true })
+        .then(cached => cached || caches.match('./index.html', { ignoreSearch: true })))
   );
 });

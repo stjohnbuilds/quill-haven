@@ -12,18 +12,9 @@
     var g = document.querySelector('.boot-tagline'); if (g) { g.style.animation = 'none'; g.style.opacity = '1'; }
     return;
   }
-  var i = 0;
   var pageStart = Date.now();
-  var TYPE_DELAY = 600;                                  // small pause so quill + title render first
-  var TYPE_DURATION = 62 * full.length + 250;            // ~1550ms to finish typing
-  var MIN_SPLASH_MS = TYPE_DELAY + TYPE_DURATION + 500;  // ~2650ms — fade no earlier than this
-  setTimeout(function startTyping() {
-    var iv = setInterval(function() {
-      i++;
-      if (typeEl) typeEl.textContent = full.slice(0, i);
-      if (i >= full.length) clearInterval(iv);
-    }, 62);
-  }, TYPE_DELAY);
+  var MIN_SPLASH_MS = 1400;                 // brief, calm splash — no load bar, no typing
+  if (typeEl) typeEl.textContent = full;    // subtitle shown as plain text (it loaded too fast to type)
   function setLoader(pct) { var f = document.querySelector('.boot-loader-fill'); if (f) f.style.width = pct + '%'; }
   setLoader(15);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setLoader(35); });
