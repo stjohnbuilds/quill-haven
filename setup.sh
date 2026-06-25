@@ -20,10 +20,16 @@ HELPER_DIR="$HOME/.local/share/quill-haven"
 
 say() { printf "\n\033[1;36m==> %s\033[0m\n" "$*"; }
 
-say "Updating packages"
-sudo apt-get update -y
-say "Installing Chromium + helpers"
-sudo apt-get install -y chromium unclutter xdotool python3 curl xfce4-terminal network-manager-gnome
+# apt must NEVER abort the whole setup. On a RE-RUN the packages are already
+# installed, and a flaky third-party repo (e.g. linux-surface) can make
+# `apt-get update` fail. With `set -e` that aborted the script at the very first
+# step — so the re-run did NOTHING (no file refresh, no policy, no helper). That
+# is exactly the "re-run did nothing / sites still blocked" bug. Guard apt and
+# carry on to the parts that actually matter.
+say "Updating packages (not fatal — skipped if a repo is down)"
+sudo apt-get update -y || true
+say "Installing Chromium + helpers (skipped if already present)"
+sudo apt-get install -y chromium unclutter xdotool python3 curl xfce4-terminal network-manager-gnome || true
 
 # Chromium must be the APT build, not snap — snap ignores /etc/chromium policies.
 if snap list 2>/dev/null | grep -q '^chromium '; then
