@@ -110,6 +110,11 @@ mkdir -p "$HELPER_DIR/extension"
 fetch_to "$EXT_RAW/manifest.json"       "$HELPER_DIR/extension/manifest.json"
 fetch_to "$EXT_RAW/quill-overlay.js"    "$HELPER_DIR/extension/quill-overlay.js"
 fetch_to "$EXT_RAW/quill-overlay.css"   "$HELPER_DIR/extension/quill-overlay.css"
+# These three are REQUIRED by manifest.json (service worker + content scripts).
+# Without them Chromium refuses to load the overlay at all — no pill, no buttons.
+fetch_to "$EXT_RAW/qh-early.js"         "$HELPER_DIR/extension/qh-early.js"
+fetch_to "$EXT_RAW/qh-bg.js"            "$HELPER_DIR/extension/qh-bg.js"
+fetch_to "$EXT_RAW/confirm.js"          "$HELPER_DIR/extension/confirm.js"
 fetch_to "$EXT_RAW/icon-48.png"         "$HELPER_DIR/extension/icon-48.png"
 fetch_to "$EXT_RAW/icon-128.png"        "$HELPER_DIR/extension/icon-128.png"
 # Seed the version file from the manifest so the first update check is honest.
