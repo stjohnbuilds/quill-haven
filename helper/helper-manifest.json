@@ -2,14 +2,14 @@
   "version": "1.7",
   "sha256": "39ddde0d8949edcb62957b8deb9251ec7c140db9b0dd5c01f7a03635788dbae8",
   "extras": [
-    { "name": "extension/manifest.json",     "src": "extension/manifest.json",     "sha256": "4ae6c6826115c500e54bb9d700c4cb87e05eabe71e664e6fec070a0d3799922d" },
-    { "name": "extension/quill-overlay.js",   "src": "extension/quill-overlay.js",   "sha256": "0d8397506145aa1b4188408e31ef310ee5584db6e7a494729ada48c645de2a61" },
-    { "name": "extension/qh-early.js",        "src": "extension/qh-early.js",        "sha256": "ce4664b3e53577a3dee594311c3180af37b2aa32400746591cb83c1430e83d39" },
+    { "name": "extension/manifest.json",     "src": "extension/manifest.json",     "sha256": "ec33191302def4237a3ee2d7ee59a07b077a3b0f08a170639cb9810e6c7db844" },
+    { "name": "extension/quill-overlay.js",   "src": "extension/quill-overlay.js",   "sha256": "42fdc3c121f056a1f0eefdfb795e3a3022736813d9fe9760de0c8e4235847a17" },
+    { "name": "extension/qh-early.js",        "src": "extension/qh-early.js",        "sha256": "ce98008621b475c788a0e92ffe70a539a78284c2afaffc127756df89cbb5a71d" },
     { "name": "extension/quill-overlay.css",  "src": "extension/quill-overlay.css",  "sha256": "f49443ba4e7189ef5d93be2d05fb235ac30d999677dc35f37b97b69fa253e1e3" },
     { "name": "extension/confirm.js",         "src": "extension/confirm.js",         "sha256": "188b9df00508a8d46d7ac23535b576a92f780a2664eb7f39b3709781a01e3b8c" },
     { "name": "extension/qh-bg.js",           "src": "extension/qh-bg.js",           "sha256": "8672330165d0a5503e77ae4dfbba70e3ac22e5f73f8333a536e9aef9a4748016" },
     { "name": "extension/icon-48.png",        "src": "extension/icon-48.png",        "sha256": "18278d9b569bb3abdf5229c6d003d312d5773d571a8b347d4a15e9a7a188cc92" },
     { "name": "extension/icon-128.png",       "src": "extension/icon-128.png",       "sha256": "b9d996dd818baa807f22b8b6eb0634ad591b4e3c756c3e3b34e89026dd42cfae" },
-    { "name": "launch-home.sh",               "src": "helper/launch-home.sh",        "sha256": "f395ee3729f4b59ac355b3f09b95fbf3d191d1de4cc2782bab72ad666b7914da" }
+    { "name": "launch-home.sh",               "src": "helper/launch-home.sh",        "sha256": "4cb894d0efea0a2827b8f8dc0468aad097dd85d91a471cde8ba029f9d3f48b9f" }
   ]
 }

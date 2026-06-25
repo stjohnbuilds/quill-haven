@@ -19,8 +19,8 @@
   var HOME_BASE = 'https://stjohnbuilds.github.io/quill-haven/home-screen/';
   var HOME_URL = HOME_BASE;
   var VERSION_URL = 'https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json';
-  var LOCAL_VERSION = '4.5';
-  var localEmoji = '📖';
+  var LOCAL_VERSION = '4.6';
+  var localEmoji = '🕯️';
   var updateInfo = null;
 
   function esc(s) {
@@ -108,7 +108,11 @@
   function appById(id) { var l = allApps(); for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i]; return null; }
 
   // ── Talk to the local helper (via the background worker, so it works anywhere) ──
-  function helper(path, opts) {
+  // The MV3 background worker can be ASLEEP, so the first message sometimes fails
+  // with lastError — which used to make Power/Restart "do nothing". So we retry a
+  // few times (200ms apart) to wake the worker before giving up. The actions are
+  // idempotent (power off / go home), so a retry is safe.
+  function helperOnce(path, opts) {
     return new Promise(function (resolve, reject) {
       try {
         chrome.runtime.sendMessage({ type: 'qh-helper', path: path, method: (opts && opts.method) || 'POST', json: !!(opts && opts.json) }, function (resp) {
@@ -116,6 +120,18 @@
           if (resp && resp.ok) resolve(resp.data); else reject(resp && resp.err);
         });
       } catch (e) { reject(e); }
+    });
+  }
+  function helper(path, opts) {
+    var maxTries = (opts && opts.noRetry) ? 1 : 4;
+    return new Promise(function (resolve, reject) {
+      var tries = 0;
+      (function attempt() {
+        helperOnce(path, opts).then(resolve, function (err) {
+          if (++tries >= maxTries) { reject(err); return; }
+          setTimeout(attempt, 200);
+        });
+      })();
     });
   }
   function helperAction(path) {
@@ -561,6 +577,9 @@
       document.documentElement.appendChild(pill);
       document.documentElement.appendChild(dock);
       document.documentElement.appendChild(settingsEl);
+      window.__qhOverlayUp = true;   // tell qh-early.js the overlay is up, so its
+                                     // safety-net timer leaves the native hide in place
+
       setupDrag(pill, pill.querySelector('#qh-pill-grip'), 'posPill');   // drag from the grip
       setupDrag(dock, dock.querySelector('#qh-dock-grip'), 'posDock');   // drag from the grip
       // Only hide the home screen's OWN top bar + dock AFTER our overlay is safely
@@ -569,6 +588,18 @@
       if (isHome()) document.documentElement.classList.add('qh-ext-home');
       checkForUpdate();
       startIdleWatch();   // turn the screen off after a few idle minutes (battery)
+      // Live app-list sync (no reload needed): when the home screen changes its
+      // apps, re-bridge localStorage -> chrome.storage; and keep our in-memory
+      // settings fresh from chrome.storage so the switcher always lists the latest.
+      window.addEventListener('qh-apps-changed', function () { try { bridgeHome(); } catch (e) {} });
+      try {
+        chrome.storage.onChanged.addListener(function (changes, area) {
+          if (area !== 'local') return;
+          ['addons', 'apps', 'order', 'theme', 'tz'].forEach(function (k) {
+            if (changes[k]) settings[k] = changes[k].newValue;
+          });
+        });
+      } catch (e) {}
     } catch (e) {
       // Last resort: make sure the home screen's native buttons are still there.
       document.documentElement.classList.remove('qh-ext-home');

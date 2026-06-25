@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Quill Haven",
-  "version": "3.1",
+  "version": "4.6",
   "description": "Quill Haven overlay — the status pill and app switcher that live on every page so you can always see the time and never get stuck in an app.",
   "permissions": ["storage"],
   "host_permissions": [

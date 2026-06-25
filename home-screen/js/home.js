@@ -254,7 +254,10 @@ function loadAddons() {
   var byId = {}; DEFAULT_ADDONS.forEach(function(d){ byId[d.id] = d; });
   return a.map(function(app){ return byId[app.id] || app; });
 }
-function saveAddons(a) { try { localStorage.setItem('qh-addons', JSON.stringify(a)); } catch(e) {} }
+// Tell the overlay (and any other tab) that the app list changed, so the
+// bottom-right switcher refreshes immediately instead of needing a reload.
+function notifyAppsChanged() { try { window.dispatchEvent(new Event('qh-apps-changed')); } catch(e) {} }
+function saveAddons(a) { try { localStorage.setItem('qh-addons', JSON.stringify(a)); } catch(e) {} notifyAppsChanged(); }
 
 var addons = loadAddons();
 function allApps() { return BUILTIN_APPS.concat(addons); }
@@ -263,7 +266,7 @@ function isBuiltin(id) { return BUILTIN_APPS.some(function(a){ return a.id === i
 // Custom display order (set by dragging rows in Settings). Stored as a list of
 // app ids; any app not listed keeps its natural place at the end.
 function loadOrder() { try { var o = JSON.parse(localStorage.getItem('qh-order')); return Array.isArray(o) ? o : []; } catch(e) { return []; } }
-function saveOrder(ids) { try { localStorage.setItem('qh-order', JSON.stringify(ids)); } catch(e) {} }
+function saveOrder(ids) { try { localStorage.setItem('qh-order', JSON.stringify(ids)); } catch(e) {} notifyAppsChanged(); }
 function orderedApps() {
   var apps = allApps();
   var order = loadOrder();
@@ -547,6 +550,7 @@ function toggleAppVis(name, visible) {
   if (!visible && currentApp === name) goHome();
   refreshDockEmpty();
   try { var a = JSON.parse(localStorage.getItem('qh-apps') || '{}'); a[name] = visible; localStorage.setItem('qh-apps', JSON.stringify(a)); } catch(e) {}
+  notifyAppsChanged();
 }
 
 // Recolour app icons in place when the theme changes (no view/iframe rebuild).
@@ -1231,8 +1235,8 @@ function setNight(on) {
 })();
 
 // ── Update check ──
-var LOCAL_VERSION = '4.5';
-var LOCAL_EMOJI = '📖';
+var LOCAL_VERSION = '4.6';
+var LOCAL_EMOJI = '🕯️';
 
 // Set the footer version + emoji dynamically so it always matches the code
 (function() {
