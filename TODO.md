@@ -3,16 +3,15 @@
 ## 🔧 Fixing now (2026-06-24) — from Marie's first real-hardware run (Surface Laptop Go)
 
 **Quick UI**
-- [ ] Loading screen: remove the load bar; show the subtitle as plain text
-      (it loads too fast for the typing animation to play).
-- [ ] Pill: full length — does NOT resize or move on click/hover.
-- [ ] Pill drag-handle: even dots.
+- [x] Loading screen: removed the load bar; subtitle shows as plain text. (4.5)
+- [x] Pill: full length — no longer resizes on click/hover. (4.5)
+- [x] Pill drag-handle: round, even dots (were stretched ovals). (4.5)
 
 **Behaviour**
 - [ ] Power-off button reliability — the relay to the helper can be asleep (MV3
       service worker), so the tap misses. Make it wake-and-retry.
-- [ ] Boot order: never show Chromium's offline "Dino" page — wait for Wi-Fi /
-      show a "connecting…" state.
+- [x] Boot order: ROOT fix — launcher waits until the home host is reachable
+      before opening Chromium, so it never lands on the Dino page. (4.5)
 - [ ] Clean shutdown: hide the scary "[FAILED] Failed to…" flash on power-off.
 
 **Bigger builds**
