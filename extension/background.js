@@ -21,7 +21,7 @@ var HELPER = 'http://127.0.0.1:8137';
 /* ── 1. Relay helper actions ── */
 chrome.runtime.onMessage.addListener(function (msg, sender, sendResponse) {
   if (!msg || msg.type !== 'helper' || typeof msg.path !== 'string') return;
-  var ALLOWED = ['/sleep', '/reboot', '/poweroff', '/wifi-settings', '/come-home'];
+  var ALLOWED = ['/sleep', '/reboot', '/poweroff', '/wifi-settings', '/come-home', '/apply-update'];
   if (ALLOWED.indexOf(msg.path) < 0) { sendResponse({ ok: false, reason: 'not-allowed' }); return; }
   fetch(HELPER + msg.path, { method: 'POST' })
     .then(function () { sendResponse({ ok: true }); })
@@ -55,19 +55,21 @@ function rebuildState(v) {
   v = v || {};
   state.homeUrl = v['qh-home-url'] || '';
   state.homeHost = hostOf(state.homeUrl);
-  var apps = Array.isArray(v['qh-apps-full']) ? v['qh-apps-full'] : [];
+  // The shell publishes the one app list's URLs as 'qh-app-urls'; we derive the
+  // allowed base domains here (so the allow-list has ONE source — the app list).
+  var urls = Array.isArray(v['qh-app-urls']) ? v['qh-app-urls'] : [];
   var doms = {};
-  apps.forEach(function (a) { var d = baseDomain(hostOf(a && a.url)); if (d) doms[d] = true; });
+  urls.forEach(function (u) { var d = baseDomain(hostOf(u)); if (d) doms[d] = true; });
   state.appDomains = Object.keys(doms);
 }
 
 function loadState() {
-  try { chrome.storage.local.get(['qh-home-url', 'qh-apps-full'], function (v) { if (!chrome.runtime.lastError) rebuildState(v); }); }
+  try { chrome.storage.local.get(['qh-home-url', 'qh-app-urls'], function (v) { if (!chrome.runtime.lastError) rebuildState(v); }); }
   catch (e) {}
 }
 loadState();
 chrome.storage.onChanged.addListener(function (changes, area) {
-  if (area === 'local' && (changes['qh-apps-full'] || changes['qh-home-url'])) loadState();
+  if (area === 'local' && (changes['qh-app-urls'] || changes['qh-home-url'])) loadState();
 });
 
 // STAGED ROLLOUT SWITCH. The floating bar is safe; the lockdown is the part not

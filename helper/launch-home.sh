@@ -2,8 +2,8 @@
 # Quill Haven kiosk launcher. Starts Chromium in fullscreen kiosk mode and the
 # helper service. If Chromium crashes, it restarts automatically.
 # This file is kept up to date by the helper's self-update (no re-run needed).
-# rev: v2.0.0-2026-06-25  (Quill Haven 2.0 switch-over: points at the new screen +
-#                    new floating-bar extension. Locking ships OFF for the first test.)
+# rev: v2.1.0-2026-06-25  (Quill Haven 2.1 — the ONE-shell rebuild. One bar/dock/
+#                    settings on every page. Sweeps the old overlay files. Locking OFF.)
 
 xset s off 2>/dev/null; xset -dpms 2>/dev/null; xset s noblank 2>/dev/null
 
@@ -41,6 +41,11 @@ fi
 # every page). Only added if the extension actually downloaded, so a partial
 # download can never stop the laptop from booting into the home screen.
 EXT_DIR="$HOME/.local/share/quill-haven/extension"
+# One-time sweep: the old two-shell overlay files are no longer used (the one shell
+# is content.js). The helper only ever ADDS files, never deletes, so clear the stale
+# ones here so nothing ghost can ever load alongside the new shell.
+rm -f "$EXT_DIR/quill-overlay.js" "$EXT_DIR/quill-overlay.css" "$EXT_DIR/qh-bg.js" \
+      "$EXT_DIR/qh-early.js" "$EXT_DIR/confirm.js" "$EXT_DIR/icon-48.png" "$EXT_DIR/icon-128.png"
 EXT_FLAGS=""
 if [ -f "$EXT_DIR/manifest.json" ]; then
   EXT_FLAGS="--load-extension=$EXT_DIR --disable-extensions-except=$EXT_DIR"
