@@ -2,10 +2,14 @@
 # Quill Haven kiosk launcher. Starts Chromium in fullscreen kiosk mode and the
 # helper service. If Chromium crashes, it restarts automatically.
 # This file is kept up to date by the helper's self-update (no re-run needed).
-# rev: v4.9-2026-06-24  (bumping this line makes the helper relaunch Chromium so a
-#                    new overlay extension takes effect after one reboot)
+# rev: v2.0.0-2026-06-25  (Quill Haven 2.0 switch-over: points at the new screen +
+#                    new floating-bar extension. Locking ships OFF for the first test.)
 
 xset s off 2>/dev/null; xset -dpms 2>/dev/null; xset s noblank 2>/dev/null
+
+# Use whichever Chromium binary this distro installed — some call it chromium-browser.
+# (Matches the helper's own detection so boot can't fail on a "command not found".)
+BROWSER="$(command -v chromium || command -v chromium-browser || echo chromium)"
 
 # Hide the mouse cursor after 2 seconds of inactivity
 pgrep -f unclutter >/dev/null || unclutter -idle 2 -root &
@@ -47,13 +51,13 @@ fi
 # offline error page. Polls up to ~30s, then falls through (so a genuinely
 # offline boot still proceeds rather than hanging forever).
 for _ in $(seq 1 30); do
-  curl -fsS --max-time 2 -o /dev/null "https://stjohnbuilds.github.io/quill-haven/version.json" && break
+  curl -fsS --max-time 2 -o /dev/null "https://stjohnbuilds.github.io/quill-haven-2/version.json" && break
   sleep 1
 done
 
 # If Chromium ever crashes, restart it so Marie is never dumped to a bare X.
 while true; do
-  chromium \
+  "$BROWSER" \
     --kiosk \
     --start-fullscreen \
     $SIZE_FLAGS \
@@ -63,6 +67,6 @@ while true; do
     --disable-session-crashed-bubble \
     --disable-features=TranslateUI,LocalNetworkAccessChecks \
     --overscroll-history-navigation=1 \
-    "https://stjohnbuilds.github.io/quill-haven/"
+    "https://stjohnbuilds.github.io/quill-haven-2/home-screen/"
   sleep 2
 done

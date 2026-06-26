@@ -1,36 +1,20 @@
 {
   "manifest_version": 3,
-  "name": "Quill Haven",
-  "version": "4.9",
-  "description": "Quill Haven overlay — the status pill and app switcher that live on every page so you can always see the time and never get stuck in an app.",
-  "permissions": ["storage"],
-  "host_permissions": [
-    "http://127.0.0.1:8137/*",
-    "https://stjohnbuilds.github.io/*",
-    "https://docs.google.com/*",
-    "https://*.google.com/*",
-    "https://*.dabblewriter.com/*",
-    "https://typingandtomes.vercel.app/*",
-    "https://*.vercel.app/*"
-  ],
-  "background": { "service_worker": "qh-bg.js" },
+  "name": "Quill Haven Shell",
+  "version": "0.1.0",
+  "description": "Floats the Quill Haven bar, app switcher and settings on top of every page, and keeps the laptop locked to your approved writing apps (a blocked page bounces home).",
+  "permissions": ["storage", "webNavigation", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
   "content_scripts": [
     {
-      "matches": ["https://stjohnbuilds.github.io/quill-haven/*"],
-      "js": ["qh-early.js"],
-      "run_at": "document_start",
-      "all_frames": false
-    },
-    {
-      "matches": ["<all_urls>"],
-      "js": ["confirm.js", "quill-overlay.js"],
-      "css": ["quill-overlay.css"],
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
       "run_at": "document_idle",
       "all_frames": false
     }
   ],
-  "icons": {
-    "48": "icon-48.png",
-    "128": "icon-128.png"
-  }
+  "web_accessible_resources": [
+    { "resources": ["shell.css"], "matches": ["http://*/*", "https://*/*"] }
+  ]
 }
