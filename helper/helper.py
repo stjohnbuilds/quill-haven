@@ -41,6 +41,44 @@ ACTIONS = {
     "/sleep":    ["systemctl", "suspend"],
 }
 
+def _screen_off():
+    """Power the display off to save battery. The helper might not have inherited the
+    screen-session vars, so borrow the real DISPLAY / XAUTHORITY (and Wayland) from the
+    running browser, which definitely has them. Both DPMS (X11) and the Wayland
+    equivalent wake automatically on any key or touch — the screen is never left stuck
+    off. (Earlier this only tried xset with a guessed DISPLAY, which is why some laptops
+    did nothing.)"""
+    env = dict(os.environ)
+    try:
+        pids = subprocess.check_output(["pgrep", "-f", BROWSER], timeout=3).split()
+        for pid in pids:
+            try:
+                with open("/proc/%s/environ" % pid.decode(), "rb") as f:
+                    raw = f.read()
+            except Exception:
+                continue
+            for kv in raw.split(b"\0"):
+                if b"=" not in kv:
+                    continue
+                k, _, v = kv.partition(b"=")
+                ks = k.decode("utf-8", "replace")
+                if ks in ("DISPLAY", "XAUTHORITY", "WAYLAND_DISPLAY", "XDG_RUNTIME_DIR"):
+                    env[ks] = v.decode("utf-8", "replace")
+            break
+    except Exception:
+        pass
+    env.setdefault("DISPLAY", ":0")
+    try:                                              # X11
+        subprocess.run(["xset", "+dpms"], env=env, timeout=3)
+        subprocess.run(["xset", "dpms", "force", "off"], env=env, timeout=3)
+    except Exception:
+        pass
+    if env.get("WAYLAND_DISPLAY"):                    # Wayland (sway / wlroots kiosks)
+        try:
+            subprocess.run(["swaymsg", "output", "*", "dpms", "off"], env=env, timeout=3)
+        except Exception:
+            pass
+
 # ---------- download helper ----------
 def _get(url, timeout=15):
     req = urllib.request.Request(url, headers={"Cache-Control": "no-cache"})
@@ -286,14 +324,9 @@ class H(BaseHTTPRequestHandler):
             else:
                 self._send(500, b"no wifi tool installed")
         elif p == "/screen-off":
-            # Power the display off to save battery on idle (the overlay calls this
-            # after a few minutes of no typing). Any touch/key wakes it back instantly.
-            env = dict(os.environ); env.setdefault("DISPLAY", ":0")
-            try:
-                subprocess.run(["xset", "+dpms"], env=env, timeout=3)
-                subprocess.Popen(["xset", "dpms", "force", "off"], env=env)
-            except Exception:
-                pass
+            # Power the display off to save battery (the overlay calls this on idle or
+            # when Marie taps the Screen button). Threaded so the reply returns fast.
+            threading.Thread(target=_screen_off, daemon=True).start()
             self._send()
         elif p == "/apply-update":
             # The approval gate: fetch + apply the waiting update, then restart.
