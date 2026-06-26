@@ -2,11 +2,11 @@
   "version": "1.7",
   "sha256": "d663f533089bc506e5ddd22df2e6119cde78bded62173de0e0b28f2b76e58ce3",
   "extras": [
-    { "name": "extension/manifest.json",   "src": "extension/manifest.json",   "sha256": "69dd0806b1f1afdaa84acf03038dec77fad2a62332c31726cd7e8f41c3e03944" },
+    { "name": "extension/manifest.json",   "src": "extension/manifest.json",   "sha256": "b378aeb0747e7415a8cf5168af4f2b44a986932f25a9dc1623752b6f8abde470" },
     { "name": "extension/apps.js",          "src": "extension/apps.js",          "sha256": "dab56249428671e0eb7a51eb903939f068f329000ebe23e9b82b80ef15253c28" },
-    { "name": "extension/content.js",       "src": "extension/content.js",       "sha256": "32af64ee3e881288ba3d9edc4c05479e8a509282dbec9a9bc00f126eb53f27cd" },
+    { "name": "extension/content.js",       "src": "extension/content.js",       "sha256": "1e1ebb1acf55cc56154242755e20c3f0366669fdeceb9f358fd6ac2eec4513ce" },
     { "name": "extension/background.js",    "src": "extension/background.js",    "sha256": "fc2447c93769a83b8575b8f4be2ef72d616559d9880eb2591161b2b6f77dd049" },
-    { "name": "extension/shell.css",        "src": "extension/shell.css",        "sha256": "5faa2d30a1a82534656a20128e99d4f81847b6d3223efd60cad3803b388099da" },
+    { "name": "extension/shell.css",        "src": "extension/shell.css",        "sha256": "ce1cb85f55a7c295ef1804b34a6e636fac0d02639eabc5b89bffcca656dbab74" },
     { "name": "launch-home.sh",             "src": "helper/launch-home.sh",      "sha256": "11b11ae73630aad6aa15b558bb83d256ada1ab8d4daf1f37365a4e7403bcd051" }
   ]
 }
