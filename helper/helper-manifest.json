@@ -1,6 +1,6 @@
 {
   "version": "1.7",
-  "sha256": "39ddde0d8949edcb62957b8deb9251ec7c140db9b0dd5c01f7a03635788dbae8",
+  "sha256": "d663f533089bc506e5ddd22df2e6119cde78bded62173de0e0b28f2b76e58ce3",
   "extras": [
     { "name": "extension/manifest.json",   "src": "extension/manifest.json",   "sha256": "99da68cde21ff4fc7a58565a6e2289dfa9660a37f0c02996016b7819792bf8f7" },
     { "name": "extension/apps.js",          "src": "extension/apps.js",          "sha256": "dab56249428671e0eb7a51eb903939f068f329000ebe23e9b82b80ef15253c28" },

@@ -19,10 +19,21 @@ VERF      = os.path.join(HERE, "helper-version.txt")
 DEV_VERF  = os.path.join(HERE, "device-version.txt")
 LAUNCH    = os.path.join(HERE, "launch-home.sh")
 ADMIN_BIN = "/usr/local/bin/qh-admin"
-UPDATE_EVERY_SEC = 6 * 60 * 60
 ALLOWED_ORIGIN   = "https://stjohnbuilds.github.io"
 
 BROWSER = "chromium" if shutil.which("chromium") else "chromium-browser"
+
+# One apply at a time. A double-tap (or the pill AND the home button both firing)
+# must not start two apply threads racing on the same temp files.
+_apply_lock = threading.Lock()
+_apply_started = False
+def _begin_apply():
+    global _apply_started
+    with _apply_lock:
+        if _apply_started:
+            return False
+        _apply_started = True
+        return True
 
 ACTIONS = {
     "/poweroff": ["systemctl", "poweroff"],
@@ -54,15 +65,16 @@ def current_device_version():
     except FileNotFoundError:
         return "0"
 
-# ---------- self-update (safe: verify hash + compiles, atomic swap, rollback) ----------
-def check_for_update():
+# ---------- self-update to disk (safe: verify hash + compiles, atomic swap, keep .bak) ----------
+# This ONLY writes the new helper.py to disk. It does not restart and does not touch
+# extras — apply_update() orchestrates the full apply + restart, and that only runs
+# when Marie taps "Update". Nothing here ever happens on a timer any more.
+def _self_update_to_disk(man):
     try:
-        man = json.loads(_get(BASE + "/helper-manifest.json"))
         want_ver = str(man["version"]); want_sha = man["sha256"].lower()
     except Exception:
         return False
     if want_ver == current_version():
-        _update_extras(man)
         return False
     try:
         blob = _get(BASE + "/helper.py")
@@ -82,9 +94,7 @@ def check_for_update():
     os.replace(tmp, LIVE)
     with open(VERF, "w") as f:
         f.write(want_ver)
-    # Also update extras before restarting
-    _update_extras(man)
-    os._exit(75)
+    return True
 
 # ---------- extras: user-space files (launch-home.sh etc.) ----------
 def _update_extras(man):
@@ -173,13 +183,40 @@ def check_device_manifest():
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
 
-# ---------- update loop ----------
-def update_loop():
-    time.sleep(20)
-    while True:
-        check_for_update()
+# ---------- apply updates ON DEMAND (the approval gate) ----------
+# Updates are never applied on a timer. The home screen / overlay shows
+# "Update available"; only when Marie taps it does the browser POST /apply-update,
+# which runs the same verified, hash-checked apply as before, then restarts so the
+# new overlay + helper take effect. One bad push can no longer change the device on
+# its own.
+def apply_update():
+    # 1) system-level policy files (sudo, hash-verified, atomic) — no-op if unchanged
+    try:
         check_device_manifest()
-        time.sleep(UPDATE_EVERY_SEC)
+    except Exception:
+        pass
+    # 2) user-space extras (overlay, launcher) + the helper itself, hash-verified
+    try:
+        man = json.loads(_get(BASE + "/helper-manifest.json"))
+    except Exception:
+        man = None
+    if man:
+        try:
+            _update_extras(man)
+        except Exception:
+            pass
+        try:
+            _self_update_to_disk(man)
+        except Exception:
+            pass
+    # 3) restart so the new files take effect. Done in a thread so the HTTP reply
+    #    has already gone back before we kill the browser.
+    def _restart():
+        time.sleep(1.0)
+        subprocess.Popen(["pkill", "-x", BROWSER])   # browser relaunches with new overlay
+        time.sleep(0.5)
+        os._exit(75)                                  # supervisor relaunches the new helper
+    threading.Thread(target=_restart, daemon=True).start()
 
 # ---------- http ----------
 class H(BaseHTTPRequestHandler):
@@ -229,8 +266,6 @@ class H(BaseHTTPRequestHandler):
         p = self.path.split("?")[0]
         if p in ACTIONS:
             subprocess.Popen(ACTIONS[p]); self._send()
-        elif p == "/desktop":
-            subprocess.Popen(["pkill", "-x", BROWSER]); self._send()
         elif p == "/go-home":
             subprocess.Popen(["pkill", "-x", BROWSER])
             if os.path.exists(LAUNCH):
@@ -260,11 +295,18 @@ class H(BaseHTTPRequestHandler):
             except Exception:
                 pass
             self._send()
+        elif p == "/apply-update":
+            # The approval gate: fetch + apply the waiting update, then restart.
+            # Reply immediately so the browser hears back before the restart. Only
+            # the first call actually applies; repeats are acknowledged and ignored.
+            self._send()
+            if _begin_apply():
+                threading.Thread(target=apply_update, daemon=True).start()
         else:
             self._send(404, b"no")
 
 def main():
-    threading.Thread(target=update_loop, daemon=True).start()
+    # No background update thread — updates apply only on Marie's tap (/apply-update).
     ThreadingHTTPServer(("127.0.0.1", PORT), H).serve_forever()
 
 if __name__ == "__main__":
