@@ -263,7 +263,14 @@ def apply_update():
 # ---------- http ----------
 class H(BaseHTTPRequestHandler):
     def _cors(self):
-        self.send_header("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
+        # The browser's Update / Terminal / Screen messages come from the EXTENSION's own
+        # origin (chrome-extension://… or "null"), NOT the home-screen page — so a single
+        # hard-coded ALLOWED_ORIGIN never matched and the browser discarded every reply,
+        # which is why none of those buttons worked. Reflect the caller's Origin (falling
+        # back to "*"). Safe: the server binds 127.0.0.1 only, so nothing off this machine
+        # can reach it. (Replies are sent with credentials omitted, so "*" is valid too.)
+        origin = self.headers.get("Origin")
+        self.send_header("Access-Control-Allow-Origin", origin if origin else "*")
         self.send_header("Access-Control-Allow-Private-Network", "true")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "*")
