@@ -41,13 +41,11 @@ ACTIONS = {
     "/sleep":    ["systemctl", "suspend"],
 }
 
-def _screen_off():
-    """Power the display off to save battery. The helper might not have inherited the
-    screen-session vars, so borrow the real DISPLAY / XAUTHORITY (and Wayland) from the
-    running browser, which definitely has them. Both DPMS (X11) and the Wayland
-    equivalent wake automatically on any key or touch — the screen is never left stuck
-    off. (Earlier this only tried xset with a guessed DISPLAY, which is why some laptops
-    did nothing.)"""
+def _gui_env():
+    """The helper may not have inherited the screen-session variables, so anything it
+    launches (a terminal window, the wifi window) can have nowhere to appear and fails
+    silently. Borrow the real DISPLAY / XAUTHORITY (and Wayland) from the running
+    browser, which definitely has them, so launched windows actually show up."""
     env = dict(os.environ)
     try:
         pids = subprocess.check_output(["pgrep", "-f", BROWSER], timeout=3).split()
@@ -68,6 +66,12 @@ def _screen_off():
     except Exception:
         pass
     env.setdefault("DISPLAY", ":0")
+    return env
+
+def _screen_off():
+    """Power the display off to save battery. DPMS (X11) and the Wayland equivalent both
+    wake automatically on any key or touch — the screen is never left stuck off."""
+    env = _gui_env()
     try:                                              # X11
         subprocess.run(["xset", "+dpms"], env=env, timeout=3)
         subprocess.run(["xset", "dpms", "force", "off"], env=env, timeout=3)
@@ -310,16 +314,16 @@ class H(BaseHTTPRequestHandler):
                 subprocess.Popen(["bash", LAUNCH])
             self._send()
         elif p == "/terminal":
-            term = next((t for t in ("xfce4-terminal", "gnome-terminal", "mate-terminal", "xterm") if shutil.which(t)), None)
+            term = next((t for t in ("x-terminal-emulator", "xfce4-terminal", "gnome-terminal", "mate-terminal", "konsole", "lxterminal", "xterm") if shutil.which(t)), None)
             if term:
-                subprocess.Popen([term])
+                subprocess.Popen([term], env=_gui_env())
                 self._send()
             else:
                 self._send(500, b"no terminal installed")
         elif p == "/wifi-settings":
             tool = next((t for t in ("nm-connection-editor", "nm-applet") if shutil.which(t)), None)
             if tool:
-                subprocess.Popen([tool])
+                subprocess.Popen([tool], env=_gui_env())
                 self._send()
             else:
                 self._send(500, b"no wifi tool installed")
