@@ -2,8 +2,8 @@
 # Quill Haven kiosk launcher. Starts Chromium in fullscreen kiosk mode and the
 # helper service. If Chromium crashes, it restarts automatically.
 # This file is kept up to date by the helper's self-update (no re-run needed).
-# rev: v2.1.0-2026-06-25  (Quill Haven 2.1 — the ONE-shell rebuild. One bar/dock/
-#                    settings on every page. Sweeps the old overlay files. Locking OFF.)
+# rev: v2.3.10-2026-06-27  (clears the extension's cached background service worker on
+#                    each launch so a frozen worker can't block Update/Terminal. Locking OFF.)
 
 xset s off 2>/dev/null; xset -dpms 2>/dev/null; xset s noblank 2>/dev/null
 
@@ -62,6 +62,15 @@ done
 
 # If Chromium ever crashes, restart it so Marie is never dumped to a bare X.
 while true; do
+  # Force the extension's background service worker to recompile from the current
+  # background.js on disk. On an in-place relaunch Chromium otherwise restores the OLD
+  # compiled worker from this profile, freezing background.js a version behind — the
+  # cause of "Update says not-allowed" and the dead Terminal/Update buttons. Only these
+  # two caches are removed (rebuilt automatically); Cookies / Login Data are untouched,
+  # so the Google sign-in survives. The */ glob covers Default or any numbered profile.
+  for d in "$HOME/.quill-profile"/*/"Service Worker" "$HOME/.quill-profile"/*/"Code Cache"; do
+    [ -d "$d" ] && rm -rf "$d"
+  done
   "$BROWSER" \
     --kiosk \
     --start-fullscreen \

@@ -30,7 +30,7 @@
     {
       "name": "launch-home.sh",
       "src": "helper/launch-home.sh",
-      "sha256": "11b11ae73630aad6aa15b558bb83d256ada1ab8d4daf1f37365a4e7403bcd051"
+      "sha256": "a233c67728f148fc094ff9a7b9240c9eb5c2b912c4f62147c2adc58c1533c4c7"
     }
   ]
 }
