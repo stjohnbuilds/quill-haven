@@ -144,6 +144,11 @@ while IFS=$'\t' read -r name dest mode; do
     [ -z "$name" ] && continue
     src="$DIR/$name"
     [ -f "$src" ] || { echo "SKIP $name (not found)"; continue; }
+    case "$dest" in
+        /etc/chromium/*|/etc/chromium-browser/*) : ;;
+        *) echo "REJECT $dest (outside allowed paths)"; continue ;;
+    esac
+    case "$dest" in *..*) echo "REJECT $dest (unsafe path)"; continue ;; esac
     mkdir -p "$(dirname "$dest")"
     [ -f "$dest" ] && cp -a "$dest" "${dest}.qh-bak"
     cp "$src" "$dest"
@@ -334,8 +339,43 @@ sudo tee /etc/tlp.d/01-quillhaven.conf >/dev/null <<'TLP'
 # Quill Haven: tune for battery, but NEVER throttle Wi-Fi (keeps it snappy).
 WIFI_PWR_ON_AC=off
 WIFI_PWR_ON_BAT=off
+# Power-saving CPU governor + lean toward efficiency on this low-power chip.
+CPU_SCALING_GOVERNOR_ON_AC=powersave
+CPU_SCALING_GOVERNOR_ON_BAT=powersave
+CPU_ENERGY_PERF_POLICY_ON_AC=balance_power
+CPU_ENERGY_PERF_POLICY_ON_BAT=power
+# The 4415Y has no turbo worth the heat/drain on a writing box — keep it off.
+CPU_BOOST_ON_AC=0
+CPU_BOOST_ON_BAT=0
+# Let idle USB devices sleep (TLP's allow-list keeps keyboard/touch awake).
+USB_AUTOSUSPEND=1
+# Audio codec sleeps fast when nothing is playing.
+SOUND_POWER_SAVE_ON_AC=1
+SOUND_POWER_SAVE_ON_BAT=1
+# Power down idle PCIe/SATA lanes.
+RUNTIME_PM_ON_AC=auto
+RUNTIME_PM_ON_BAT=auto
 TLP
 sudo systemctl enable --now tlp 2>/dev/null || true
+
+# powertop flips a few idle power bits TLP leaves alone. Run it ONCE per boot as
+# a one-shot (never a live daemon, so it can't fight TLP).
+sudo apt-get install -y powertop || true
+sudo tee /etc/systemd/system/powertop.service >/dev/null <<'PT'
+[Unit]
+Description=Quill Haven one-shot powertop --auto-tune
+After=multi-user.target
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/powertop --auto-tune
+[Install]
+WantedBy=multi-user.target
+PT
+sudo systemctl enable --now powertop.service 2>/dev/null || true
+
+# A Surface Go has a screen-rotation sensor that polls forever — useless on a
+# fixed writing machine. Switch it off (one command turns it back on).
+sudo systemctl disable --now iio-sensor-proxy.service 2>/dev/null || true
 
 # Switch off background services a locked writing machine never uses:
 # printing, Bluetooth, local-network discovery, and the cellular-modem manager.
