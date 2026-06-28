@@ -5,7 +5,7 @@
     {
       "name": "extension/manifest.json",
       "src": "extension/manifest.json",
-      "sha256": "889582b7fbd02881f35793c6b993a3f49d07afcb3b2455e5df36b89dac353a39"
+      "sha256": "7093bbb1acd50c742c95f5a4741e0ea3b472718677213f144a432b99a3c177f8"
     },
     {
       "name": "extension/apps.js",
@@ -15,12 +15,12 @@
     {
       "name": "extension/content.js",
       "src": "extension/content.js",
-      "sha256": "a94afd97cbb04584d9fec88ca4dabf5450a05368b172e6a3093267e87f000e1f"
+      "sha256": "c6f5354893db9cb1fee339604545911bf310bef00ed1394264e717aafa46e60d"
     },
     {
       "name": "extension/background.js",
       "src": "extension/background.js",
-      "sha256": "407fde3d2d1d0588ad6cf0c582cff5b680f5ee2558402eaf0a52c4108bf868cc"
+      "sha256": "2af9fa877f76fbb31f6c4218fc0d883667f6fac9b24f13829d44c851d3a01927"
     },
     {
       "name": "extension/shell.css",
