@@ -37,7 +37,7 @@
   ];
 
   // Version identity. MUST agree with version.json (same number AND same emoji).
-  var LOCAL = { version: '2.3.17', emoji: '🦊' };
+  var LOCAL = { version: '2.3.18', emoji: '🦉' };
   var REMOTE_VERSION_URL = 'https://raw.githubusercontent.com/stjohnbuilds/quill-haven-2/main/version.json';
   // The delivery repo's copy of THIS file. Before telling the laptop to install, the
   // browser confirms the new version is actually published here — so the laptop can
@@ -490,7 +490,7 @@
 
   // ── Overlays (open/close any popup) ──
   function openOverlay(name) {
-    if (name === 'settings') { buildThemeDots(); buildSwatches(); buildIcons(); renderManage(); syncControls(); }
+    if (name === 'settings') { buildThemeDots(); renderManage(); syncControls(); }
     if (name === 'update' && !_updating) fillUpdate();   // don't reset the popup while an update is mid-flight
     var ov = $('.qh-overlay[data-ov="' + name + '"]'); if (ov) ov.classList.add('open');
   }
@@ -508,17 +508,16 @@
 
   // ── Clock — ONE ──
   function tick() {
-    var tz = state.tz || undefined, now = new Date(), h, m, day, mon, date;
+    var tz = state.tz || undefined, now = new Date(), h, m, wd, mo, date;
     if (tz) {
       try {
         var p = {};
         new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', minute: 'numeric', weekday: 'short', month: 'short', day: 'numeric', hour12: false }).formatToParts(now).forEach(function (x) { p[x.type] = x.value; });
-        var dm = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }, mm = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
-        h = parseInt(p.hour, 10) % 24; m = +p.minute; day = dm[p.weekday]; mon = mm[p.month]; date = +p.day;
+        h = parseInt(p.hour, 10) % 24; m = +p.minute; wd = p.weekday; mo = p.month; date = +p.day;  // 'short' parts already read 'Mon'/'Jun'
       } catch (e) { tz = null; }
     }
-    if (!tz) { h = now.getHours(); m = now.getMinutes(); day = now.getDay(); mon = now.getMonth(); date = now.getDate(); }
-    var el = $('.qh-time'); if (el) el.textContent = DAYS[day] + ', ' + MONTHS[mon] + ' ' + date + '  ' + pad(h) + ':' + pad(m);
+    if (!tz) { h = now.getHours(); m = now.getMinutes(); wd = DAYS[now.getDay()]; mo = MONTHS[now.getMonth()]; date = now.getDate(); }
+    var el = $('.qh-time'); if (el) el.textContent = wd + ', ' + mo + ' ' + date + '  ' + pad(h) + ':' + pad(m);
   }
 
   // ── Battery — ONE ──
