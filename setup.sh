@@ -110,19 +110,16 @@ fetch_to() {  # url dest  — only overwrites on a clean download
 fetch_to "$RAW/helper.py"       "$HELPER_DIR/helper.py"
 fetch_to "$RAW/run-helper.sh"   "$HELPER_DIR/run-helper.sh"
 fetch_to "$RAW/launch-home.sh"  "$HELPER_DIR/launch-home.sh"
-# Download the Quill Haven overlay extension
+# Download the Quill Haven extension (the shell: bar, dock, settings, lockdown).
 EXT_RAW="https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/extension"
 mkdir -p "$HELPER_DIR/extension"
-fetch_to "$EXT_RAW/manifest.json"       "$HELPER_DIR/extension/manifest.json"
-fetch_to "$EXT_RAW/quill-overlay.js"    "$HELPER_DIR/extension/quill-overlay.js"
-fetch_to "$EXT_RAW/quill-overlay.css"   "$HELPER_DIR/extension/quill-overlay.css"
-# These three are REQUIRED by manifest.json (service worker + content scripts).
-# Without them Chromium refuses to load the overlay at all — no pill, no buttons.
-fetch_to "$EXT_RAW/qh-early.js"         "$HELPER_DIR/extension/qh-early.js"
-fetch_to "$EXT_RAW/qh-bg.js"            "$HELPER_DIR/extension/qh-bg.js"
-fetch_to "$EXT_RAW/confirm.js"          "$HELPER_DIR/extension/confirm.js"
-fetch_to "$EXT_RAW/icon-48.png"         "$HELPER_DIR/extension/icon-48.png"
-fetch_to "$EXT_RAW/icon-128.png"        "$HELPER_DIR/extension/icon-128.png"
+# These FIVE files ARE the extension — they must match extension/manifest.json.
+# Without them Chromium loads an empty shell: no bar, no dock, no lockdown.
+fetch_to "$EXT_RAW/manifest.json"   "$HELPER_DIR/extension/manifest.json"
+fetch_to "$EXT_RAW/apps.js"         "$HELPER_DIR/extension/apps.js"
+fetch_to "$EXT_RAW/content.js"      "$HELPER_DIR/extension/content.js"
+fetch_to "$EXT_RAW/background.js"   "$HELPER_DIR/extension/background.js"
+fetch_to "$EXT_RAW/shell.css"       "$HELPER_DIR/extension/shell.css"
 # Seed the version file from the manifest so the first update check is honest.
 curl -fsSL "$RAW/helper-manifest.json" \
   | python3 -c 'import sys,json; print(json.load(sys.stdin)["version"])' > "$HELPER_DIR/helper-version.txt" 2>/dev/null \
