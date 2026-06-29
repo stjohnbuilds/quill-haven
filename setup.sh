@@ -2,7 +2,7 @@
 # Quill Haven — full device setup for Linux Mint (any wiped Intel/AMD laptop,
 # incl. an Intel Mac). Run AFTER installing Linux Mint. SAFE TO RE-RUN any time.
 #
-#   curl -L https://stjohnbuilds.github.io/quill-haven/setup.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/setup.sh | bash
 #
 # One command sets up EVERYTHING, so a reinstall on any laptop is one paste:
 #   - Chromium kiosk that boots straight into Quill Haven (no password)
@@ -19,6 +19,16 @@ ME="$(whoami)"
 HELPER_DIR="$HOME/.local/share/quill-haven"
 
 say() { printf "\n\033[1;36m==> %s\033[0m\n" "$*"; }
+
+# Non-interactive apt — Mint 22 / Ubuntu 24.04 ships needrestart, which otherwise
+# pops a menu that would hang an install piped from curl.
+export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
+
+# Ask for the password ONCE, clearly, then keep it alive so a long install never
+# silently re-prompts deep in the scrolling output.
+echo "Enter your computer password when asked (you won't see it as you type):"
+sudo -v || { echo "Need your password to continue — run the line again."; exit 1; }
+( while true; do sudo -n true 2>/dev/null || true; sleep 50; kill -0 "$$" 2>/dev/null || exit; done ) &
 
 # apt must NEVER abort the whole setup. On a RE-RUN the packages are already
 # installed, and a flaky third-party repo (e.g. linux-surface) can make
@@ -37,6 +47,10 @@ if snap list 2>/dev/null | grep -q '^chromium '; then
   sudo snap remove chromium || true
   sudo apt-get install -y chromium || true
 fi
+
+# A kiosk with no browser is just a black screen — stop now rather than reboot into one.
+command -v chromium >/dev/null 2>&1 || command -v chromium-browser >/dev/null 2>&1 || {
+  say "Chromium didn't install. Check the internet, then run the line again."; exit 1; }
 
 # ---------------------------------------------------------------------------
 # Auto-login — no password every boot
@@ -126,6 +140,14 @@ curl -fsSL "$RAW/helper-manifest.json" \
   || echo "0" > "$HELPER_DIR/helper-version.txt"
 cp "$HELPER_DIR/helper.py" "$HELPER_DIR/helper.py.bak" 2>/dev/null || true
 chmod +x "$HELPER_DIR/run-helper.sh" "$HELPER_DIR/helper.py" "$HELPER_DIR/launch-home.sh" 2>/dev/null || true
+
+# A WiFi blip must NOT leave a silently broken machine that reboots anyway: make
+# sure every critical file actually downloaded before we go any further.
+for f in helper.py run-helper.sh launch-home.sh \
+         extension/manifest.json extension/apps.js extension/content.js \
+         extension/background.js extension/shell.css; do
+  [ -s "$HELPER_DIR/$f" ] || { say "Download failed ($f). Connect to WiFi and run the line again."; exit 1; }
+done
 
 # ---------------------------------------------------------------------------
 # Admin helper — lets the helper push system-level fixes from GitHub
@@ -331,8 +353,10 @@ say "Tuning for battery (switching off everything a writing machine never uses)"
 curl -fsSL "https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/tools/battery.sh" | bash || true
 
 echo ""
-echo "==========================================="
-echo "  Quill Haven is set up. Rebooting in 5s   "
-echo "==========================================="
-sleep 5
+echo "==================================================================="
+echo "  All done! Quill Haven will RESTART this laptop by itself now."
+echo "  The screen goes black for about a minute — that's normal."
+echo "  Don't touch it or unplug it. It opens on its own when it's back."
+echo "==================================================================="
+sleep 15
 sudo reboot
