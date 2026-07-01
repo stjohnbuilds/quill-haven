@@ -373,6 +373,25 @@ class H(BaseHTTPRequestHandler):
             self._send()
             if _begin_apply():
                 threading.Thread(target=apply_update, daemon=True).start()
+        elif p == "/wifi-connect":
+            try:
+                length = int(self.headers.get("Content-Length", 0) or 0)
+                data = json.loads(self.rfile.read(length) or b"{}")
+            except Exception:
+                data = {}
+            ssid = str(data.get("ssid", "")); pw = str(data.get("password", ""))
+            if not ssid:
+                self._send(400, b"no network chosen"); return
+            cmd = ["nmcli", "dev", "wifi", "connect", ssid] + (["password", pw] if pw else [])
+            try:
+                r = subprocess.run(cmd, capture_output=True, text=True, timeout=35)
+                if r.returncode == 0:
+                    self._send(body=b"connected")
+                else:
+                    lines = (r.stderr or r.stdout or "could not connect").strip().splitlines()
+                    self._send(400, (lines[-1] if lines else "could not connect")[:140].encode())
+            except Exception as e:
+                self._send(500, str(e)[:140].encode())
         else:
             self._send(404, b"no")
 
