@@ -1,127 +1,148 @@
-# HANDOVER — Quill Haven, 2026-06-24
+# HANDOVER — Quill Haven (current as of 2026-06-27)
 
-New chat: read this, then `MEMORY.md` and `CLAUDE.md`. The overlay extension is
-**built, shipped, and working on the real device.** This is no longer "go build it" —
-it's "keep refining it."
+There is only ONE handover file — this one. The next AI: read the copy-paste block below,
+then the files in section 3, and change nothing until you have.
+
+## 📋 COPY-PASTE THIS into a fresh Claude Code chat
+
+> You're picking up **Quill Haven** — a writing-only Linux OS for **Marie**, who is
+> **non-technical**. Talk plainly and short, no jargon, **NO wellness/"take a breath"
+> language**. Never say something "works" until it has run on her **real laptop** (the preview
+> is a mock — it proves layout/look, not device behaviour). End any reply that touches files
+> with a **"Files I changed:"** footer. **Push only when she asks.** Every release gets a
+> **new emoji** (her proof an update landed).
+>
+> Two repos: **build** in `quill-haven-2` (`/Users/mariemackay/Dev/quill-haven-2`, github
+> `stjohnbuilds/quill-haven-2`, GitHub Pages ON) — **deliver** via `QuillHaven`
+> (`/Users/mariemackay/Dev/QuillHaven`, github `stjohnbuilds/quill-haven`). **Live now: 2.3.15
+> 🐧, helper 1.10.** App ≈ 1129 lines across 7 files.
+>
+> **THE KEYSTONE FIX (do not undo):** the long-standing "buttons / updates do nothing" bug was
+> a **frozen cached MV3 service worker** — Chromium kept reloading an old `background.js` whose
+> relay rejected `/apply-update` etc. as `not-allowed`. The launcher (`helper/launch-home.sh`)
+> now **deletes the profile's `Service Worker` + `Code Cache` on every Chromium launch**, so the
+> worker always recompiles from disk. Because of this, **updates are now HANDS-FREE** (the
+> in-app Update button works). Also: `helper.py` `_cors()` reflects the caller's Origin (it
+> bound to 127.0.0.1 only) — don't revert it; `window.confirm`/`prompt` are blocked in kiosk —
+> never use them (use the in-app confirm).
+>
+> Read in order, change nothing first:
+> 1. /Users/mariemackay/Dev/QuillHaven/HANDOVER.md (this file)
+> 2. /Users/mariemackay/Dev/QuillHaven/CLAUDE.md
+> 3. /Users/mariemackay/.claude/projects/-Users-mariemackay-Dev-QuillHaven/memory/MEMORY.md
+> 4. /Users/mariemackay/Dev/quill-haven-2/STRUCTURE.md  (the one-place-for-everything law)
+> 5. /Users/mariemackay/Dev/quill-haven-2/PUNCHLIST.md  +  /Users/mariemackay/Dev/quill-haven-2/AUDIT_PROMPT.md
+>
+> To ship a version: in `quill-haven-2` bump `version.json` + `LOCAL` in `extension/content.js`
+> + `extension/manifest.json` to a NEW number AND a NEW emoji; commit + push. Copy the changed
+> `extension/*` into `QuillHaven/extension/`, recompute their sha256 in
+> `QuillHaven/helper/helper-manifest.json` extras, commit + push **only the touched files**
+> (this repo has unrelated edits — never `git add -A`). CDN-verify the raw bytes + Pages
+> `version.json` are live, THEN Marie taps Update. If you edit `helper.py`, run
+> `tools/release-helper.sh <ver>` FIRST (brick risk). **Lockdown is OFF on purpose.**
 
 ---
 
-## 0. THE DEVICE (read this first — it has been corrected many times)
-Quill Haven runs on a **Mac with Linux installed**. It is **NOT a Chromebook** — that
-was an early hardware option that's been dropped. Do not call it a Chromebook. The tech
-stack is Chromium in `--kiosk` mode on Linux; only the *device wording* matters here.
+## 1. WHO IS THE USER
+**Marie. Non-coder.** Talk like she's 10 — plain English, short (2–4 sentences), no jargon, no
+code/hashes in chat. **Banned: ALL wellness/therapy language** ("breathe", "calm down", "I
+understand this is frustrating", "don't worry"). When she's annoyed, just fix it — no comfort.
+She cannot copy-paste on the device; every TTY command is hand-typed and error-prone — keep
+them to ONE short line. She is very sensitive to **code bloat** — justify every added line and
+trim genuine fat.
 
-## 1. WHAT QUILL HAVEN IS
-A locked-down writing OS. On power-on the Mac-Linux boots straight into Chromium kiosk
-showing a home screen + writing web apps (Google Docs, Dabble Writer, Typing & Tomes),
-everything else blocked. Three layers:
-- **Home screen** (`home-screen/`, hosted on GitHub Pages at
-  `stjohnbuilds.github.io/quill-haven/` which redirects to `/home-screen/`). The visual
-  source of truth (icons, colours, settings).
-- **Overlay extension** (`extension/`) — a Chrome extension injected on EVERY page so the
-  status pill + app switcher ride on top of every app. This is the main UI now.
-- **Helper** (`helper/`) — a local Python service (port 8137) for power/wifi/terminal/
-  screen-off, plus self-updating from GitHub.
+## 2. HARD RULES (these have bitten before)
+- **Never say it "works" until it ran on her laptop.** Preview/mock = "code reads right". Only
+  she confirms the device half.
+- **"Files I changed:" footer** on every reply that touches files (the Stop-hook output is
+  swallowed; the footer is how she sees changes).
+- **No confidence %, no self-certifying** (a Stop-hook blocks "X% sure" etc.). Say "fully
+  checked" / "code reads right, not run on device" / "didn't test".
+- **No duplicate components** — one of everything (see STRUCTURE.md). **Plain English always.**
+- **Push only when asked.** Never `git add -A` in `QuillHaven` (it carries unrelated edits).
+- **Every release = a NEW emoji** (her proof it landed).
+- **`window.confirm` / `window.prompt` are silently blocked in Chromium --kiosk** — never use
+  them; use the in-app confirm (`askConfirm` in content.js).
+- **A bad `helper.py` can BRICK the device** (recoverable only by hand at the TTY). Keep helper
+  changes on-demand only (nothing new at startup), `py_compile` first, run
+  `tools/release-helper.sh` before `release.sh`/the manual hash step.
+- **Never bump/byte-change `home-screen/service-worker.js`** — it's pinned cache-first on purpose.
 
-## 2. CURRENT STATE (all working, confirmed on hardware)
-| Thing | Version | Status |
-|-------|---------|--------|
-| Home screen | 4.3 💤 | On the device, its native top-bar + dock are hidden by the overlay; just wallpaper + clock show. |
-| Overlay extension | 4.3 💤 | Pill + app switcher + settings + drag + screen-off. Loads in kiosk (CONFIRMED working). |
-| Helper | 1.7 | Self-updates; serves power/restart/sleep/terminal/wifi-settings/**screen-off**. |
-| version.json | 4.3 💤 | Drives the pill emoji + update pulse. |
+## 3. READ THESE FILES (IN ORDER)
+1. `/Users/mariemackay/Dev/QuillHaven/HANDOVER.md` (this)
+2. `/Users/mariemackay/Dev/QuillHaven/CLAUDE.md`
+3. `/Users/mariemackay/.claude/projects/-Users-mariemackay-Dev-QuillHaven/memory/MEMORY.md`
+4. `/Users/mariemackay/Dev/quill-haven-2/STRUCTURE.md` (the law: one place for everything)
+5. `/Users/mariemackay/Dev/quill-haven-2/PUNCHLIST.md` (live to-dos)
+6. `/Users/mariemackay/Dev/quill-haven-2/AUDIT_PROMPT.md` (paste-into-fresh-AI dead-code audit)
 
-Repo: `stjohnbuilds/quill-haven`. Git user here: `stjohnbuilds`. Push to `main` (the
-device pulls from main — a branch would never reach it).
+## 4. BROAD VISION
+Quill Haven is a custom Linux OS that turns any Linux-capable computer (Windows laptop, Mac,
+Chromebook, Pi) into a **writing-only** machine — it boots straight into a clean home screen
+with only the writing apps (ships with Google Docs; user adds others like Dabble). The OS is
+the product. It matters because it removes every distraction for a writer who wants a machine
+that does one thing. It is NOT a tablet in a locked mode — do not suggest that.
 
-## 3. THE OVERLAY (extension/) — what it does
-- **Top-right pill**: a three-dot **grip** (drag handle) + collapses to emoji + 24h time;
-  TAP the body to pop out wifi / battery / power / settings-gear. (Hover was removed — it
-  stuck "open" on the touchscreen.)
-- **Bottom-right app switcher**: a grip + the current-app bubble; tap the bubble → a
-  pop-out CARD listing each app (icon + name) + Home. Tap a row to switch.
-- **Drag**: ONLY the three-dot grips move the widgets (everything else taps normally).
-  Positions persist in `chrome.storage` (posPill/posDock). Do NOT go back to
-  "drag the whole widget" — it stole taps and Marie hated it.
-- **Settings gear**: on the HOME page it opens the REAL full home settings (it clicks the
-  home's own hidden gear → `toggleSettings()`), so brightness/Drive/storage/restore/apps/
-  clipboard are all there and wired. Off-home it shows a small "quick settings" panel
-  (theme/wifi/region/power/terminal) labelled "all settings on Home".
-- **Auto screen-off**: after 5 idle minutes the overlay calls helper `/screen-off`
-  (`xset dpms force off`); any touch/key wakes it. Battery saver that avoids the flaky
-  Asahi suspend. 5 min is hard-coded for now (no picker yet).
-- All visuals are REUSED from the home screen (exact app icons/colours from `home.js`
-  `BUILTIN_APPS`, status SVGs from `index.html`, theme vars mirrored from `theme.css`).
-  Extension files: manifest.json, quill-overlay.js, quill-overlay.css, qh-bg.js (helper
-  relay worker), qh-early.js (document_start native-chrome hide), confirm.js.
+## 5. CURRENT STATE
+- **Live: 2.3.15 🐧, helper 1.10.** quill-haven-2 HEAD `14ea171`. App ≈ **1129 lines** (7 files).
+- Live home URL: `https://stjohnbuilds.github.io/quill-haven-2/home-screen/`.
+- **Build/test:** `node --check` passes on content.js + background.js; the settings rebuild +
+  confirm dialog were verified in a local **mock render** (not the real laptop). Marie has
+  **confirmed on her laptop**: terminal opens, hands-free updates land, screen-off goes dark.
+- **Working now:** boots + writes; bar/dock/settings; themes; draggable bar; **hands-free
+  updates** (in-app button); **terminal button**; **screen-off when idle**; rebuilt settings
+  panel (Device / Apps / Power, app edit-rename + pop-up Add); in-app **are-you-sure** before
+  Restart/Off; honest updater (pulse + "Updated" toast + readable errors + wait-for-publish).
+- **Removed this session:** Night light (+ its constant colour filter), the manual "Screen"
+  button, dead `_updTimer`.
+- **Lockdown is OFF** (`LOCKDOWN_ENABLED = false` in background.js) — deliberate, never tested live.
+- **Brightness slider is still a FAKE shade** (a black overlay), NOT the real backlight — Marie
+  knows; real dimming is a pending job.
 
-## 4. HOW DEPLOY / UPDATES WORK (important)
-- Push to GitHub `main`. The helper polls every 6h (and ~20s after boot) and pulls
-  `helper/helper-manifest.json` (verifies sha256 of each file, py_compiles helper.py,
-  atomic swap, rollback on crash).
-- **To make an update land after ONE reboot**, bump the `# rev:` line in
-  `helper/launch-home.sh` every release — that changes its hash, so the helper restarts
-  Chromium and the new extension loads ~20–30s after the next boot. (Without it, extension
-  changes need two reboots.)
-- **EVERY release gets a NEW emoji** (Marie reads the pill emoji as "which version am I
-  on" + proof an update landed). Bump `version.json` (version + different emoji) AND the
-  matching `LOCAL_VERSION`/emoji in BOTH `extension/quill-overlay.js` and
-  `home-screen/js/home.js`. Emoji history: ⭐3.1 → 🪶4.0 → 📝4.1 → 🎨4.2 → 💤4.3.
-- After editing extension/helper files: recompute sha256 and update every entry in
-  `helper/helper-manifest.json` (the helper.py top-level sha when helper.py changes; bump
-  its `version` only when helper.py changes). Verify with the python hash-check before push.
-- raw.githubusercontent caches a few minutes — version.json may lag briefly after a push;
-  it's cosmetic and self-resolves (the sha-verified self-update is unaffected).
+## 6. TOP 5 NEXT JOBS (Marie's chosen order; 1–3 done this session)
+1. **Turn on website-blocking** (her #4) — flip `LOCKDOWN_ENABLED = true` in background.js + test
+   on the real laptop; the allow-list (`baseDomain`, `INFRA_SUFFIXES`) has never run live. **[Big]**
+2. **Real screen dimming** (her #5) — make the brightness slider drive the **real backlight**
+   (not the overlay). Needs a one-time device setup: `brightnessctl` (or udev rule / `video`
+   group) so the helper can write `/sys/class/backlight/*/brightness`. This is NOT pushable via
+   the normal update (system-level). **[Big + User]**
+3. **Power-tuning / battery (her #2 leftover)** — TLP install + CPU governor at install time;
+   screen-off already works. **[Big / install]**
+4. **Hardware power button = instant off, no confirm** — route logind `HandlePowerKey` to a
+   confirm. Install-side (setup.sh / device config), not pushable via app update. **[Design call]**
+5. **Lock the helper (security)** — shared-secret token so only Quill Haven can call it; do it
+   with a cutover so it can't strand the running machine. Then the installer / all-in-one boot
+   drive. **[Big]**
 
-## 5. LOCAL TESTING (no device needed)
-The overlay uses `chrome.storage`/`chrome.runtime`, so test with a stub harness: create a
-temporary `extension/_test.html` + `_test-stub.js` (stub `window.chrome`), serve the repo
-root (`python3 -m http.server 8082`), load `/extension/_test.html`, and use the preview
-tools to screenshot / eval. Test REAL taps via dispatched `pointerdown`+`pointerup`+`click`
-(an earlier `.click()`-only test missed a real tap bug). Delete the test files after.
+## 7. WHAT ONLY MARIE CAN DO
+- **Install/confirm on the device** — tap Update; report whether something actually works (only
+  she can verify the device half).
+- **TTY actions** — open Ctrl+Alt+Fn+F2, log in `marie` + password, type ONE line (e.g.
+  `curl -X POST localhost:8137/apply-update`). The reliable fallback if the button ever fails,
+  and the only recovery for a bricked helper.
+- **The one-time device setup** for real backlight dimming / power-tuning (a TTY install or a
+  setup re-run) — these are system-level, not app updates.
+- **Authorise pushes** and **design calls** (layout, what to keep/cut).
 
-## 6. OPEN / NEXT TASKS (asked for, not yet built)
-- **In-overlay Wi-Fi picker** — replace the native Linux `nm-connection-editor` ("looks
-  like 1999"). New helper endpoints `/wifi-list` (`nmcli ... dev wifi list`) +
-  `/wifi-connect`, plus an overlay UI (user types the password). KEEP the native window as
-  a fallback so she's never stuck offline if untested nmcli fails. Untestable from dev.
-- **Screen-off picker + optional auto-shutdown** — make the 5-min adjustable (5/10/15/30/
-  Never) in settings; add optional "shut down after ~1h idle" (default OFF). Marie approved
-  the screen-off; auto-shutdown not yet confirmed.
-- **Tiny DPMS tightening** — `/screen-off` does `xset +dpms; xset dpms force off`; reviewer
-  noted this leaves X's default DPMS timers active too (benign). Optional: add
-  `xset dpms 0 0 0` so only the overlay controls blanking.
-- **Hide the desktop-flash during the update-restart** — when the helper restarts Chromium,
-  the bare Linux desktop flashes for ~2s. OS-level fix (hide the dock / plain background).
-- **Lock down remaining escape hatches** (keyboard shortcuts to the Linux desktop) for a
-  fully airtight "its own thing" feel.
-- Older asks still open: a "Check for updates now" button (`/check-update` helper endpoint),
-  Google Docs recents list.
-
-## 7. HARDWARE RESEARCH (Marie is shopping for a machine)
-Full brief: `docs/HARDWARE_REQUIREMENTS.md` (untracked — commit/push if she wants the
-researcher to link it). Verified June 2026:
-- Needs: Intel/AMD laptop OR Apple-silicon Mac on **Fedora Asahi**. 4GB RAM min, 8GB+ best.
-- Apple chips: **M1 ✅, M2 ✅ (both daily-usable). M3 = NOT reliable (no GPU → too slow).
-  M4/M5/A18 'MacBook Neo' = ❌.** Best value = used **M1 MacBook Air (8GB)**.
-- Surface: Intel clamshells work with the `linux-surface` kernel; Snapdragon/'Copilot+' ❌.
-- Avoid the trap: same model name spans chips by year (MacBook Air = M1/M2/M3/M4) — pin the
-  YEAR. M3+ MacBooks look identical to M1/M2 but don't work.
-
-## 8. WORKING-STYLE NOTES (from CLAUDE.md / MEMORY.md — follow exactly)
-- Marie is non-technical. Short, plain answers. **NEVER** soothing/wellness language.
-- REUSE existing assets, never invent icons/colours/UI.
-- Never tell her to type terminal commands — deploy via the helper / git push yourself.
-- No self-certifying / confidence %. Say "untested on hardware" honestly.
-- Every file-touching reply ends with a "Files I changed:" footer.
-- "Files I changed" + the emoji rule are non-negotiable.
-
-## 9. KEY GOTCHAS
-- Site root redirects to `/home-screen/`, so local apps live at
-  `.../quill-haven/home-screen/apps/...` (HOME_BASE in the overlay must include
-  `home-screen/`). Getting this wrong = the Files/Writing 404 bug.
-- The overlay hides native chrome only AFTER it renders, and removes the hide on error —
-  so a glitch can never leave the home screen with no buttons.
-- Each update restart can log her out of an app if its login is a session cookie; normal
-  use keeps her signed in (persistent `--user-data-dir` profile). Tell her to tick "keep
-  me logged in" if offered.
+## 8. WHERE THINGS LIVE + COMMANDS
+**Two repos:** `quill-haven-2` = THE APP (build here). `QuillHaven` = delivery + helper + docs.
+- App = 7 files in `quill-haven-2`: `home-screen/index.html`, `home-screen/css/home.css`,
+  `extension/{apps.js, content.js, shell.css, background.js, manifest.json}`. `content.js` is
+  ~90% of it (bar, dock, settings, update popup, confirm). `version.json` = the version source.
+- Delivery in `QuillHaven`: `helper/helper.py` (local helper on 127.0.0.1:8137),
+  `helper/helper-manifest.json` (version + per-file sha256 the device pulls),
+  `helper/launch-home.sh` (the kiosk launcher — **contains the SW-cache-clear keystone fix**),
+  `helper/run-helper.sh`, `setup.sh` (installer), `tools/release-helper.sh`.
+- **Ship a version (manual):** edit in quill-haven-2 → bump version.json + content.js `LOCAL` +
+  manifest.json (new number + new emoji) → `git push`. Copy changed `extension/*` to
+  `QuillHaven/extension/`, `shasum -a 256` them, paste into `helper-manifest.json` extras,
+  `git add` ONLY those files → `git push`. CDN-verify (curl raw + Pages until hashes/version
+  match) → Marie taps Update.
+- **Helper edit:** `tools/release-helper.sh <ver>` re-stamps helper version + helper.py hash
+  (preserves extras) BEFORE you re-hash extras. Brick risk — `python3 -m py_compile` first.
+- **Verify the UI in a mock** (preview can't run the extension normally): a tiny harness that
+  mocks `chrome.storage`/`chrome.runtime` and loads apps.js + content.js, served via
+  `.claude/launch.json` + the preview tools, then screenshot. (Used this session to verify the
+  settings rebuild + confirm dialog.) The mock proves layout/look, NOT device behaviour.
+- **Recovery:** Ctrl+Alt+Fn+F2 → TTY. A dead helper: `cd ~/.local/share/quill-haven` →
+  `cp helper.py.bak helper.py` → `pkill -f helper.py` → reboot.

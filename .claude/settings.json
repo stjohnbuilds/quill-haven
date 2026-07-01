@@ -2,34 +2,64 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "command": "bash .claude/hooks/user-prompt-submit.sh",
-        "timeout": 30000
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/user-prompt-submit.sh",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "PreToolUse": [
       {
-        "command": "bash .claude/hooks/pre-tool-use-git.sh",
-        "timeout": 10000
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/pre-tool-use-git.sh",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
-        "command": "bash .claude/hooks/post-tool-use-tracker.sh",
-        "timeout": 5000
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/post-tool-use-tracker.sh",
+            "timeout": 5
+          }
+        ]
       }
     ],
     "Stop": [
       {
-        "command": "bash .claude/hooks/stop-build-check.sh",
-        "timeout": 60000
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/stop-build-check.sh",
+            "timeout": 60
+          }
+        ]
       },
       {
-        "command": "bash .claude/hooks/stop-no-mess.sh",
-        "timeout": 10000
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/stop-no-mess.sh",
+            "timeout": 10
+          }
+        ]
       },
       {
-        "command": "bash .claude/hooks/stop-no-self-cert.sh",
-        "timeout": 10000
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/stop-no-self-cert.sh",
+            "timeout": 10
+          }
+        ]
       }
     ]
   }

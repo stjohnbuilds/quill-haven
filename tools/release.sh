@@ -29,6 +29,17 @@ root = pathlib.Path('.')
 vj = json.loads((root/'version.json').read_text())
 cur_ver, cur_emoji = vj['version'], vj['emoji']
 
+# Guard: if helper.py was edited but helper-manifest.json wasn't re-stamped, the
+# device's self-updater won't pull the new helper — the update gate would half-deploy
+# (new overlay lands, old helper stays, /apply-update 404s). Refuse to release until
+# they agree. Runs before any writes, so a failed check changes nothing.
+_hm = json.loads((root/'helper/helper-manifest.json').read_text())
+_helper_sha = hashlib.sha256((root/'helper/helper.py').read_bytes()).hexdigest()
+if _hm.get('sha256', '').lower() != _helper_sha:
+    sys.exit("ERROR: helper.py has changed but helper/helper-manifest.json is stale.\n"
+             "       Run  tools/release-helper.sh <next-helper-version>  first "
+             "(e.g. 1.8), then re-run this.")
+
 if arg:
     new_ver = arg
 else:
@@ -59,7 +70,9 @@ sub('extension/quill-overlay.js', r"(var LOCAL_VERSION = ')[^']*(')", rf"\g<1>{n
 sub('extension/quill-overlay.js', r"(var localEmoji = ')[^']*(')",    rf"\g<1>{new_emoji}\g<2>")
 sub('home-screen/js/home.js',     r"(var LOCAL_VERSION = ')[^']*(')", rf"\g<1>{new_ver}\g<2>")
 sub('home-screen/js/home.js',     r"(var LOCAL_EMOJI = ')[^']*(')",   rf"\g<1>{new_emoji}\g<2>")
-sub('home-screen/service-worker.js', r"(const VERSION = ')[^']*(')",  rf"\g<1>{new_ver}\g<2>")
+# NOTE: home-screen/service-worker.js is deliberately NOT version-bumped any more.
+# It is pinned + byte-stable so the home screen can't silently re-pin on reboot (the
+# update gate). Bumping it would reinstall the worker and defeat that. Leave it alone.
 sub('extension/manifest.json',    r'("version":\s*")[^"]*(")',        rf'\g<1>{new_ver}\g<2>')
 sub('helper/launch-home.sh',      r"(# rev: )\S+",                    rf"\g<1>v{new_ver}-{today}")
 
@@ -87,6 +100,6 @@ hv = re.search(r"var LOCAL_VERSION = '([^']*)'", (root/'home-screen/js/home.js')
 if bad: sys.exit("HASH MISMATCH: " + ", ".join(bad))
 if not (ov == hv == new_ver): sys.exit(f"VERSION DRIFT: overlay={ov} home={hv} want={new_ver}")
 
-print("Updated version + emoji in all 5 places; hashes + versions verified consistent.")
+print("Updated version + emoji in version.json, the overlay, the home screen and the extension manifest; hashes + versions verified consistent.")
 print(f"Next: git add -A && git commit -m 'Release {new_ver} {new_emoji} — <what>' && git push")
 PY

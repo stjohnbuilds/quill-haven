@@ -14,6 +14,13 @@ while IFS=$'\t' read -r name dest mode; do
     [ -z "$name" ] && continue
     src="$DIR/$name"
     [ -f "$src" ] || { echo "SKIP $name (not found)"; continue; }
+    # Only ever write into the approved system locations, and never via "..", so a
+    # bad or injected manifest can't aim this privileged copy at the rest of the disk.
+    case "$dest" in
+        /etc/chromium/*|/etc/chromium-browser/*) : ;;
+        *) echo "REJECT $dest (outside allowed paths)"; continue ;;
+    esac
+    case "$dest" in *..*) echo "REJECT $dest (unsafe path)"; continue ;; esac
     mkdir -p "$(dirname "$dest")"
     # Back up existing file before overwriting
     [ -f "$dest" ] && cp -a "$dest" "${dest}.qh-bak"

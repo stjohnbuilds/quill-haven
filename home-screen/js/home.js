@@ -1244,17 +1244,34 @@ var LOCAL_EMOJI = '🔖';
   if (f) f.textContent = 'Quill Haven v' + LOCAL_VERSION + ' ' + LOCAL_EMOJI;
 })();
 
+// The update is GATED: we only flag that a newer version exists. Nothing installs
+// until Marie taps the button and confirms (requestUpdate -> doUpdate).
+var pendingUpdate = null;
 function checkForUpdate() {
   fetch('https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json', { cache: 'no-store' })
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.version && d.version !== LOCAL_VERSION) {
+        pendingUpdate = d;
         var btn = document.getElementById('updateBtn');
         btn.innerHTML = '<span class="update-dot"></span> Update to v' + esc(d.version) + ' ' + (d.emoji || '');
         btn.classList.add('show');
       }
     })
     .catch(function() {});
+}
+// Tapping the button asks first — nothing changes on a "no".
+function requestUpdate() {
+  if (window.qhConfirm && pendingUpdate) {
+    window.qhConfirm({
+      title: 'Update to v' + esc(pendingUpdate.version) + ' ' + (pendingUpdate.emoji || '') + '?',
+      message: 'Quill Haven will restart to finish. Your writing is safe.',
+      confirmText: 'Update',
+      onConfirm: doUpdate
+    });
+  } else {
+    doUpdate();
+  }
 }
 function doUpdate() {
   if (!navigator.onLine) {
@@ -1266,18 +1283,23 @@ function doUpdate() {
     return;
   }
   var btn = document.getElementById('updateBtn');
-  btn.textContent = 'Updating…';
-  btn.style.pointerEvents = 'none';
-  var p1 = window.caches ? caches.keys().then(function(ks) {
+  if (btn) { btn.textContent = 'Updating…'; btn.style.pointerEvents = 'none'; }
+  // Clear the pinned home cache so the new home screen is fetched after restart. We
+  // keep the service worker registered — clearing the cache is enough, and it avoids
+  // a brief window with no offline fallback.
+  var clearLocal = (window.caches ? caches.keys().then(function(ks) {
     return Promise.all(ks.map(function(k) { return caches.delete(k); }));
-  }) : Promise.resolve();
-  var p2 = navigator.serviceWorker ? navigator.serviceWorker.getRegistrations().then(function(regs) {
-    return Promise.all(regs.map(function(r) { return r.unregister(); }));
-  }) : Promise.resolve();
-  Promise.all([p1, p2]).then(function() {
-    window.location.href = window.location.pathname + '?v=' + Date.now();
-  }).catch(function() {
-    window.location.href = window.location.pathname + '?v=' + Date.now();
+  }) : Promise.resolve()).catch(function() {});
+  clearLocal.then(function() {
+    var reload = function() { window.location.href = window.location.pathname + '?v=' + Date.now(); };
+    // If the device restart never comes (or there is no helper), reload anyway.
+    var fallback = setTimeout(reload, 15000);
+    // On the real device the helper applies the gated files (overlay, launcher,
+    // system policy) and restarts the browser. Off-device there is no helper, so
+    // we just reload the freshly-cleared home screen.
+    fetch(QH_HELPER + '/apply-update', { method: 'POST', mode: 'cors' })
+      .then(function() { /* helper is applying and will restart the browser */ })
+      .catch(function() { clearTimeout(fallback); reload(); });
   });
 }
 setTimeout(checkForUpdate, 3000);

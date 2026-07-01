@@ -1,5 +1,11 @@
 # TODO — Quill Haven
 
+> ⚠️ **CURRENT WORK (2026-06-25) is in the 2.x rebuild, not this old list.**
+> The app was rebuilt as ONE shell in repo `quill-haven-2`; **2.1.0 🌳 is live on the
+> laptop and confirmed working.** The live to-do list is now
+> **`quill-haven-2/PUNCHLIST.md`**, and the plan/state is in `HANDOVER.md`. Most items
+> below relate to the OLD app and are superseded. Read HANDOVER.md first.
+
 ## 🔧 Active list (2026-06-24) — priority order
 
 **✅ MILESTONE: the update pipeline works.** Pushes now land on the device
@@ -7,12 +13,53 @@
 no longer bails early. Everything below builds on this.
 
 ### ▶ NEXT UP (Marie's order, 2026-06-24)
-- [ ] **1. "Updates available" gate** — stop auto-applying updates; show "update
-      available" and only update when Marie taps it, so a bad push can't auto-break
-      a working setup. NOTE: one last auto-update carries the switch over, then it
-      is manual from then on.
+- [~] **1. "Updates available" gate** — BUILT + verified in preview; awaiting Marie's
+      OK to ship (release 4.10 🌙). Stops auto-applying; shows "Update available";
+      applies only on her tap + confirm. NOTE: one last auto-update carries the switch
+      over, then manual from then on.
+      • helper.py: removed the 6-hourly auto-apply; added POST /apply-update (applies
+        device-manifest + extras + helper-self, then restarts), with a one-at-a-time guard.
+      • service-worker.js: now CACHE-FIRST / PINNED + byte-stable — home screen can't
+        silently refresh on reboot; only doUpdate's cache-clear pulls a new version.
+      • overlay + home.js: emoji no longer changes on check (only flags); tap → confirm
+        → apply; offline-guarded; 15s fallback reload.
+      • release-helper.sh FIXED (was wiping extras); release.sh refuses to ship a stale
+        helper hash (no half-deploy). Ship = tools/release-helper.sh 1.8 → tools/release.sh.
+      • Adversarially reviewed (5-way); real findings fixed (offline blank-screen, SW
+        unregister window, double-tap/concurrent-apply, ship footgun, stale docs).
 - [ ] **2. Battery "time left"** (≈ Xh) in the pill — the helper reads it from the
       laptop (upower / /sys/class/power_supply) and the pill shows it.
+
+### 🔎 Full-sweep fix list (2026-06-25) — read every file + clicked the live app
+~60 raw findings boiled down (9 false alarms cut). Grouped so nothing's forgotten.
+
+**A. Writing safety — do first, protects the novel**
+- [ ] Save never fails silently — keep "NOT saved" showing until a save really succeeds
+      (writing.js persist(): don't hide after one warning / reset _saveFailedWarned).
+- [ ] Storage bar shows live usage, not only when Settings opens (home.js updateStorage()).
+- [ ] Block typing when no scene is loaded so text can't vanish into nothing (writing.js loadEditor()).
+- (see "Writing backup" below — a real off-device copy is the biggest safety win, its own task.)
+
+**B. Duplication cleanup — kills the "two settings" + the core mess (overlay copies home)**
+- [ ] One settings: delete the overlay's quick-settings; the gear always opens the home
+      screen's full settings (overlay buildSettings/openSettings).
+- [ ] One app list: overlay reads the home list, not its own BUILTIN copy (overlay BUILTIN vs home.js BUILTIN_APPS).
+- [ ] One of everything else the overlay copies — theme colours, the "are you sure?" box,
+      version/emoji — borrow from home, don't duplicate (~26 spots, all one root).
+
+**C. Security back-doors (already listed below, restated)**
+- [ ] Lock the helper endpoints to the real screen only (Origin/token check in helper.py).
+- [ ] Stop the root file-writer writing outside an allowlist (qh-admin.sh dest check).
+
+**D. Small bugs + dead leftovers**
+- [ ] Fill or remove the always-empty greeting line (home.js / index.html).
+- [ ] Cap the settings panel width so it doesn't run off small screens (home.css .settings-panel).
+- [ ] Warn the user if reordering apps didn't save (home.js saveOrder()).
+- [ ] Wire up (or remove) the Files app receiving downloads from Writing (files.js).
+- [ ] Make launch-home.sh use the same chromium / chromium-browser detection as the helper.
+- [ ] Bin the junk: ~8 stale docs, unused /desktop endpoint, __pycache__ + .DS_Store (gitignore them).
+
+**✅ Done this session:** update gate (approve-before-apply); fixed release-helper.sh (was wiping extras).
 
 ### Then (from the audit + earlier asks)
 - [ ] Writing backup — only one copy of the novel today; a reset loses it. (biggest real risk)

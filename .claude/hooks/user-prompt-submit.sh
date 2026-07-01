@@ -26,12 +26,15 @@ echo "5. 'Files I changed' footer on every response that touches files."
 echo "6. Talk like Marie is 10. No jargon."
 echo ""
 
-# --- Build marker emoji ---
-EMOJI_FILE="$EXPECTED_DIR/src/buildEmoji.ts"
-if [ -f "$EMOJI_FILE" ]; then
-  CURRENT_EMOJI=$(grep -oP "export const BUILD_EMOJI = ['\"]\\K[^'\"]*" "$EMOJI_FILE" 2>/dev/null || echo "")
-  if [ -n "$CURRENT_EMOJI" ]; then
-    echo "Live build emoji: $CURRENT_EMOJI (only change on push)"
+# --- Build marker emoji (Quill Haven's real source is version.json — the pill emoji) ---
+# (Was pointing at src/buildEmoji.ts, a leftover from a React project that doesn't exist
+#  here, so it never ran. Now reads the actual version.json this project ships.)
+VERSION_FILE="$EXPECTED_DIR/version.json"
+if [ -f "$VERSION_FILE" ]; then
+  CUR_EMOJI=$(sed -n 's/.*"emoji"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$VERSION_FILE" | head -1)
+  CUR_VER=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$VERSION_FILE" | head -1)
+  if [ -n "$CUR_EMOJI" ]; then
+    echo "Build marker: v$CUR_VER $CUR_EMOJI — the emoji on the pill (only changes on a real release)."
   fi
 fi
 
@@ -60,17 +63,25 @@ if echo "$LOWER_PROMPT" | grep -qE 'deep.?check|deep.?audit|full.?check'; then
   bash "$SCRIPT_DIR/_log.sh" "user-prompt-submit" "TRIGGER" "deep-check"
 fi
 
-# Handover trigger
+# Handover trigger — FULL protocol (per the bible). One file only.
 if echo "$LOWER_PROMPT" | grep -qE 'handover|hand.?over|hand.?off|next.?ai|next.?session'; then
   echo ""
-  echo "=== HANDOVER TRIGGERED ==="
-  echo "Write a handover summary:"
-  echo "  1. What was done this session"
-  echo "  2. What's left / blocked"
-  echo "  3. Any known bugs or warnings"
-  echo "  4. Files changed (with paths)"
-  echo "  5. Update TODO.md"
-  echo "  6. Update CLAUDE.md if structure changed"
+  echo "=== HANDOVER PROTOCOL TRIGGERED ==="
+  echo "OVERWRITE the ONE handover file (HANDOVER.md) with these 8 sections IN ORDER."
+  echo "Replace its contents entirely — do NOT append, do NOT make a v2, do NOT add a"
+  echo "second handover file. There is only ever ONE handover file."
+  echo "  1. WHO IS THE USER — Marie, non-coder, plain English, banned words (no wellness talk)."
+  echo "  2. HARD RULES — the ones that have bitten before (no duplicate components, no"
+  echo "     self-certifying, plain English, mandatory 'Files I changed' footer, clickable"
+  echo "     links, double-confirm destructive actions, never suggest stopping, push only when asked)."
+  echo "  3. READ THESE FILES (IN ORDER) — exact paths to every bootstrap doc the next AI reads."
+  echo "  4. BROAD VISION — 2-3 sentences: what the app is, why it matters, who it's for."
+  echo "  5. CURRENT STATE — % done, latest commit SHA, test/build status, the correct live URL."
+  echo "  6. TOP 5 NEXT JOBS — priority order with an effort tag (Easy / User / Design call / Big)."
+  echo "  7. WHAT ONLY THE USER CAN DO — pushes, hands-on tests, design calls, authorisations."
+  echo "  8. WHERE THINGS LIVE — file map + the commands actually used."
+  echo "Put a COPY-PASTE bootstrap block at the very TOP of the file for a fresh chat, and"
+  echo "ALSO show that block back in the reply (in a code block) so Marie can copy it directly."
   bash "$SCRIPT_DIR/_log.sh" "user-prompt-submit" "TRIGGER" "handover"
 fi
 
