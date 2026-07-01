@@ -15,7 +15,7 @@
     {
       "name": "extension/content.js",
       "src": "extension/content.js",
-      "sha256": "7a829d0ef6229fac4fa034b0112939ba2da6836d3475ecb0956f9b3f430473bd"
+      "sha256": "f76c2aa457c8665ba4c75e112903647108df979e12aa57785262ee70aaacbcd7"
     },
     {
       "name": "extension/background.js",
