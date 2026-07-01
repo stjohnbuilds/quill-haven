@@ -106,10 +106,19 @@ cat > "$OFFLINE_PAGE" <<'HTML'
     fetch("http://127.0.0.1:8137/wifi-settings", { method: "POST", mode: "no-cors" })
       .catch(function () {});
   });
+  var busy = false;
   function check() {
-    fetch(VER + "?t=" + Date.now(), { mode: "no-cors", cache: "no-store" })
-      .then(function () { statusEl.textContent = "Connected — opening…"; location.replace(HOME); })
-      .catch(function () {});
+    if (busy) return;              // never let a slow check stack up on another
+    busy = true;
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 4000);  // a hung check can't freeze us
+    fetch(VER + "?t=" + Date.now(), { mode: "no-cors", cache: "no-store", signal: ctrl.signal })
+      .then(function () {
+        clearTimeout(timer);
+        statusEl.textContent = "Connected — opening…";
+        location.replace(HOME);
+      })
+      .catch(function () { clearTimeout(timer); busy = false; });
   }
   setInterval(check, 3000);
   check();
