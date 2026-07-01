@@ -5,7 +5,7 @@
     {
       "name": "extension/manifest.json",
       "src": "extension/manifest.json",
-      "sha256": "7270468e5b4dcd985e55dada878333ea1deb5c8c940f48cc31c11d43ee283b5b"
+      "sha256": "6b0f410fb1efe3335bbbb98b3fd7e8c3ca7faf1486547d9496e5ab5f4df313a7"
     },
     {
       "name": "extension/apps.js",
