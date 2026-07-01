@@ -310,27 +310,36 @@ class H(BaseHTTPRequestHandler):
             self.end_headers(); self.wfile.write(body)
         elif p == "/wifi-list":
             nets = []
+            # Is the Wi-Fi radio on at all? The panel's on/off switch mirrors this.
+            radio = True
             try:
-                subprocess.run(["nmcli", "dev", "wifi", "rescan"], capture_output=True, timeout=8)
+                r = subprocess.run(["nmcli", "radio", "wifi"],
+                                   capture_output=True, text=True, timeout=4)
+                radio = "enabled" in (r.stdout or "").lower()
             except Exception:
                 pass
-            try:
-                out = subprocess.run(["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY", "dev", "wifi", "list"],
-                                     capture_output=True, text=True, timeout=8).stdout
-                seen = set()
-                for line in out.splitlines():
-                    parts = [x.replace("\x00", ":") for x in line.replace("\\:", "\x00").split(":")]
-                    if len(parts) < 4 or not parts[1] or parts[1] in seen:
-                        continue
-                    seen.add(parts[1])
-                    nets.append({"ssid": parts[1],
-                                 "signal": int(parts[2]) if parts[2].isdigit() else 0,
-                                 "secure": parts[3] not in ("", "--"),
-                                 "active": parts[0].strip() == "*"})
-            except Exception:
-                pass
+            if radio:
+                try:
+                    subprocess.run(["nmcli", "dev", "wifi", "rescan"], capture_output=True, timeout=8)
+                except Exception:
+                    pass
+                try:
+                    out = subprocess.run(["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY", "dev", "wifi", "list"],
+                                         capture_output=True, text=True, timeout=8).stdout
+                    seen = set()
+                    for line in out.splitlines():
+                        parts = [x.replace("\x00", ":") for x in line.replace("\\:", "\x00").split(":")]
+                        if len(parts) < 4 or not parts[1] or parts[1] in seen:
+                            continue
+                        seen.add(parts[1])
+                        nets.append({"ssid": parts[1],
+                                     "signal": int(parts[2]) if parts[2].isdigit() else 0,
+                                     "secure": parts[3] not in ("", "--"),
+                                     "active": parts[0].strip() == "*"})
+                except Exception:
+                    pass
             nets.sort(key=lambda n: (not n["active"], -n["signal"]))
-            body = json.dumps({"networks": nets}).encode()
+            body = json.dumps({"networks": nets, "radio": radio}).encode()
             self.send_response(200); self._cors()
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
