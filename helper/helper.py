@@ -370,6 +370,8 @@ class H(BaseHTTPRequestHandler):
 
     def do_POST(self):
         p = self.path.split("?")[0]
+        if not self._origin_ok(p):
+            self._send(403, b"locked"); return
         if p in ACTIONS:
             subprocess.Popen(ACTIONS[p]); self._send()
         elif p == "/go-home":
