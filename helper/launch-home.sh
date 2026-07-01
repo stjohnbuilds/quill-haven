@@ -143,6 +143,10 @@ while true; do
   for d in "$HOME/.quill-profile"/*/"Service Worker" "$HOME/.quill-profile"/*/"Code Cache"; do
     [ -d "$d" ] && rm -rf "$d"
   done
+  # Online -> writing screen. Offline -> the local splash (which self-heals to the
+  # writing screen the instant a connection appears), so a lost Wi-Fi never leaves a
+  # bare Chrome error page. Re-checked every relaunch, so it recovers on its own.
+  if is_online; then TARGET="$HOME_URL"; else TARGET="file://$OFFLINE_PAGE"; fi
   "$BROWSER" \
     --kiosk \
     --start-fullscreen \
@@ -153,6 +157,6 @@ while true; do
     --disable-session-crashed-bubble \
     --disable-features=TranslateUI,LocalNetworkAccessChecks \
     --overscroll-history-navigation=1 \
-    "https://stjohnbuilds.github.io/quill-haven-2/home-screen/"
+    "$TARGET"
   sleep 2
 done
