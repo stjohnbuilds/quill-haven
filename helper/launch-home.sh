@@ -146,7 +146,15 @@ while true; do
   # Online -> writing screen. Offline -> the local splash (which self-heals to the
   # writing screen the instant a connection appears), so a lost Wi-Fi never leaves a
   # bare Chrome error page. Re-checked every relaunch, so it recovers on its own.
-  if is_online; then TARGET="$HOME_URL"; else TARGET="file://$OFFLINE_PAGE"; fi
+  # Belt-and-braces: if the splash file somehow didn't write, fall back to the network
+  # rather than a file-not-found — the worst case can never be worse than before.
+  if is_online; then
+    TARGET="$HOME_URL"
+  elif [ -f "$OFFLINE_PAGE" ]; then
+    TARGET="file://$OFFLINE_PAGE"
+  else
+    TARGET="$HOME_URL"
+  fi
   "$BROWSER" \
     --kiosk \
     --start-fullscreen \
