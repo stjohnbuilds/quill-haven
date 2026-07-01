@@ -1,10 +1,12 @@
 # TODO — Quill Haven
 
 > 📌 **2026-07-01:** Full audit done — the live fix list is now **`FIX_CHECKLIST.md`**
-> (11 items). Shipped 2.3.22 🦢: Wi-Fi panel finished (on/off switch + signal bars,
-> matches Marie's mock) + the no-wifi "please connect" boot screen (audit fix #1).
-> Waiting on Marie's Update tap + one offline boot to confirm on hardware. Next:
-> fix #2 (lock the helper back door) and #3 (close the all-of-Google hole).
+> (11 items). Shipped 2.3.22 🦢 (Wi-Fi panel + no-wifi boot screen = fix #1) and
+> 2.3.23 🐇 (fix #2 back-door lock: Origin gate + trusted-tap + Terminal confirm;
+> Wi-Fi fixes from Marie's live test: connected network named, Disconnect button,
+> saved passwords, working on/off switch; home-screen logo baked into SVG so it
+> can never mis-render). Marie tapped Update for 🦢; 🐇 awaits her tap. Offline-boot
+> splash still unconfirmed on hardware. Next: fix #3 (close the all-of-Google hole).
 
 > ⚠️ **CURRENT WORK (2026-06-25) is in the 2.x rebuild, not this old list.**
 > The app was rebuilt as ONE shell in repo `quill-haven-2`; **2.1.0 🌳 is live on the
