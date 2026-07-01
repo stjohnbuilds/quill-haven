@@ -5,10 +5,11 @@ in the order we should do them. One at a time. Tick as we go.
 
 ## Fix first — these break the whole point of the device
 
-- [ ] **1. No-wifi fallback screen.** Save a small "Please connect to wifi" page on
-      the device so a lost/unknown wifi shows a friendly screen with a wifi button,
-      instead of a blank stuck screen. (Marie's idea. Much simpler than the old
-      typing-at-home app — it's just one local page, not a full app.)
+- [~] **1. No-wifi fallback screen.** DONE IN CODE (helper/launch-home.sh), not yet
+      shipped or tested on a real device. When there's no wifi the launcher now shows a
+      calm "No Wi-Fi yet — please connect" page, opens the wifi picker, and slides into
+      the writing screen by itself the moment you're online. Needs: (a) a real offline
+      boot on the device to confirm, (b) shipping via a release so it reaches devices.
 
 - [ ] **2. Lock the back door.** Right now any website open in the browser can tell
       the computer to open a terminal, restart, or shut down — and Settings has a
