@@ -20,7 +20,7 @@
     {
       "name": "extension/background.js",
       "src": "extension/background.js",
-      "sha256": "6782284530e99c30ed1dd3d96a355ee388b9c756e49a5bfaf90f426fcfcb39bf"
+      "sha256": "8b13f9ffe71c5c7a7d0ae4856be663f9b61ff5aaf0e34cc9d1b8b91f4d8e4346"
     },
     {
       "name": "extension/shell.css",
