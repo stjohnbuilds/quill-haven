@@ -5,11 +5,12 @@ in the order we should do them. One at a time. Tick as we go.
 
 ## Fix first — these break the whole point of the device
 
-- [~] **1. No-wifi fallback screen.** DONE IN CODE (helper/launch-home.sh), not yet
-      shipped or tested on a real device. When there's no wifi the launcher now shows a
-      calm "No Wi-Fi yet — please connect" page, opens the wifi picker, and slides into
-      the writing screen by itself the moment you're online. Needs: (a) a real offline
-      boot on the device to confirm, (b) shipping via a release so it reaches devices.
+- [x] **1. No-wifi fallback screen.** SHIPPED in 2.3.22 🦢 (2026-07-01), inside
+      helper/launch-home.sh. When there's no wifi the laptop now shows a calm "No
+      Wi-Fi yet — please connect" page with a wifi button, and slides into the
+      writing screen by itself the moment it's online. Reaches the device on the
+      next Update tap. Still to confirm: one real offline boot on the laptop
+      (code reads right; not yet seen running on hardware).
 
 - [ ] **2. Lock the back door.** Right now any website open in the browser can tell
       the computer to open a terminal, restart, or shut down — and Settings has a
