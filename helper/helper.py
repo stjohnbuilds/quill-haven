@@ -457,14 +457,54 @@ class H(BaseHTTPRequestHandler):
             ssid = str(data.get("ssid", "")); pw = str(data.get("password", ""))
             if not ssid:
                 self._send(400, b"no network chosen"); return
-            cmd = ["nmcli", "dev", "wifi", "connect", ssid] + (["password", pw] if pw else [])
             try:
-                r = subprocess.run(cmd, capture_output=True, text=True, timeout=35)
+                if not pw:
+                    # No password given: first try the SAVED profile (a network she has
+                    # used before reconnects with its remembered password — no re-asking).
+                    r = subprocess.run(["nmcli", "con", "up", "id", ssid],
+                                       capture_output=True, text=True, timeout=35)
+                    if r.returncode == 0:
+                        self._send(body=b"connected"); return
+                    r = subprocess.run(["nmcli", "dev", "wifi", "connect", ssid],
+                                       capture_output=True, text=True, timeout=35)
+                    if r.returncode == 0:
+                        self._send(body=b"connected"); return
+                    err = (r.stderr or r.stdout or "").lower()
+                    if "secret" in err or "password" in err or "802.1x" in err or "no network with ssid" not in err and "not found" not in err and ("required" in err or "auth" in err):
+                        self._send(401, b"needs-password"); return
+                    lines = (r.stderr or r.stdout or "could not connect").strip().splitlines()
+                    self._send(400, (lines[-1] if lines else "could not connect")[:140].encode()); return
+                r = subprocess.run(["nmcli", "dev", "wifi", "connect", ssid, "password", pw],
+                                   capture_output=True, text=True, timeout=35)
                 if r.returncode == 0:
                     self._send(body=b"connected")
                 else:
                     lines = (r.stderr or r.stdout or "could not connect").strip().splitlines()
                     self._send(400, (lines[-1] if lines else "could not connect")[:140].encode())
+            except Exception as e:
+                self._send(500, str(e)[:140].encode())
+        elif p == "/wifi-disconnect":
+            # Drop the current Wi-Fi connection (the Disconnect button on the panel).
+            dev = ""
+            try:
+                out = subprocess.run(["nmcli", "-t", "-f", "DEVICE,TYPE", "dev"],
+                                     capture_output=True, text=True, timeout=4).stdout
+                for line in out.splitlines():
+                    d, _, t = line.partition(":")
+                    if t.strip() == "wifi":
+                        dev = d.strip(); break
+            except Exception:
+                pass
+            if not dev:
+                self._send(500, b"no wifi device found"); return
+            try:
+                r = subprocess.run(["nmcli", "dev", "disconnect", dev],
+                                   capture_output=True, text=True, timeout=15)
+                if r.returncode == 0:
+                    self._send(body=b"disconnected")
+                else:
+                    lines = (r.stderr or r.stdout or "could not disconnect").strip().splitlines()
+                    self._send(500, (lines[-1] if lines else "could not disconnect")[:140].encode())
             except Exception as e:
                 self._send(500, str(e)[:140].encode())
         else:
