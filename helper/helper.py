@@ -310,6 +310,8 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):
         p = self.path.split("?")[0]
+        if not self._origin_ok(p):
+            self._send(403, b"locked"); return
         if p in ("/status", "/ping"):
             self._send(body=("quill-helper " + current_version() + " ok").encode())
         elif p == "/network":
