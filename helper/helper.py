@@ -382,6 +382,24 @@ class H(BaseHTTPRequestHandler):
             self._send()
             if _begin_apply():
                 threading.Thread(target=apply_update, daemon=True).start()
+        elif p == "/wifi-toggle":
+            # Turn the Wi-Fi radio on or off (the switch at the top of the Wi-Fi panel).
+            try:
+                length = int(self.headers.get("Content-Length", 0) or 0)
+                data = json.loads(self.rfile.read(length) or b"{}")
+            except Exception:
+                data = {}
+            want_on = bool(data.get("on", True))
+            try:
+                r = subprocess.run(["nmcli", "radio", "wifi", "on" if want_on else "off"],
+                                   capture_output=True, text=True, timeout=10)
+                if r.returncode == 0:
+                    self._send(body=b"on" if want_on else b"off")
+                else:
+                    lines = (r.stderr or r.stdout or "could not switch wifi").strip().splitlines()
+                    self._send(500, (lines[-1] if lines else "could not switch wifi")[:140].encode())
+            except Exception as e:
+                self._send(500, str(e)[:140].encode())
         elif p == "/wifi-connect":
             try:
                 length = int(self.headers.get("Content-Length", 0) or 0)
