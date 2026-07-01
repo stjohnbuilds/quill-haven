@@ -1,5 +1,11 @@
 # TODO — Quill Haven
 
+> 📌 **2026-07-01:** Full audit done — the live fix list is now **`FIX_CHECKLIST.md`**
+> (11 items). Shipped 2.3.22 🦢: Wi-Fi panel finished (on/off switch + signal bars,
+> matches Marie's mock) + the no-wifi "please connect" boot screen (audit fix #1).
+> Waiting on Marie's Update tap + one offline boot to confirm on hardware. Next:
+> fix #2 (lock the helper back door) and #3 (close the all-of-Google hole).
+
 > ⚠️ **CURRENT WORK (2026-06-25) is in the 2.x rebuild, not this old list.**
 > The app was rebuilt as ONE shell in repo `quill-haven-2`; **2.1.0 🌳 is live on the
 > laptop and confirmed working.** The live to-do list is now
