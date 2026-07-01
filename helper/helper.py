@@ -261,14 +261,33 @@ def apply_update():
     threading.Thread(target=_restart, daemon=True).start()
 
 # ---------- http ----------
+# THE BACK-DOOR LOCK. Binding to 127.0.0.1 keeps other MACHINES out, but not other
+# WEB PAGES: any site open in the kiosk browser can fire a POST at 127.0.0.1:8137,
+# and the old code would happily open a terminal / power off / force an update for
+# it. Now every action endpoint checks WHO is asking, via the Origin header — which
+# the browser sets itself and a web page cannot fake:
+#   * no Origin header  -> a local program (curl, the launcher, the TTY rescue) — allowed
+#   * chrome-extension:// -> the Quill Haven shell's background worker — allowed
+#   * anything else (https://some-site.com, file://, null) -> a web page — REFUSED
+# Only the harmless read-only + recovery endpoints stay open to everyone
+# (SAFE_PATHS below), so the offline splash's Wi-Fi button keeps working.
+SAFE_PATHS = {"/status", "/ping", "/network", "/wifi-settings"}
+
 class H(BaseHTTPRequestHandler):
+    def _origin_ok(self, path):
+        if path in SAFE_PATHS:
+            return True
+        origin = self.headers.get("Origin")
+        if origin is None:
+            return True
+        return origin.startswith("chrome-extension://")
+
     def _cors(self):
         # The browser's Update / Terminal / Screen messages come from the EXTENSION's own
         # origin (chrome-extension://… or "null"), NOT the home-screen page — so a single
         # hard-coded ALLOWED_ORIGIN never matched and the browser discarded every reply,
         # which is why none of those buttons worked. Reflect the caller's Origin (falling
-        # back to "*"). Safe: the server binds 127.0.0.1 only, so nothing off this machine
-        # can reach it. (Replies are sent with credentials omitted, so "*" is valid too.)
+        # back to "*"). Replies carry no secrets; the WHO-may-ACT check is _origin_ok.
         origin = self.headers.get("Origin")
         self.send_header("Access-Control-Allow-Origin", origin if origin else "*")
         self.send_header("Access-Control-Allow-Private-Network", "true")
