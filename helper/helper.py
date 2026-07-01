@@ -470,7 +470,7 @@ class H(BaseHTTPRequestHandler):
                     if r.returncode == 0:
                         self._send(body=b"connected"); return
                     err = (r.stderr or r.stdout or "").lower()
-                    if "secret" in err or "password" in err or "802.1x" in err or "no network with ssid" not in err and "not found" not in err and ("required" in err or "auth" in err):
+                    if "secret" in err or "password" in err or "auth" in err:
                         self._send(401, b"needs-password"); return
                     lines = (r.stderr or r.stdout or "could not connect").strip().splitlines()
                     self._send(400, (lines[-1] if lines else "could not connect")[:140].encode()); return
