@@ -347,18 +347,43 @@ class H(BaseHTTPRequestHandler):
                 try:
                     out = subprocess.run(["nmcli", "-t", "-f", "IN-USE,SSID,SIGNAL,SECURITY", "dev", "wifi", "list"],
                                          capture_output=True, text=True, timeout=8).stdout
-                    seen = set()
+                    # A network can appear several times (one row per antenna it's heard
+                    # from), and the row marked in-use is NOT always first. Merge rows per
+                    # name, keeping the connected mark if ANY row has it — otherwise the
+                    # panel says nothing is connected and asks for passwords it knows.
+                    seen = {}
                     for line in out.splitlines():
                         parts = [x.replace("\x00", ":") for x in line.replace("\\:", "\x00").split(":")]
-                        if len(parts) < 4 or not parts[1] or parts[1] in seen:
+                        if len(parts) < 4 or not parts[1]:
                             continue
-                        seen.add(parts[1])
-                        nets.append({"ssid": parts[1],
-                                     "signal": int(parts[2]) if parts[2].isdigit() else 0,
-                                     "secure": parts[3] not in ("", "--"),
-                                     "active": parts[0].strip() == "*"})
+                        ent = {"ssid": parts[1],
+                               "signal": int(parts[2]) if parts[2].isdigit() else 0,
+                               "secure": parts[3] not in ("", "--"),
+                               "active": parts[0].strip() == "*"}
+                        old = seen.get(parts[1])
+                        if old:
+                            old["signal"] = max(old["signal"], ent["signal"])
+                            old["active"] = old["active"] or ent["active"]
+                        else:
+                            seen[parts[1]] = ent
+                            nets.append(ent)
                 except Exception:
                     pass
+                # Belt-and-braces: if no row carried the mark, ask which network is
+                # active directly and tag it, so "Connected" always names its network.
+                if nets and not any(n["active"] for n in nets):
+                    try:
+                        out = subprocess.run(["nmcli", "-t", "-f", "active,ssid", "dev", "wifi"],
+                                             capture_output=True, text=True, timeout=4).stdout
+                        for line in out.splitlines():
+                            if line.startswith("yes:"):
+                                cur = line.split(":", 1)[1].strip()
+                                for n in nets:
+                                    if n["ssid"] == cur:
+                                        n["active"] = True
+                                break
+                    except Exception:
+                        pass
             nets.sort(key=lambda n: (not n["active"], -n["signal"]))
             body = json.dumps({"networks": nets, "radio": radio}).encode()
             self.send_response(200); self._cors()
