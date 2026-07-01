@@ -12,10 +12,12 @@ in the order we should do them. One at a time. Tick as we go.
       next Update tap. Still to confirm: one real offline boot on the laptop
       (code reads right; not yet seen running on hardware).
 
-- [ ] **2. Lock the back door.** Right now any website open in the browser can tell
-      the computer to open a terminal, restart, or shut down — and Settings has a
-      one-tap Terminal button with no confirm. Add a secret code the helper checks,
-      and hide/PIN the Terminal button. (Already on TODO.md.)
+- [x] **2. Lock the back door.** SHIPPED in 2.3.23 🐇 (2026-07-01). The helper now
+      only obeys Quill Haven itself (it checks WHO is asking — web pages get
+      "locked"), fake scripted clicks on shell buttons are ignored, the shell's
+      insides are sealed off from page scripts, and the Terminal button asks
+      "are you sure?". TTY rescue (curl) still works. Needs Marie's Update tap;
+      code reads right, not yet watched on hardware.
 
 - [ ] **3. Close the whole-of-Google hole.** Because Google Docs is built in, the
       block-list also lets through Google Search, Gmail and Google News. Tighten the
