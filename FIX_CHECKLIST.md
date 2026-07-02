@@ -58,8 +58,10 @@ in the order we should do them. One at a time. Tick as we go.
       too) — the boot splash covers the start-up case; full mid-session offline
       recovery is a bigger job, noted for later.
 
-- [ ] **10. Small cleanups.** Fix qh-diag.sh reporting the wrong version, remove two
-      unused font files, and add a few missing block-list domains.
+- [x] **10. Small cleanups.** DONE (2026-07-01). qh-diag.sh now reads the real version
+      (from content.js) and the right repo; removed THREE unused font files (~87KB — the
+      logo is baked-in SVG now). Left the block-list domains as-is on purpose (adding
+      URL-shorteners risks blocking legit links; not worth the over-blocking).
 
 ## Later / advanced (optional)
 
