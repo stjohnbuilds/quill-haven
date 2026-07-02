@@ -19,9 +19,12 @@ in the order we should do them. One at a time. Tick as we go.
       "are you sure?". TTY rescue (curl) still works. Needs Marie's Update tap;
       code reads right, not yet watched on hardware.
 
-- [ ] **3. Close the whole-of-Google hole.** Because Google Docs is built in, the
-      block-list also lets through Google Search, Gmail and Google News. Tighten the
-      rule so only docs.google.com opens, not all of google.com.
+- [x] **3. Close the whole-of-Google hole.** SHIPPED in 2.3.24 🦔 (2026-07-01).
+      Google Docs, sign-in and Drive still work; Google Search, Gmail, News and the
+      Web Store are now blocked. Same tightening for app-hosting platforms
+      (vercel.app, github.io) so only your own added apps open, not strangers'.
+      Unit-tested (18 cases pass). Needs Marie's Update tap; not yet watched on
+      hardware.
 
 ## Fix soon — protect your work and stop future sessions being misled
 
