@@ -284,7 +284,13 @@ class H(BaseHTTPRequestHandler):
         origin = self.headers.get("Origin")
         if origin is None:
             return True
-        return origin.startswith("chrome-extension://")
+        if origin.startswith("chrome-extension://"):
+            return True
+        # The offline splash (a local file:// page) reports Origin "null". Let it use
+        # ONLY the Wi-Fi family, so Marie can connect when stranded — nothing else.
+        if path in WIFI_PATHS and origin == "null":
+            return True
+        return False
 
     def _cors(self):
         # The browser's Update / Terminal / Screen messages come from the EXTENSION's own
