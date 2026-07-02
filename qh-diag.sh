@@ -45,8 +45,9 @@ P2="/etc/chromium-browser/policies/managed/quill-haven.json"
   echo "helper /status reply:         $(curl -fsS --max-time 3 http://127.0.0.1:8137/status 2>/dev/null || echo 'no reply')"
 
   echo "--- NETWORK / WHAT GITHUB SERVES NOW ---"
-  echo "github reachable: $(curl -fsS --max-time 6 -o /dev/null -w 'HTTP %{http_code}' https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json 2>/dev/null || echo 'NO internet to GitHub')"
-  echo "github version.json: $(curl -fsS --max-time 6 https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/version.json 2>/dev/null | tr -d '\n ')"
+  echo "github reachable:    $(curl -fsS --max-time 6 -o /dev/null -w 'HTTP %{http_code}' https://raw.githubusercontent.com/stjohnbuilds/quill-haven-2/main/version.json 2>/dev/null || echo 'NO internet to GitHub')"
+  echo "app version (live):  $(curl -fsS --max-time 6 https://raw.githubusercontent.com/stjohnbuilds/quill-haven-2/main/version.json 2>/dev/null | tr -d '\n ')"
+  echo "helper manifest ver: $(curl -fsS --max-time 6 https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/helper/helper-manifest.json 2>/dev/null | grep -o '\"version\": *\"[^\"]*\"' | head -1)"
   echo "END OF REPORT"
 } > "$OUT" 2>&1
 
