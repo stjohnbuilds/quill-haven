@@ -28,9 +28,10 @@ in the order we should do them. One at a time. Tick as we go.
 
 ## Fix soon — protect your work and stop future sessions being misled
 
-- [ ] **4. Save the safety fixes to GitHub.** Several fixes exist only on this laptop,
-      unsaved — one "undo" wipes them. Commit them (carefully, file by file), and fix
-      the release-helper script that would silently break the update channel if run.
+- [x] **4. Save the safety fixes to GitHub.** DONE / verified (2026-07-01). The repo is
+      now clean and fully pushed — nothing sits only on the laptop. Confirmed the two
+      "landmine" files are the SAFE versions: release-helper.sh preserves the update
+      list, and qh-admin.sh has its path guard.
 
 - [ ] **5. Clean up the notes that lie.** Update CLAUDE.md (points at the wrong repo +
       a crashing release script), fix HANDOVER (says "Mac not Chromebook", says
