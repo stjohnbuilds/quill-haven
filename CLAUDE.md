@@ -45,21 +45,26 @@ The shipping app is the **2.x rebuild** and lives in a **separate repo**:
 - "Files I changed" footer on every response
 - No confidence percentages or self-certifying
 - **EVERY release gets a NEW emoji.** Marie reads the pill emoji as "which version am
-  I on" and the changing emoji is her proof an update landed. **This is built in: run
-  `tools/release.sh`** — it bumps the version + the NEXT unused emoji in EVERY place
-  that must agree (`version.json`, `extension/quill-overlay.js`, `home-screen/js/home.js`,
-  `extension/manifest.json`), bumps the launcher rev, and recomputes every
-  `helper-manifest.json` hash. Use `QH_DRY=1 tools/release.sh` to preview. Never
-  hand-bump versions and never ship a change without a new emoji.
+  I on" and the changing emoji is her proof an update landed. Never hand-wave a version
+  and never ship a change without a new, unused emoji.
+- **How to actually ship a release (the real 2.x process — `tools/release.sh` is STALE
+  and CRASHES, do NOT run it; it edits `extension/quill-overlay.js` which no longer
+  exists).** By hand:
+  1. In `quill-haven-2`: bump version + next unused emoji in all three — `version.json`,
+     `extension/content.js` (`var LOCAL = { version, emoji }`), `extension/manifest.json`.
+  2. Copy the 5 `extension/` files into this repo's `extension/` (the delivery mirror).
+  3. If `helper/helper.py` changed, run `tools/release-helper.sh <next-helper-version>`
+     FIRST (re-stamps `helper-manifest.json` version + hash, PRESERVES `extras`).
+  4. Re-hash the 6 `extras` in `helper/helper-manifest.json` (5 extension files +
+     `launch-home.sh`) with `shasum -a 256`, then VERIFY every hash matches its file.
+  5. Commit + push BOTH repos. Confirm the raw CDN serves the new `version.json`.
 - **Updates are GATED — they apply only when Marie taps "Update" and confirms.** The
-  helper (`helper/helper.py`) no longer auto-applies on a timer; the browser POSTs
-  `/apply-update` on her tap. `home-screen/service-worker.js` is CACHE-FIRST / PINNED
-  and is kept **byte-stable on purpose** — do NOT version-bump it (that's why it left
-  the `release.sh` list above); changing it reinstalls the worker and defeats the pin.
-- **If you edit `helper/helper.py`, run `tools/release-helper.sh <next-helper-version>`
-  BEFORE `tools/release.sh`** (it re-stamps `helper-manifest.json`'s version + hash
-  while preserving `extras`). `release.sh` now refuses to run if the helper hash is
-  stale, so the gate can't half-deploy (new overlay, old helper).
+  helper (`helper/helper.py`) does not auto-apply on a timer; the browser POSTs
+  `/apply-update` on her tap.
+- **The live app has NO service worker.** The home screen is served straight from
+  `quill-haven-2` GitHub Pages. `home-screen/service-worker.js` in THIS repo belongs to
+  the RETIRED 1.x app — the device never loads it. (Old rule about keeping it byte-stable
+  is history.)
 
 ## What we're building
 1. A home screen (HTML/CSS/JS) that looks like a real OS — Mac-style dock or top-bar icons, settings panel
