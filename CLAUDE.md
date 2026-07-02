@@ -73,14 +73,20 @@ The shipping app is the **2.x rebuild** and lives in a **separate repo**:
 4. A USB installer package with everything ready to go
 
 ## The apps
-- Google Docs: https://docs.google.com
-- Dabble Writer: https://app.dabblewriter.com
-- Typing & Tomes: https://typingandtomes.vercel.app
+- **Only Google Docs ships built-in** (`quill-haven-2/extension/apps.js`). Everything
+  else is add-your-own via the shell's "Add app". Common ones Marie uses:
+  - Dabble Writer: https://app.dabblewriter.com
+  - Typing & Tomes: https://typingandtomes.vercel.app
 
 ## GitHub
-- Repo: stjohnbuilds/quill-haven
-- Updates: home screen checks version.json on GitHub, shows "Update available" button in top bar
+- **`stjohnbuilds/quill-haven-2`** — the live app (home screen served from its Pages;
+  `version.json` is the update signal the shell checks).
+- **`stjohnbuilds/quill-haven`** — this repo; the device pulls the extension + launcher
+  from its raw `main` via `helper/helper-manifest.json`.
+- Update flow: the shell compares its built-in version to `quill-haven-2/version.json`,
+  shows "Update available"; on Marie's tap the helper fetches + hash-verifies + restarts.
 
 ## Commands
-- Preview: open home-screen/index.html in browser
-- No build step — this is static HTML/CSS/JS
+- Preview the real app: open `../quill-haven-2/home-screen/index.html` (but most UI is
+  the extension shell — load `../quill-haven-2/extension/` as an unpacked extension).
+- No build step — static HTML/CSS/JS.
