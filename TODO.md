@@ -8,8 +8,11 @@
 > can never mis-render) and 2.3.24 🦔 (fix #3: only Docs/sign-in/Drive allowed on
 > google.com — Search/Gmail/News blocked; app-host platforms exact-host only;
 > unit-tested). Marie tapped Update for 🦢; 🐇 + 🦔 await her taps. Offline-boot splash
-> still unconfirmed on hardware. Next: fix #4 (commit the uncommitted safety fixes)
-> or the smaller tidy-ups (#8 idle gap, #9 failed-load bounce, #10 diag/fonts).
+> still unconfirmed on hardware. Also shipped 2.3.25 🦫 (fixes #8 cold-start race +
+> #9 failed-load bounce-home). Google Docs confirmed working on hardware after 🦔.
+> LEFT: #4 (commit/verify the uncommitted safety fixes), #5 (clean the stale docs),
+> #6 (fix this repo's dead .claude hooks), #7 (retire the old live app), #10 (qh-diag
+> version + unused fonts + block-list domains), #11 (pin releases — optional).
 
 > ⚠️ **CURRENT WORK (2026-06-25) is in the 2.x rebuild, not this old list.**
 > The app was rebuilt as ONE shell in repo `quill-haven-2`; **2.1.0 🌳 is live on the
