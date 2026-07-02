@@ -47,8 +47,9 @@ in the order we should do them. One at a time. Tick as we go.
 
 ## Tidy up — lower risk, still worth doing
 
-- [ ] **8. Block-list idle gap.** The first click after the browser has been idle can
-      slip past the block-list. Make the lock wait until it's ready before allowing.
+- [x] **8. Block-list idle gap.** SHIPPED in 2.3.25 🦫 (2026-07-01). The lock now
+      loads its list before judging the first click after an idle spell, so nothing
+      slips through. Needs Marie's Update tap.
 
 - [ ] **9. Catch failed page loads.** A typo or an offline tap lands on a dead error
       page with no dock and no way home. Make failed loads bounce back home.
