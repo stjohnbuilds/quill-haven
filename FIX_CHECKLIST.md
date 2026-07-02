@@ -23,8 +23,8 @@ in the order we should do them. One at a time. Tick as we go.
       Google Docs, sign-in and Drive still work; Google Search, Gmail, News and the
       Web Store are now blocked. Same tightening for app-hosting platforms
       (vercel.app, github.io) so only your own added apps open, not strangers'.
-      Unit-tested (18 cases pass). Needs Marie's Update tap; not yet watched on
-      hardware.
+      Unit-tested (18 cases pass). ✅ Google Docs confirmed working on the real
+      laptop (2026-07-01). Still to spot-check: that Search/Gmail now bounce home.
 
 ## Fix soon — protect your work and stop future sessions being misled
 
