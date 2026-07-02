@@ -268,10 +268,14 @@ def apply_update():
 # the browser sets itself and a web page cannot fake:
 #   * no Origin header  -> a local program (curl, the launcher, the TTY rescue) — allowed
 #   * chrome-extension:// -> the Quill Haven shell's background worker — allowed
-#   * anything else (https://some-site.com, file://, null) -> a web page — REFUSED
+#   * anything else (https://some-site.com) -> a web page — REFUSED
 # Only the harmless read-only + recovery endpoints stay open to everyone
-# (SAFE_PATHS below), so the offline splash's Wi-Fi button keeps working.
+# (SAFE_PATHS below). The Wi-Fi FAMILY is also allowed from the offline splash — a
+# local file:// page whose Origin is "null" — so a stuck-offline Marie can join a
+# network right there. Real distraction sites have a real https:// origin and stay
+# blocked from everything here. Terminal / power / update remain strict.
 SAFE_PATHS = {"/status", "/ping", "/network", "/wifi-settings"}
+WIFI_PATHS = {"/wifi-list", "/wifi-connect", "/wifi-toggle", "/wifi-disconnect", "/wifi-forget"}
 
 class H(BaseHTTPRequestHandler):
     def _origin_ok(self, path):
