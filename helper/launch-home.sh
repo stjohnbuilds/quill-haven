@@ -2,11 +2,11 @@
 # Quill Haven kiosk launcher. Starts Chromium in fullscreen kiosk mode and the
 # helper service. If Chromium crashes, it restarts automatically.
 # This file is kept up to date by the helper's self-update (no re-run needed).
-# rev: v2.3.21-2026-07-01  (adds an offline "connect to Wi-Fi" screen: a boot with no
-#                    Wi-Fi now shows a friendly page + opens the Wi-Fi picker instead of a
-#                    dead Chrome error page, then slides into the writing screen by itself
-#                    once online. Still clears the cached background service worker each
-#                    launch so a frozen worker can't block Update/Terminal.)
+# rev: v2.3.28-2026-07-01  (offline splash v2: now a delivered file (offline.html) styled
+#                    like the real home screen; the long black-screen wait is gone — Wi-Fi
+#                    off = straight to the splash, otherwise a ~6s grace; no more surprise
+#                    system window at boot, the splash's button opens it instead. Still
+#                    clears the cached background service worker each launch.)
 
 xset s off 2>/dev/null; xset -dpms 2>/dev/null; xset s noblank 2>/dev/null
 
