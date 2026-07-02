@@ -1,3 +1,8 @@
+> ⚠️ **SUPERSEDED / HISTORY (pre-rebuild, 1.x).** This describes the RETIRED old app
+> and is no longer "the single source of truth". The live app is the 2.x rebuild in
+> `quill-haven-2`; the current source of truth is **`CLAUDE.md`** + **`FIX_CHECKLIST.md`**.
+> Kept only for history.
+
 # Quill Haven — Game Plan (the brain)
 
 > **The single source of truth for the whole project.** Goal, who it's for, how
