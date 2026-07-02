@@ -324,7 +324,16 @@ class H(BaseHTTPRequestHandler):
                         ssid = line.split(":", 1)[1].strip(); break
             except Exception:
                 pass
-            body = json.dumps({"ssid": ssid}).encode()
+            # Also say whether the Wi-Fi radio is even ON — the offline splash uses
+            # this to tell Marie "switched off" apart from "no connection yet".
+            radio = True
+            try:
+                r = subprocess.run(["nmcli", "radio", "wifi"],
+                                   capture_output=True, text=True, timeout=2)
+                radio = "enabled" in (r.stdout or "").lower()
+            except Exception:
+                pass
+            body = json.dumps({"ssid": ssid, "radio": radio}).encode()
             self.send_response(200); self._cors()
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
