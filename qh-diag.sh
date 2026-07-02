@@ -22,9 +22,9 @@ P2="/etc/chromium-browser/policies/managed/quill-haven.json"
   echo "chromium: $({ chromium --version || chromium-browser --version; } 2>/dev/null)"
 
   echo "--- INSTALLED QUILL HAVEN VERSION ---"
-  echo "overlay on disk: $(grep -o "LOCAL_VERSION = '[^']*'" "$QH/extension/quill-overlay.js" 2>/dev/null)  $(grep -o "localEmoji = '[^']*'" "$QH/extension/quill-overlay.js" 2>/dev/null)"
+  echo "app on disk:             $(grep -o "version: '[^']*', emoji: '[^']*'" "$QH/extension/content.js" 2>/dev/null || echo 'content.js missing')"
   echo "helper version:          $(cat "$QH/helper-version.txt" 2>/dev/null || echo 'none')"
-  echo "device-manifest applied: $(cat "$QH/device-version.txt" 2>/dev/null || echo 'none / never applied')  (latest is 2)"
+  echo "device-manifest applied: $(cat "$QH/device-version.txt" 2>/dev/null || echo 'none / never applied')"
   echo "launcher rev:            $(grep -m1 'rev:' "$QH/launch-home.sh" 2>/dev/null || echo 'no launch-home.sh')"
   echo "extension files present: $(ls "$QH/extension" 2>/dev/null | tr '\n' ' ' || echo 'NONE / dir missing')"
 
