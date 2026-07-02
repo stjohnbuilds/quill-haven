@@ -497,6 +497,27 @@ class H(BaseHTTPRequestHandler):
                     self._send(400, (lines[-1] if lines else "could not connect")[:140].encode())
             except Exception as e:
                 self._send(500, str(e)[:140].encode())
+        elif p == "/wifi-forget":
+            # Delete the saved profile for a network (the Forget button): it will no
+            # longer auto-reconnect, and it'll ask for the password next time.
+            try:
+                length = int(self.headers.get("Content-Length", 0) or 0)
+                data = json.loads(self.rfile.read(length) or b"{}")
+            except Exception:
+                data = {}
+            ssid = str(data.get("ssid", ""))
+            if not ssid:
+                self._send(400, b"no network chosen"); return
+            try:
+                r = subprocess.run(["nmcli", "connection", "delete", "id", ssid],
+                                   capture_output=True, text=True, timeout=15)
+                if r.returncode == 0:
+                    self._send(body=b"forgotten")
+                else:
+                    lines = (r.stderr or r.stdout or "could not forget").strip().splitlines()
+                    self._send(400, (lines[-1] if lines else "could not forget")[:140].encode())
+            except Exception as e:
+                self._send(500, str(e)[:140].encode())
         elif p == "/wifi-disconnect":
             # Drop the current Wi-Fi connection (the Disconnect button on the panel).
             dev = ""
