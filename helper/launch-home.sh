@@ -2,13 +2,19 @@
 # Quill Haven kiosk launcher. Starts Chromium in fullscreen kiosk mode and the
 # helper service. If Chromium crashes, it restarts automatically.
 # This file is kept up to date by the helper's self-update (no re-run needed).
-# rev: v2.3.28-2026-07-01  (offline splash v2: now a delivered file (offline.html) styled
-#                    like the real home screen; the long black-screen wait is gone — Wi-Fi
-#                    off = straight to the splash, otherwise a ~6s grace; no more surprise
-#                    system window at boot, the splash's button opens it instead. Still
-#                    clears the cached background service worker each launch.)
+# rev: v2.3.30-2026-07-01  (ANTI-BRICK: always switch the Wi-Fi radio back ON at boot,
+#                    so "turned Wi-Fi off" can never strand the laptop — a restart heals
+#                    it. Plus offline splash v2 (delivered file, home-screen look, no long
+#                    black wait). Still clears the cached background service worker.)
 
 xset s off 2>/dev/null; xset -dpms 2>/dev/null; xset s noblank 2>/dev/null
+
+# ANTI-BRICK SAFETY NET: this laptop lives on the internet, so the Wi-Fi radio must
+# never stay off. Force it back ON at every boot and clear any block — so if Wi-Fi
+# ever gets switched off, a simple restart brings it back and it auto-rejoins a known
+# network. (This is the fix for the "turned Wi-Fi off and got locked out" trap.)
+rfkill unblock wifi 2>/dev/null || true
+nmcli radio wifi on 2>/dev/null || true
 
 # Use whichever Chromium binary this distro installed — some call it chromium-browser.
 # (Matches the helper's own detection so boot can't fail on a "command not found".)
