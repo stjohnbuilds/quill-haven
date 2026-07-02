@@ -369,6 +369,20 @@ class H(BaseHTTPRequestHandler):
                             nets.append(ent)
                 except Exception:
                     pass
+                # Mark which networks the laptop REMEMBERS (has a saved profile for),
+                # so the panel can offer "Forget" on them.
+                try:
+                    out = subprocess.run(["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show"],
+                                         capture_output=True, text=True, timeout=4).stdout
+                    saved = set()
+                    for line in out.splitlines():
+                        name, _, typ = line.partition(":")
+                        if "wireless" in typ or typ.strip() == "wifi":
+                            saved.add(name.strip())
+                    for n in nets:
+                        n["saved"] = n["ssid"] in saved
+                except Exception:
+                    pass
                 # Belt-and-braces: if no row carried the mark, ask which network is
                 # active directly and tag it, so "Connected" always names its network.
                 if nets and not any(n["active"] for n in nets):
