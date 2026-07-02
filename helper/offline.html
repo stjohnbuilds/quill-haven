@@ -166,18 +166,8 @@
     }).catch(function () { connecting = ""; setStatus("Couldn’t connect. Try again.", false); setTimeout(scan, 2500); });
   }
 
-  radioEl.addEventListener("change", function () {
-    // One-way: the switch can only turn Wi-Fi ON. Off would strand the laptop, so we
-    // never allow it — snap the switch back if it's unchecked.
-    if (!radioEl.checked) {
-      radioEl.checked = true;
-      listEl.innerHTML = '<div class="msg">Wi&#8209;Fi stays on — Quill Haven needs it.</div>';
-      setTimeout(scan, 1600);
-      return;
-    }
-    listEl.innerHTML = '<div class="msg">Turning Wi&#8209;Fi on&hellip;</div>';
-    api("/wifi-toggle", { on: true }).then(function () { setTimeout(scan, 1400); }).catch(function () {});
-  });
+  // (No Wi-Fi off-switch here at all. If Wi-Fi is off, scan() shows a one-way
+  // "Turn Wi-Fi on" button instead — off is never offered.)
   document.getElementById("rescan").addEventListener("click", scan);
 
   // Self-heal: the instant the internet is reachable, go to writing.

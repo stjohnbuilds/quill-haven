@@ -5,7 +5,7 @@
     {
       "name": "extension/manifest.json",
       "src": "extension/manifest.json",
-      "sha256": "916584c3f6642c5807d43adaf93a8868097767bc167f9b8e2965c8387d15f722"
+      "sha256": "de32f4b582866d00b9164526be7cb8cdba8cc35a296fd25b37ac79b56a9c7e77"
     },
     {
       "name": "extension/apps.js",
@@ -15,7 +15,7 @@
     {
       "name": "extension/content.js",
       "src": "extension/content.js",
-      "sha256": "3a8acc4d7dd125f9451dab9d41e338cf2739b6abc99670479c2efe56478551a7"
+      "sha256": "6bc737122ff28a9e42724b4c17b613d908d762e3151cccfcc2ee02e96dfd1d36"
     },
     {
       "name": "extension/background.js",
@@ -30,7 +30,7 @@
     {
       "name": "offline.html",
       "src": "helper/offline.html",
-      "sha256": "5474cb787891361188215092e63416d30f11e28f36fdcd961773cc76a8fa8178"
+      "sha256": "8d0e1604809994d6ac9afe81dc4f1201ba9f62ef9238cf6311054d153d09871b"
     },
     {
       "name": "launch-home.sh",
