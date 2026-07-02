@@ -51,8 +51,11 @@ in the order we should do them. One at a time. Tick as we go.
       loads its list before judging the first click after an idle spell, so nothing
       slips through. Needs Marie's Update tap.
 
-- [ ] **9. Catch failed page loads.** A typo or an offline tap lands on a dead error
-      page with no dock and no way home. Make failed loads bounce back home.
+- [x] **9. Catch failed page loads.** SHIPPED in 2.3.25 🦫 (2026-07-01). A failed
+      page load (typo, dead link) now bounces you home instead of a blank error
+      page. Note: a mid-session Wi-Fi drop still shows an error page (home is remote
+      too) — the boot splash covers the start-up case; full mid-session offline
+      recovery is a bigger job, noted for later.
 
 - [ ] **10. Small cleanups.** Fix qh-diag.sh reporting the wrong version, remove two
       unused font files, and add a few missing block-list domains.
