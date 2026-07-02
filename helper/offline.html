@@ -101,8 +101,16 @@
   function scan() {
     api("/wifi-list").then(function (r) { return r.json(); }).then(function (d) {
       var nets = (d && d.networks) || [];
-      radioEl.checked = !(d && d.radio === false);
-      if (d && d.radio === false) { listEl.innerHTML = '<div class="msg">Wi&#8209;Fi is off. Flip the switch above to turn it on.</div>'; return; }
+      // No off-switch anywhere. If Wi-Fi is off (rare), offer ONE "Turn on" button.
+      if (d && d.radio === false) {
+        listEl.innerHTML = '<div class="msg">Wi&#8209;Fi is off.</div><div style="text-align:center;padding:0 0 14px;"><button class="btn" id="wifion">Turn Wi&#8209;Fi on</button></div>';
+        var b = document.getElementById("wifion");
+        if (b) b.addEventListener("click", function () {
+          listEl.innerHTML = '<div class="msg">Turning Wi&#8209;Fi on&hellip;</div>';
+          api("/wifi-toggle", { on: true }).then(function () { setTimeout(scan, 1400); }).catch(function () {});
+        });
+        return;
+      }
       if (!nets.length) { listEl.innerHTML = '<div class="msg">No networks found. Tap Refresh.</div>'; return; }
       render(nets);
     }).catch(function () { listEl.innerHTML = '<div class="msg err">Couldn’t read Wi&#8209;Fi. Tap Refresh.</div>'; });
