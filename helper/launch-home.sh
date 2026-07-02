@@ -62,83 +62,21 @@ OFFLINE_PAGE="$HOME/.local/share/quill-haven/offline.html"
 # "Are we online?" = can we reach the home host right now.
 is_online() { curl -fsS --max-time 2 -o /dev/null "$VER_URL"; }
 
-# Write the local "no Wi-Fi" splash. It is shown ONLY when there is no connection,
-# never needs the network to render, checks every few seconds, and jumps straight to
-# the writing screen the moment a connection appears. Its button asks the helper to
-# open the Wi-Fi picker. (Quoted heredoc: the page is stored exactly as written.)
-mkdir -p "$(dirname "$OFFLINE_PAGE")"
-cat > "$OFFLINE_PAGE" <<'HTML'
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quill Haven</title>
-<style>
-  html, body { margin: 0; height: 100%; }
-  body {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    min-height: 100vh; padding: 24px; box-sizing: border-box; text-align: center;
-    font-family: Georgia, "EB Garamond", serif; color: #f4efe6;
-    background: linear-gradient(160deg, #2b2440, #1c1830);
-  }
-  h1 { font-size: 34px; font-weight: 600; margin: 0 0 12px; }
-  p  { font-size: 19px; line-height: 1.5; max-width: 24em; margin: 0 0 28px; color: #d8cfe6; }
-  button {
-    font: inherit; font-size: 19px; padding: 14px 30px; border: 0; border-radius: 14px;
-    background: #efe7d6; color: #2b2440; cursor: pointer;
-  }
-  button:active { transform: translateY(1px); }
-  .status { margin-top: 22px; font-size: 15px; color: #a89fc0; min-height: 1.4em; }
-</style>
-</head>
-<body>
-  <h1>No Wi&#8209;Fi yet</h1>
-  <p>Quill Haven needs Wi&#8209;Fi to open your writing. Please connect &mdash; this screen will carry on by itself.</p>
-  <button id="wifi">Connect to Wi&#8209;Fi</button>
-  <div class="status" id="status">Looking for a connection&hellip;</div>
-<script>
-  var HOME = "https://stjohnbuilds.github.io/quill-haven-2/home-screen/";
-  var VER  = "https://stjohnbuilds.github.io/quill-haven-2/version.json";
-  var statusEl = document.getElementById("status");
-  document.getElementById("wifi").addEventListener("click", function () {
-    statusEl.textContent = "Opening Wi‑Fi settings…";
-    fetch("http://127.0.0.1:8137/wifi-settings", { method: "POST", mode: "no-cors" })
-      .catch(function () {});
-  });
-  var busy = false;
-  function check() {
-    if (busy) return;              // never let a slow check stack up on another
-    busy = true;
-    var ctrl = new AbortController();
-    var timer = setTimeout(function () { ctrl.abort(); }, 4000);  // a hung check can't freeze us
-    fetch(VER + "?t=" + Date.now(), { mode: "no-cors", cache: "no-store", signal: ctrl.signal })
-      .then(function () {
-        clearTimeout(timer);
-        statusEl.textContent = "Connected — opening…";
-        location.replace(HOME);
-      })
-      .catch(function () { clearTimeout(timer); busy = false; });
-  }
-  setInterval(check, 3000);
-  check();
-</script>
-</body>
-</html>
-HTML
+# The "no Wi-Fi" splash is a real delivered file (helper/offline.html via the update
+# manifest), styled to match the home screen. This launcher only POINTS at it. If it's
+# somehow missing, we fall back to the home URL — never worse than before.
 
-# ROOT-CAUSE fix for the "boots into the dino game" problem: wait until the home
-# host is actually reachable BEFORE loading it, so Chromium never opens on the
-# offline error page. Polls up to ~30s. If still offline, pop the Wi-Fi picker so
-# Marie can connect straight away (the splash below covers the wait either way).
-ONLINE=0
-for _ in $(seq 1 30); do
-  if is_online; then ONLINE=1; break; fi
-  sleep 1
-done
-if [ "$ONLINE" -eq 0 ]; then
-  PICKER="$(command -v nm-connection-editor || command -v nm-applet || true)"
-  [ -n "$PICKER" ] && "$PICKER" &
+# Short grace wait so a normal boot (Wi-Fi takes a few seconds to join) still lands
+# straight on the writing screen. If Wi-Fi is switched OFF, skip the wait entirely —
+# this was the long black screen Marie saw. If we're still offline after ~6s, the
+# splash takes over (it self-heals to the writing screen the moment we're online).
+if nmcli radio wifi 2>/dev/null | grep -qi disabled; then
+  : # Wi-Fi is off — no point waiting; the splash will say so.
+else
+  for _ in $(seq 1 6); do
+    is_online && break
+    sleep 1
+  done
 fi
 
 # If Chromium ever crashes, restart it so Marie is never dumped to a bare X.
