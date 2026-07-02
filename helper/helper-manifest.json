@@ -28,9 +28,14 @@
       "sha256": "256cdf913f14b2df917770d51b495ab19898669c90cf2bce78af7e60415e267b"
     },
     {
+      "name": "offline.html",
+      "src": "helper/offline.html",
+      "sha256": "PLACEHOLDER"
+    },
+    {
       "name": "launch-home.sh",
       "src": "helper/launch-home.sh",
-      "sha256": "c8678fab1a89d4806d39b22956772b905e454d6880a4ab3dcbdf02f3e66b7545"
+      "sha256": "PLACEHOLDER"
     }
   ]
 }
