@@ -26,6 +26,18 @@ Quill Haven.
 ## Who this is for
 Marie. Non-technical. Talk like she's 10. No jargon.
 
+## Where the code actually lives (READ THIS FIRST)
+The shipping app is the **2.x rebuild** and lives in a **separate repo**:
+- **`quill-haven-2`** (`/Users/mariemackay/Dev/quill-haven-2`) — THE SOURCE OF TRUTH.
+  The 7-file app (5 `extension/` files + `home-screen/index.html` + `css/home.css`).
+  The home screen is served LIVE from its GitHub Pages; the version pill + emoji live
+  in `extension/content.js` (`var LOCAL`) and `version.json`.
+- **`QuillHaven`** (this repo) — the DELIVERY + device side: the installer (`setup.sh`),
+  the on-device helper (`helper/`), the boot launcher (`helper/launch-home.sh`), and a
+  mirror of the 5 `extension/` files that the device pulls from `helper-manifest.json`.
+- The live fix list from the 2026-07-01 audit is **`FIX_CHECKLIST.md`**. `HANDOVER.md`
+  / `TODO.md` / most of `docs/` describe the RETIRED 1.x app — treat as history.
+
 ## Rules
 - NEVER create duplicate components — check what exists first
 - Plan before building
