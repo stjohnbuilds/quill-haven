@@ -1,3 +1,9 @@
+> ⚠️ **SUPERSEDED / HISTORY (pre-rebuild, 1.x).** Do NOT follow this doc. Its ground
+> rules are now WRONG and dangerous: the device runs the 2.x app from `quill-haven-2`,
+> updates are gated on Marie's tap (never "push to main and it applies"), and
+> `tools/release.sh` is stale/crashes. The live fix list is **`FIX_CHECKLIST.md`** and
+> the current process is in **`CLAUDE.md`**. Kept only for history.
+
 # Quill Haven — Remaining Fixes (handoff work-order)
 
 **Purpose.** A detailed, self-contained to-do so another AI or developer (e.g.
