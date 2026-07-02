@@ -124,6 +124,7 @@ fetch_to() {  # url dest  — only overwrites on a clean download
 fetch_to "$RAW/helper.py"       "$HELPER_DIR/helper.py"
 fetch_to "$RAW/run-helper.sh"   "$HELPER_DIR/run-helper.sh"
 fetch_to "$RAW/launch-home.sh"  "$HELPER_DIR/launch-home.sh"
+fetch_to "$RAW/offline.html"    "$HELPER_DIR/offline.html"   # the "no Wi-Fi" splash
 # Download the Quill Haven extension (the shell: bar, dock, settings, lockdown).
 EXT_RAW="https://raw.githubusercontent.com/stjohnbuilds/quill-haven/main/extension"
 mkdir -p "$HELPER_DIR/extension"
