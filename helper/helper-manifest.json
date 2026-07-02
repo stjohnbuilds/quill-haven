@@ -1,11 +1,11 @@
 {
-  "version": "1.13",
-  "sha256": "8ac6af4d9630bbda45114425089870fef8f06f99d1a22b5595f3ea51beb33e87",
+  "version": "1.14",
+  "sha256": "9f94ff9607d1249c982d74525fc8eddcfee2991be97f299c01c29ef4ce6100ea",
   "extras": [
     {
       "name": "extension/manifest.json",
       "src": "extension/manifest.json",
-      "sha256": "f5c1cd677f43d3b02aceb092d1c27ccabdb96bf982f0017f43ba6028da62d092"
+      "sha256": "b6adbd4b8dc6cdb400fe0db22ad722901c4e59697f9f78a974896dae8c83dab5"
     },
     {
       "name": "extension/apps.js",
@@ -15,12 +15,12 @@
     {
       "name": "extension/content.js",
       "src": "extension/content.js",
-      "sha256": "33ec08b7ceac57a00f1d8ae73a6abc802a091e607d6990845048bf8cda7cd3f8"
+      "sha256": "a111efbe56d017fcaa51e7bdf5127da3d1b817d994d4f9af501990c8bef52bfd"
     },
     {
       "name": "extension/background.js",
       "src": "extension/background.js",
-      "sha256": "b0558b1434775a415765da36009bdfc6ba42946db7281c95481aced188aec3d3"
+      "sha256": "9ffd27e2d2da68d8ee6f92fd78520a885eb980b810f80479ea488fe3b0a5da10"
     },
     {
       "name": "extension/shell.css",
