@@ -10,9 +10,10 @@
 > unit-tested). Marie tapped Update for 🦢; 🐇 + 🦔 await her taps. Offline-boot splash
 > still unconfirmed on hardware. Also shipped 2.3.25 🦫 (fixes #8 cold-start race +
 > #9 failed-load bounce-home). Google Docs confirmed working on hardware after 🦔.
-> LEFT: #4 (commit/verify the uncommitted safety fixes), #5 (clean the stale docs),
-> #6 (fix this repo's dead .claude hooks), #7 (retire the old live app), #10 (qh-diag
-> version + unused fonts + block-list domains), #11 (pin releases — optional).
+> DONE this session: audit fixes #1–#10. #4 (backups) verified clean+pushed; #5 (docs
+> cleaned, this CLAUDE.md now current); #6 (hooks fire); #7 (old app URL redirects to
+> the live app); #10 (qh-diag + fonts). ONLY #11 LEFT (pin releases — optional safety
+> net; not a bug). Marie still owes Update taps for 🐇🦔🦫 and one offline-boot test.
 
 > ⚠️ **CURRENT WORK (2026-06-25) is in the 2.x rebuild, not this old list.**
 > The app was rebuilt as ONE shell in repo `quill-haven-2`; **2.1.0 🌳 is live on the
