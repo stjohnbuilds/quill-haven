@@ -33,18 +33,18 @@ in the order we should do them. One at a time. Tick as we go.
       "landmine" files are the SAFE versions: release-helper.sh preserves the update
       list, and qh-admin.sh has its path guard.
 
-- [ ] **5. Clean up the notes that lie.** Update CLAUDE.md (points at the wrong repo +
-      a crashing release script), fix HANDOVER (says "Mac not Chromebook", says
-      blocking is OFF when it's ON, says 3 apps when only Google Docs ships), refresh
-      TODO/PUNCHLIST, and add "old — superseded" banners to the out-of-date docs.
-      Also write down the real release steps (they currently live nowhere saved).
+- [x] **5. Clean up the notes that lie.** DONE (2026-07-01). CLAUDE.md now points at the
+      right repo, has the REAL release steps written down, warns that release.sh is
+      stale, and says Google Docs is the only built-in. "SUPERSEDED/HISTORY" banners
+      added to the most dangerous stale docs (REMAINING_FIXES, GAME_PLAN, AUDIT_PROMPT).
+      (HANDOVER/TODO left as history — CLAUDE.md now says to treat them as history.)
 
-- [ ] **6. Fix the dead Claude hooks.** Correct .claude/settings.json in this repo, and
-      use the copy-paste prompt to fix all the other apps too.
+- [x] **6. Fix the dead Claude hooks.** DONE. .claude/settings.json is in the correct
+      format now and the hooks fire (the "Session Reminders" show every message).
+      Copy-paste prompt still available for Marie's other apps.
 
-- [ ] **7. Retire the old app.** The old (3,293-line) app is still live at the exact web
-      address the lock always trusts, with working power/update buttons. Either take it
-      down or stop the lock auto-trusting it.
+- [x] **7. Retire the old app.** DONE (2026-07-01). The old address now redirects
+      straight to the live 2.x app, so the outdated app can no longer be opened.
 
 ## Tidy up — lower risk, still worth doing
 
