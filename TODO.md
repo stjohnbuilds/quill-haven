@@ -5,8 +5,11 @@
 > 2.3.23 🐇 (fix #2 back-door lock: Origin gate + trusted-tap + Terminal confirm;
 > Wi-Fi fixes from Marie's live test: connected network named, Disconnect button,
 > saved passwords, working on/off switch; home-screen logo baked into SVG so it
-> can never mis-render). Marie tapped Update for 🦢; 🐇 awaits her tap. Offline-boot
-> splash still unconfirmed on hardware. Next: fix #3 (close the all-of-Google hole).
+> can never mis-render) and 2.3.24 🦔 (fix #3: only Docs/sign-in/Drive allowed on
+> google.com — Search/Gmail/News blocked; app-host platforms exact-host only;
+> unit-tested). Marie tapped Update for 🦢; 🐇 + 🦔 await her taps. Offline-boot splash
+> still unconfirmed on hardware. Next: fix #4 (commit the uncommitted safety fixes)
+> or the smaller tidy-ups (#8 idle gap, #9 failed-load bounce, #10 diag/fonts).
 
 > ⚠️ **CURRENT WORK (2026-06-25) is in the 2.x rebuild, not this old list.**
 > The app was rebuilt as ONE shell in repo `quill-haven-2`; **2.1.0 🌳 is live on the
